@@ -6,14 +6,14 @@
 Ultimately it will be a tool to run:
 
 * population projections
-* school rolls projections
+* school roll projections
 * small area projections
 
 
 `witan.models.demography` proposes different ways to run each of those three types of projections.
 The different methodologies depend on your preferences and/or the data available to you.
 
-Note: Both school rolls projections and small area projections take as an input population projections.
+Note: Both school roll projections and small area projections take as an input population projections.
 
 
 **The content of the library follows this structure:**
@@ -38,7 +38,7 @@ Note: Both school rolls projections and small area projections take as an input 
   - [Housing-led Cohort Component Model](#housing-led-cohort-component-model)
   - [Employment-led Cohort Component Model](#employment-led-cohort-component-model)
 
-* [School rolls projections](#school-rolls-projections)
+* [School roll projections](#school-roll-projections)
 
 * [Small area projections](#small-area-projections)
 
@@ -87,7 +87,7 @@ This method involves projecting births, deaths and migrations by age and sex.
 1) Fertility
 
 The standard methodology for birth projections relies on applying age-specific fertility rates (ASFR)
-to the female population and split the estimated births into male and female using a standard ratio.
+to the female population and splitting the estimated births into male and female using a standard ratio.
 
 * Historic data on births by mother's age
 
@@ -112,9 +112,9 @@ to the female population and split the estimated births into male and female usi
 
 <br>
 
-## School rolls projections
+## School roll projections
 
-There is one possibility to produce school rolls projections
+There is the possibility to produce school roll projections
 
 <br>
 
