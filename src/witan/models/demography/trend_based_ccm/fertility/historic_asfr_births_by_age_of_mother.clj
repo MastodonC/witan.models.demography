@@ -5,14 +5,13 @@
             [clojure-csv.core :as csv]
             [schema.coerce :as coerce]
             [schema.core :as s]
-            [clojure.core.matrix.dataset :as ds]))
+            [clojure.core.matrix.dataset :as ds]
+            [incanter.core :as i]))
 
-(defn ->births-pool
-  "Calculates birth pool as avg of at risk popn in births-data's max year & max year - 1
-   Inputs:  * births-data dataset
-            * at-risk-popn dataset
-   Outputs: * dataset with cols gss-code, sex, age, year, birth-pool"
-  [births-data at-risk-popn])
+(defn ->births-data-year
+  [{:keys [births-data]}]
+  "Takes births-data dataset
+   Returns maximum value in Year column of births-data")
 
 (defn ->historic-fertility
   "Calculates historic fertility rates using births by age of mother data
@@ -20,5 +19,4 @@
             * map of parameters that incl. fert-last-yr
    Outputs: * map of datasets containing historic-fert (calculated historic fertility rates)"
   [{births-data :births-data at-risk-popn :denominators mye-coc :mye-coc}
-   {fert-last-yr :fert-last-yr}]
-  (let [births-pool (->births-pool births-data at-risk-popn)]))
+   {fert-last-yr :fert-last-yr}])
