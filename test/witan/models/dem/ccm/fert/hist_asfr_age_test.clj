@@ -7,7 +7,8 @@
             [clojure-csv.core :as csv]
             [schema.coerce :as coerce]
             [schema.core :as s]
-            [clojure.core.matrix.dataset :as ds]))
+            [clojure.core.matrix.dataset :as ds]
+            [incanter.core :as i]))
 
 
 ;; Load testing data
