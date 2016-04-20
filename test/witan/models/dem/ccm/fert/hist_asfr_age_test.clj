@@ -1,6 +1,6 @@
-(ns witan.models.demography.trend-based-ccm.fertility.historic-asfr-births-by-age-of-mother-test
+(ns witan.models.dem.ccm.fert.hist-asfr-age-test
   (:require [clojure.test :refer :all]
-            [witan.models.demography.trend-based-ccm.fertility.historic-asfr-births-by-age-of-mother :refer :all]
+            [witan.models.dem.ccm.fert.hist-asfr-age :refer :all]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.walk :as walk]

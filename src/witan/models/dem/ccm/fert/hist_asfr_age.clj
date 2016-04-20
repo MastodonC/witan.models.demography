@@ -1,4 +1,4 @@
-(ns witan.models.demography.trend-based-ccm.fertility.historic-asfr-births-by-age-of-mother
+(ns witan.models.dem.ccm.fert.hist-asfr-age
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.walk :as walk]
