@@ -1,5 +1,5 @@
-(ns witan.models.demography.trend-based-ccm.fertility.historic-asfr-workspace
-  (:require [witan.models.demography.trend-based-ccm.fertility.historic-asfr-births-by-age-of-mother :as asfr]
+(ns witan.models.dem.ccm.fert.hist-asfr-ws
+  (:require [witan.models.dem.ccm.fert.hist-asfr-age :as asfr]
             [witan.workspace-executor.core :as wex]
             [schema.core :as s]))
 
