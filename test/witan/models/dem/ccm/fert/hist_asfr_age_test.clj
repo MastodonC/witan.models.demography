@@ -33,7 +33,7 @@
    :births s/Num
    :year s/Int})
 
-(def Denominators
+(def AtRiskPopn
   {:gss.code s/Str
    :sex s/Str
    s/Keyword s/Int})
@@ -65,21 +65,33 @@
   [data-info csv-data]
   (map #(record-coercion BirthsData %) csv-data))
 
-(defmethod apply-rec-coercion :denominators
+(defmethod apply-rec-coercion :at-risk-popn
   [data-info csv-data]
-  (map #(record-coercion Denominators %) csv-data))
+  (map #(record-coercion AtRiskPopn %) csv-data))
 
 (defmethod apply-rec-coercion :mye-coc
   [data-info csv-data]
   (map #(record-coercion MyeCoc %) csv-data))
 
 (def data-inputs (->> {:births-data "resources/test_data/bristol_births_data.csv"
-                       :denominators "resources/test_data/bristol_denominators.csv"
+                       :at-risk-popn "resources/test_data/bristol_denominators.csv"
                        :mye-coc "resources/test_data/bristol_mye_coc.csv"}
                       (transduce (map (fn [[k path]]
                                         (hash-map k (ds/dataset (apply-rec-coercion
                                                                  {:type k}
                                                                  (load-csv path))))))
-                                 merge)
-                      (merge {:fert-last-yr 2014})))
-;; End of input handling
+                                 merge)))
+
+(def params {:fert-last-yr 2014})
+;; End of input data handling
+
+;; Functions take maps of all inputs/outputs from parent nodes in workflow
+(def from-births-data-year (merge data-inputs
+                                  (->births-data-year data-inputs)))
+(def for-births-pool (merge from-births-data-year
+                            (->at-risk-this-year from-births-data-year)
+                            (->at-risk-last-year from-births-data-year)))
+
+(def from-births-pool (merge for-births-pool
+                             (->births-pool for-births-pool)))
+;; End of data map creation
