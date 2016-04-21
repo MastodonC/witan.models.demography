@@ -95,3 +95,35 @@
 (def from-births-pool (merge for-births-pool
                              (->births-pool for-births-pool)))
 ;; End of data map creation
+
+(defn- same-coll? [coll1 coll2]
+  (= (set coll1) (set coll2)))
+
+;; Tests
+(deftest ->births-data-year-test
+  (testing "The latest year is returned"
+    (is (= 2013
+           (:yr (->births-data-year data-inputs))))))
+
+(deftest ->at-risk-this-year-test
+  (testing "The data transformation returns the correct columns"
+    (is (same-coll? [:gss.code :sex :popn-this-yr :age]
+                    (ds/column-names (:at-risk-this-year
+                                      (->at-risk-this-year from-births-data-year))))))
+  (testing "The age column range is now 0-89 instead of 1-90"
+    (let [former-age-range (distinct (i/$ :age (:at-risk-popn data-inputs)))
+          min-former-range (reduce min former-age-range)
+          max-former-range (reduce max former-age-range)]
+      (is (same-coll? (range (dec min-former-range) max-former-range)
+                      (distinct (i/$ :age (:at-risk-this-year
+                                           (->at-risk-this-year from-births-data-year)))))))))
+
+(deftest ->at-risk-last-year-test
+  (testing "The data is filtered by the correct year"
+    (is (same-coll? '(2013)
+                    (distinct (i/$ :year (:at-risk-last-year
+                                          (->at-risk-last-year from-births-data-year)))))))
+  (testing "The data transformation returns the correct columns"
+    (is (same-coll? [:gss.code :sex :age :year :popn-last-yr]
+                    (ds/column-names (:at-risk-last-year
+                                      (->at-risk-last-year from-births-data-year)))))))
