@@ -42,24 +42,14 @@
   [{:keys [at-risk-this-year at-risk-last-year]}]
   (let [ds-joined (i/$join [[:gss.code :sex :age] [:gss.code :sex :age]]
                            at-risk-last-year
-                           at-risk-this-year)
-        ;; Replace `nil` by `NaN` in popn-last-yr column
-        ds-joined-cleaned (ds/replace-column ds-joined :popn-last-yr
-                                             (i/$map (fn [lst-yr-popn]
-                                                       (if (nil? lst-yr-popn) (Double/NaN)
-                                                           lst-yr-popn)) :popn-last-yr ds-joined))
-        ds-bp-nan (-> ds-joined-cleaned
-                      ;; Add a birth-pool column that averages popn-this-yr and popn-last-yr
-                      (ds/add-column :birth-pool (i/$map (fn [this-yr last-yr]
-                                                           (double (/ (+ this-yr last-yr) 2)))
-                                                         [:popn-this-yr :popn-last-yr]
-                                                         ds-joined-cleaned))
-                      (ds/remove-columns [:popn-this-yr :popn-last-yr]))]
-    (hash-map :births-pool ;; Replace `NaN` by 0.0 in the birth-pool column
-              (ds/replace-column ds-bp-nan :birth-pool
-                                 (i/$map (fn [bp]
-                                           (if (Double/isNaN bp) 0.0 bp))
-                                         :birth-pool ds-bp-nan)))))
+                           at-risk-this-year)]
+    (hash-map :births-pool
+              (-> ds-joined
+                  (ds/add-column :birth-pool (i/$map (fn [this-yr last-yr]
+                                                       (if (nil? last-yr) 0.0
+                                                           (double (/ (+ this-yr last-yr) 2))))
+                                                     [:popn-this-yr :popn-last-yr] ds-joined))
+                  (ds/remove-columns [:popn-this-yr :popn-last-yr])))))
 
 (defn ->historic-fertility
   "Calculates historic fertility rates using births by age of mother data
