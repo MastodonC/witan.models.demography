@@ -12,10 +12,16 @@
 
 
 ;; Load testing data
+
+(defn- custom-keyword [coll]
+  (mapv #(-> %
+            (clojure.string/replace #"[.]" "-")
+            keyword) coll))
+
 (defn- load-csv
   "Loads csv file as a sequence of maps, with column names as keywords"
   ([filename]
-   (load-csv filename nil))
+   (foo filename nil))
   ([filename eol]
    (when (.exists (clojure.java.io/as-file filename))
      (let [normalised-data (-> (slurp filename)
@@ -24,25 +30,52 @@
            parsed-csv (csv/parse-csv normalised-data :end-of-line eol)
            parsed-data (rest parsed-csv)
            headers (map str/lower-case (first parsed-csv))]
-       (map #(walk/keywordize-keys (zipmap headers %1)) parsed-data)))))
+       [(custom-keyword headers) (vec parsed-data)]))))
 
-(def BirthsData
-  {:gss.code s/Str
-   :sex s/Str
-   :age s/Int
-   :births s/Num
-   :year s/Int})
+(def BirthsDataSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
+                                      (s/one (s/eq :sex) ":sex")
+                                      (s/one (s/eq :age) ":age")
+                                      (s/one (s/eq :births) ":births")
+                                      (s/one (s/eq :year) ":year")]
+                       :columns [(s/one [s/Str] "col gss-code")
+                                 (s/one [s/Str] "col sex")
+                                 (s/one [s/Int] "col age")
+                                 (s/one [s/Num] "col births")
+                                 (s/one [s/Int] "col year")]
+                       s/Keyword s/Any})
 
-(def AtRiskPopn
-  {:gss.code s/Str
-   :sex s/Str
-   s/Keyword s/Int})
+(def AtRiskPopnSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
+                                      (s/one (s/eq :sex) ":sex")
+                                      (s/one (s/eq :age) ":age")
+                                      (s/one (s/eq :year) ":year")
+                                      (s/one (s/eq :popn) ":popn")
+                                      (s/one (s/eq :actualyear) ":actualyear")
+                                      (s/one (s/eq :actualage) ":actualage")]
+                       :columns [(s/one [s/Str] "col gss-code")
+                                 (s/one [s/Str] "col sex")
+                                 (s/one [s/Int] "col age")
+                                 (s/one [s/Int] "col year")
+                                 (s/one [s/Num] "col popn")
+                                 (s/one [s/Int] "col actualyear")
+                                 (s/one [s/Int] "col actualage")]
+                       s/Keyword s/Any})
 
-(def MyeCoc
-  {:age s/Int
-   :year s/Int
-   :estimate s/Int
-   s/Keyword s/Str})
+
+(def MyeCoCSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
+                                  (s/one (s/eq :district) ":district")
+                                  (s/one (s/eq :sex) ":sex")
+                                  (s/one (s/eq :age) ":age")
+                                  (s/one (s/eq :var) ":var")
+                                  (s/one (s/eq :year) ":year")
+                                  (s/one (s/eq :estimate) ":estimate")]
+                   :columns [(s/one [s/Str] "col gss-code")
+                             (s/one [s/Str] "col district")
+                             (s/one [s/Str] "col sex")
+                             (s/one [s/Int] "col age")
+                             (s/one [s/Str] "col var")
+                             (s/one [s/Int] "col year")
+                             (s/one [s/Num] "col estimate")]
+                   s/Keyword s/Any})
 
 (defn record-coercion
   "Coerce numbers by matching them to the
@@ -63,37 +96,38 @@
 
 (defmethod apply-rec-coercion :births-data
   [data-info csv-data]
-  (map #(record-coercion BirthsData %) csv-data))
+  (map #(record-coercion BirthsDataSchema %) csv-data))
 
 (defmethod apply-rec-coercion :at-risk-popn
   [data-info csv-data]
-  (map #(record-coercion AtRiskPopn %) csv-data))
+  (map #(record-coercion AtRiskPopnSchema %) csv-data))
 
 (defmethod apply-rec-coercion :mye-coc
   [data-info csv-data]
-  (map #(record-coercion MyeCoc %) csv-data))
+  (map #(record-coercion MyeCoCSchema %) csv-data))
 
 (def data-inputs (->> {:births-data "resources/test_data/bristol_births_data.csv"
-                       :at-risk-popn "resources/test_data/bristol_denominators.csv"
-                       :mye-coc "resources/test_data/bristol_mye_coc.csv"}
-                      (transduce (map (fn [[k path]]
-                                        (hash-map k (ds/dataset (apply-rec-coercion
-                                                                 {:type k}
-                                                                 (load-csv path))))))
-                                 merge)))
+                  :at-risk-popn "resources/test_data/bristol_denominators.csv"
+                  :mye-coc "resources/test_data/bristol_mye_coc.csv"}
+                 (transduce (map (fn [[k path]]
+                                   (hash-map k (apply-rec-coercion
+                                                {:type k}
+                                                (ds/dataset (first (load-csv path))
+                                                            (last (load-csv path)))))))
+                            merge)))
 
 (def params {:fert-last-yr 2014})
 ;; End of input data handling
 
 ;; Functions take maps of all inputs/outputs from parent nodes in workflow
-(def from-births-data-year (merge data-inputs
-                                  (->births-data-year data-inputs)))
-(def for-births-pool (merge from-births-data-year
-                            (->at-risk-this-year from-births-data-year)
-                            (->at-risk-last-year from-births-data-year)))
+;; (def from-births-data-year (merge data-inputs
+;;                                   (->births-data-year data-inputs)))
+;; (def for-births-pool (merge from-births-data-year
+;;                             (->at-risk-this-year from-births-data-year)
+;;                             (->at-risk-last-year from-births-data-year)))
 
-(def from-births-pool (merge for-births-pool
-                             (->births-pool for-births-pool)))
+;; (def from-births-pool (merge for-births-pool
+;;                              (->births-pool for-births-pool)))
 ;; End of data map creation
 
 (defn- same-coll? [coll1 coll2]
