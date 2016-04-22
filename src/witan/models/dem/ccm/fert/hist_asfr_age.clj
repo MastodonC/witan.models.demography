@@ -43,16 +43,13 @@
   (let [ds-joined (i/$join [[:gss.code :sex :age] [:gss.code :sex :age]]
                            at-risk-last-year
                            at-risk-this-year)]
-    {:births-pool ds-joined}
-    ;; FIXME: cannot perform calculation due to missing values (NAs in R)
-    ;; (-> ds-joined
-    ;;     (ds/add-column :birth-pool (i/$map (fn [this-yr last-yr]
-    ;;                                          (double (/ (+ this-yr last-yr) 2)))
-    ;;                                        [:popn-this-yr :popn-last-yr] ds-joined))
-    ;;     (ds/remove-columns [:popn-this-yr :popn-last-yr]))
-    ;; TODO: Make sure any missing values in :birth-pool column are set to zero
-    ;; TODO: Remove unwanted columns
-    ))
+    (hash-map :births-pool
+              (-> ds-joined
+                  (ds/add-column :birth-pool (i/$map (fnil (fn [this-yr last-yr]
+                                                             (double (/ (+ this-yr last-yr) 2)))
+                                                           0 0)
+                                                     [:popn-this-yr :popn-last-yr] ds-joined))
+                  (ds/remove-columns [:popn-this-yr :popn-last-yr])))))
 
 (defn ->historic-fertility
   "Calculates historic fertility rates using births by age of mother data

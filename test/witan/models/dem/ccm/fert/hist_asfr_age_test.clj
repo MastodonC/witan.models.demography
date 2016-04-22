@@ -127,3 +127,12 @@
     (is (same-coll? [:gss.code :sex :age :year :popn-last-yr]
                     (ds/column-names (:at-risk-last-year
                                       (->at-risk-last-year from-births-data-year)))))))
+
+(deftest ->births-pool-test
+  (testing "The data transformation returns the correct columns"
+    (is (same-coll? [:age :sex :gss.code :year :birth-pool]
+                    (ds/column-names (:births-pool (->births-pool for-births-pool))))))
+  (testing "No nil or NaN in the birth-pool column"
+    (is (not-any? nil? (i/$ :birth-pool (:births-pool (->births-pool for-births-pool)))))
+    (is (not-any? #(Double/isNaN %)
+                  (i/$ :birth-pool (:births-pool (->births-pool for-births-pool)))))))
