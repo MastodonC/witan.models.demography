@@ -45,9 +45,9 @@
                            at-risk-this-year)]
     (hash-map :births-pool
               (-> ds-joined
-                  (ds/add-column :birth-pool (i/$map (fn [this-yr last-yr]
-                                                       (if (nil? last-yr) 0.0
-                                                           (double (/ (+ this-yr last-yr) 2))))
+                  (ds/add-column :birth-pool (i/$map (fnil (fn [this-yr last-yr]
+                                                             (double (/ (+ this-yr last-yr) 2)))
+                                                           0 0)
                                                      [:popn-this-yr :popn-last-yr] ds-joined))
                   (ds/remove-columns [:popn-this-yr :popn-last-yr])))))
 
