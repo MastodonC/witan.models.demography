@@ -8,8 +8,8 @@
 
 (defn- custom-keyword [coll]
   (mapv #(-> %
-            (clojure.string/replace #"[.]" "-")
-            keyword) coll))
+             (clojure.string/replace #"[.]" "-")
+             keyword) coll))
 
 (defn- load-csv
   "Loads csv file with each row as a vector. 
@@ -77,14 +77,14 @@
   (mapv (fn [s] (let [datatype (-> s :schema first)
                       fieldname (:name s)]
                   (s/one datatype fieldname)))
-        (-> col-schema :columns)))
+        (:columns col-schema)))
 
 (defn make-col-names-schema
   [col-schema]
-  (mapv (fn [s] (let [datatype (-> s :schema)
+  (mapv (fn [s] (let [datatype (:schema s)
                       fieldname (:name s)]
                   (s/one datatype fieldname)))
-        (-> col-schema :column-names)))
+        (:column-names col-schema)))
 
 (defn record-coercion
   "Coerce numbers by matching them to the

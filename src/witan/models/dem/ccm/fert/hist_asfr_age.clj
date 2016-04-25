@@ -11,7 +11,7 @@
 (defn ->births-data-year
   "Takes births-data dataset
    Returns maximum value in Year column of births-data"
-  [{:keys [births-data]}]
+  [{:keys [births-data]} _]
   {:yr (->> births-data ;; FIXME: change key to :births-data-year once using workflow
             (i/$ :year)
             (reduce max))})
@@ -19,7 +19,7 @@
 (defn ->at-risk-this-year
   "Filters ds for actualyear = yr, removes three columns
   and rename two columns."
-  [{:keys [at-risk-popn yr]}]
+  [{:keys [at-risk-popn yr]} _]
   {:at-risk-this-year (-> at-risk-popn
                           (i/query-dataset {:actualyear yr})
                           (ds/remove-columns [:age])
@@ -29,7 +29,7 @@
 (defn ->at-risk-last-year
   "Filters ds for actualyear = yr - 1, removes three columns
   and rename one column."
-  [{:keys [at-risk-popn yr]}]
+  [{:keys [at-risk-popn yr]} _]
   {:at-risk-last-year (-> at-risk-popn
                           (i/query-dataset {:actualyear (dec yr)})
                           (ds/rename-columns {:popn :popn-last-yr})
@@ -39,7 +39,7 @@
   "Calculates birth pool as avg of at risk popn in births-data's max year & max year - 1
    Inputs:  at-risk-this-year ds and at-risk-last year ds
    Outputs: dataset with cols gss-code, sex, age, year, birth-pool"
-  [{:keys [at-risk-this-year at-risk-last-year]}]
+  [{:keys [at-risk-this-year at-risk-last-year]} _]
   (let [ds-joined (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
                            at-risk-last-year
                            at-risk-this-year)]
