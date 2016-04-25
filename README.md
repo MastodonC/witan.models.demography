@@ -1,6 +1,12 @@
 # witan.models.demography
 
-FIXME: description
+
+[![circle-ci shield](https://circleci.com/gh/:owner/:repo.svg?style=shield&circle-token=:circle-token)](https://github.com/MastodonC/witan.models.demography)
+
+
+## Description
+
+Clojure library to run demography models
 
 ## Installation
 

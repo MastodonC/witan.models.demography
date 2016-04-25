@@ -11,7 +11,7 @@
 
 (defn- custom-keyword [coll]
   (mapv #(-> %
-             (clojure.string/replace #"[.]" "-")
+             (clojure.string/replace #"[. ]" "-")
              keyword) coll))
 
 (defn- load-csv
