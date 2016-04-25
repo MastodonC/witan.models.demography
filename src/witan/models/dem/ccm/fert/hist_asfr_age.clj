@@ -40,7 +40,7 @@
    Inputs:  at-risk-this-year ds and at-risk-last year ds
    Outputs: dataset with cols gss-code, sex, age, year, birth-pool"
   [{:keys [at-risk-this-year at-risk-last-year]}]
-  (let [ds-joined (i/$join [[:gss.code :sex :age] [:gss.code :sex :age]]
+  (let [ds-joined (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
                            at-risk-last-year
                            at-risk-this-year)]
     (hash-map :births-pool
