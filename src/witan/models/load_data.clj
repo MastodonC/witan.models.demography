@@ -13,7 +13,7 @@
 
 (defn- load-csv
   "Loads csv file with each row as a vector. 
-   Stored in map separating column-names fromd data"
+   Stored in map separating column-names from data"
   ([filename]
    (load-csv filename nil))
   ([filename eol]
