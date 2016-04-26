@@ -10,8 +10,8 @@
   (let [test-data-paths {:births-data "resources/test_data/bristol_births_data.csv"
                          :at-risk-popn "resources/test_data/bristol_denominators.csv"
                          :mye-coc "resources/test_data/bristol_mye_coc.csv"}
-        data-map (ld/load-datasets test-data-paths)] 
-    (get data-map keyname))) 
+        data-map (ld/load-datasets test-data-paths)]
+    (get data-map keyname)))
 
 ;; SCHEMAS FOR OUTPUT DATSETS
 (def AtRiskThisYearSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
@@ -43,12 +43,12 @@
                                       (s/one (s/eq :birth-pool) ":birth-pool")]
                        :columns [(s/one [s/Int] "col age")
                                  (s/one [s/Str] "col sex")
-                                 (s/one [s/Int] "col year")
+                                 (s/one [(s/maybe s/Int)] "col year") ;; Bypass missing values `nil`
                                  (s/one [s/Str] "col gss-code")
                                  (s/one [s/Num] "col birth-pool")]
                        s/Keyword s/Any})
 
-;; WORKFLOW 
+;; WORKFLOW
 ;; Running this workflow is the equivalent of calling asfr/->historic-fertility
 ;; (wex/view-workflow workflow) will let you see the graph
 (def workflow [:get-births-data-year :at-risk-this-birth-year
@@ -63,14 +63,14 @@
                ;; :fert-rate-with-45-49 :estimated-sya-births
                ;; :estimated-sya-births-pool :estimated-sya-births
                ;; :estimated-sya-births :estimated-births
-               ;; :estimated-sya-births :historic-fertility    
+               ;; :estimated-sya-births :historic-fertility
                ;; :estimated-births :scaling-factors
                ;; :actual-births :scaling-factors
                ;; :scaling-factors :historic-fertility
                ])
 
-;; CONTRACTS listing terms on which functions operate 
-(def contracts [{:witan/fn :demography.ccm.fertility.historic-asfr-by-mother-age/births-data-year 
+;; CONTRACTS listing terms on which functions operate
+(def contracts [{:witan/fn :demography.ccm.fertility.historic-asfr-by-mother-age/births-data-year
                  :witan/impl 'witan.models.dem.ccm.fert.hist-asfr-age/->births-data-year
                  :witan/version "1.0"
                  :witan/params-schema nil
@@ -78,7 +78,7 @@
                                  :witan/key :births-data
                                  :witan/display-name "Births Data"}]
                  :witan/outputs [{:witan/schema s/Int
-                                  :witan/key :yr 
+                                  :witan/key :yr
                                   :witan/display-name "Births Data Max Year"}]}
                 {:witan/fn :demography.ccm.fertility.historic-asfr-by-mother-age/at-risk-this-year
                  :witan/impl 'witan.models.dem.ccm.fert.hist-asfr-age/->at-risk-this-year
