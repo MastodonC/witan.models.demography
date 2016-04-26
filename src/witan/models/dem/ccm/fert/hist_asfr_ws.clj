@@ -67,7 +67,7 @@
                ;; :estimated-births :scaling-factors
                ;; :actual-births :scaling-factors
                ;; :scaling-factors :historic-fertility
-               ])
+])
 
 ;; CONTRACTS listing terms on which functions operate
 (def contracts [{:witan/fn :demography.ccm.fertility.historic-asfr-by-mother-age/births-data-year

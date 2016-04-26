@@ -12,7 +12,7 @@
              keyword) coll))
 
 (defn- load-csv
-  "Loads csv file with each row as a vector. 
+  "Loads csv file with each row as a vector.
    Stored in map separating column-names from data"
   ([filename]
    (load-csv filename nil))
@@ -54,7 +54,6 @@
                                  (s/one [s/Int] "col actualyear")
                                  (s/one [s/Int] "col actualage")]
                        s/Keyword s/Any})
-
 
 (def MyeCoCSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
                                   (s/one (s/eq :district) ":district")

@@ -6,7 +6,6 @@
             [incanter.core :as i]
             [witan.models.load-data :as ld]))
 
-
 ;; Load testing data
 (def test-data-paths {:births-data "resources/test_data/bristol_births_data.csv"
                       :at-risk-popn "resources/test_data/bristol_denominators.csv"
