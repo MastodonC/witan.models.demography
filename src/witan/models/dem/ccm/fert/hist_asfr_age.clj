@@ -12,7 +12,7 @@
   "Takes births-data dataset
    Returns maximum value in Year column of births-data"
   [{:keys [births-data]} _]
-  {:yr (->> births-data ;; FIXME: change key to :births-data-year once using workflow
+  {:yr (->> births-data
             (i/$ :year)
             (reduce max))})
 
