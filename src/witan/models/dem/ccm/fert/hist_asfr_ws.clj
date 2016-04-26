@@ -5,13 +5,15 @@
             [witan.models.load-data :as ld]))
 
 ;; GET DATA FOR ROOT NODES
+(def root-data-paths {:births-data "resources/test_data/bristol_births_data.csv"
+                 :at-risk-popn "resources/test_data/bristol_denominators.csv"
+                 :mye-coc "resources/test_data/bristol_mye_coc.csv"})
+
+(def root-data (ld/load-datasets root-data-paths))
+
 (defn get-data
   [keyname]
-  (let [test-data-paths {:births-data "resources/test_data/bristol_births_data.csv"
-                         :at-risk-popn "resources/test_data/bristol_denominators.csv"
-                         :mye-coc "resources/test_data/bristol_mye_coc.csv"}
-        data-map (ld/load-datasets test-data-paths)]
-    (get data-map keyname)))
+  (get root-data keyname))
 
 ;; SCHEMAS FOR OUTPUT DATSETS
 (def AtRiskThisYearSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
