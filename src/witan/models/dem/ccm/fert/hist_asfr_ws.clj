@@ -2,7 +2,8 @@
   (:require [witan.models.dem.ccm.fert.hist-asfr-age :as asfr]
             [witan.workspace-executor.core :as wex]
             [schema.core :as s]
-            [witan.models.load-data :as ld]))
+            [witan.models.load-data :as ld]
+            [witan.workspace-api :as wapi]))
 
 ;; GET DATA FOR ROOT NODES
 (def root-data-paths {:births-data "resources/test_data/bristol_births_data.csv"

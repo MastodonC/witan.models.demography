@@ -67,3 +67,10 @@
     (is (not-any? nil? (i/$ :birth-pool (:births-pool (->births-pool for-births-pool params)))))
     (is (not-any? #(Double/isNaN %)
                   (i/$ :birth-pool (:births-pool (->births-pool for-births-pool params)))))))
+
+(deftest ->historic-fertility-test
+  (testing "The intermediary outputs are added to the global map"
+    (is (contains? (->historic-fertility data-inputs params) :yr))
+    (is (contains? (->historic-fertility data-inputs params) :at-risk-this-year))
+    (is (contains? (->historic-fertility data-inputs params) :at-risk-last-year))
+    (is (contains? (->historic-fertility data-inputs params) :births-pool))))
