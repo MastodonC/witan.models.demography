@@ -74,7 +74,7 @@
 
 
 ;; "Takes births-data dataset
-;;    Returns maximum value in Year column of births-data"
+;; Returns maximum value in Year column of births-data"
 
 (defworkflowfn ->births-data-year
   {:witan/name :historic-births-data-yr
@@ -87,8 +87,8 @@
             (reduce max))})
 
 
-  ;; "Filters ds for actualyear = yr, removes three columns
-  ;; and rename two columns."
+;; "Filters ds for actualyear = yr, removes three columns
+;; and rename two columns."
 
 (defworkflowfn ->at-risk-this-year
   {:witan/name :popn-at-risk-this-yr
@@ -103,8 +103,8 @@
                           (ds/rename-columns {:actualage :age :popn :popn-this-yr})
                           (ds/remove-columns [:year :actualyear]))})
 
-  ;; "Filters ds for actualyear = yr - 1, removes three columns
-  ;; and rename one column."
+ ;; "Filters ds for actualyear = yr - 1, removes three columns
+ ;; and rename one column."
 
 (defworkflowfn ->at-risk-last-year
   {:witan/name :popn-at-risk-last-yr
@@ -119,8 +119,8 @@
                           (ds/remove-columns [:actualage :actualyear]))})
 
 ;; "Calculates birth pool as avg of at risk popn in births-data's max year & max year - 1
-;;    Inputs:  at-risk-this-year ds and at-risk-last year ds
-;;    Outputs: dataset with cols gss-code, sex, age, year, birth-pool"
+;; Inputs:  at-risk-this-year ds and at-risk-last year ds
+;; Outputs: dataset with cols gss-code, sex, age, year, birth-pool"
 
 (defworkflowfn ->births-pool
   {:witan/name :births-pool
@@ -140,11 +140,21 @@
                                                      [:popn-this-yr :popn-last-yr] ds-joined))
                   (ds/remove-columns [:popn-this-yr :popn-last-yr])))))
 
-(defn ->historic-fertility
-  "Calculates historic fertility rates using births by age of mother data
-   Inputs:  * map of datasets that incl. births-data, denominators, mye-coc
-            * map of parameters that incl. fert-last-yr
-   Outputs: * map of datasets containing historic-fert (calculated historic fertility rates)"
+;; "Calculates historic fertility rates using births by age of mother data
+;;  Inputs:  * map of datasets that incl. births-data, denominators, mye-coc
+;;           * map of parameters that incl. fert-last-yr
+;;  Outputs: * map of datasets containing historic-fert (calculated historic fertility rates)"
+
+(defworkflowfn ->historic-fertility
+  {:witan/name :hist-asfr
+   :witan/version "1.0"
+   :witan/input-schema {:births-data BirthsDataSchema
+                        :at-risk-popn AtRiskPopnSchema}
+   :witan/output-schema {:yr s/Int
+                         :at-risk-this-year AtRiskThisYearSchema
+                         :at-risk-last-year AtRiskLastYearSchema
+                         :births-pool BirthsPoolSchema}
+   :witan/exported? true}
   [inputs params]
   (-> (->births-data-year inputs)
       ->at-risk-this-year
