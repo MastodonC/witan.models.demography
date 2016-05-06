@@ -7,76 +7,35 @@
             [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.workspace-api :refer [defworkflowfn]]))
+            [witan.workspace-api :refer [defworkflowfn merge->]]))
 
 ;; Input schemas:
-(def BirthsDataSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
-                                      (s/one (s/eq :sex) ":sex")
-                                      (s/one (s/eq :age) ":age")
-                                      (s/one (s/eq :births) ":births")
-                                      (s/one (s/eq :year) ":year")]
-                       :columns [(s/one [s/Str] "col gss-code")
-                                 (s/one [s/Str] "col sex")
-                                 (s/one [s/Int] "col age")
-                                 (s/one [s/Num] "col births")
-                                 (s/one [s/Int] "col year")]
-                       s/Keyword s/Any})
+;; Automate schemas creation
+(defn make-ds-schemas [col-map]
+  {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-map)
+   :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-map)
+   s/Keyword s/Any})
 
-(def AtRiskPopnSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
-                                      (s/one (s/eq :sex) ":sex")
-                                      (s/one (s/eq :age) ":age")
-                                      (s/one (s/eq :year) ":year")
-                                      (s/one (s/eq :popn) ":popn")
-                                      (s/one (s/eq :actualyear) ":actualyear")
-                                      (s/one (s/eq :actualage) ":actualage")]
-                       :columns [(s/one [s/Str] "col gss-code")
-                                 (s/one [s/Str] "col sex")
-                                 (s/one [s/Int] "col age")
-                                 (s/one [s/Int] "col year")
-                                 (s/one [s/Num] "col popn")
-                                 (s/one [s/Int] "col actualyear")
-                                 (s/one [s/Int] "col actualage")]
-                       s/Keyword s/Any})
+(def BirthsDataSchema
+  (make-ds-schemas {:gss-code s/Str :sex s/Str :age s/Int :births s/Num :year s/Int}))
 
-(def AtRiskThisYearSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
-                                          (s/one (s/eq :sex) ":sex")
-                                          (s/one (s/eq :popn-this-yr) ":popn-this-yr")
-                                          (s/one (s/eq :age) ":age")]
-                           :columns [(s/one [s/Str] "col gss-code")
-                                     (s/one [s/Str] "col sex")
-                                     (s/one [s/Num] "col popn-this-yr")
-                                     (s/one [s/Int] "col age")]
-                           s/Keyword s/Any})
+(def AtRiskPopnSchema
+  (make-ds-schemas {:gss-code s/Str :sex s/Str :age s/Int :year s/Int
+                    :popn s/Num :actualyear s/Int :actualage s/Int}))
 
-(def AtRiskLastYearSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
-                                          (s/one (s/eq :sex) ":sex")
-                                          (s/one (s/eq :age) ":age")
-                                          (s/one (s/eq :year) ":year")
-                                          (s/one (s/eq :popn-last-yr) ":popn-last-yr")]
-                           :columns [(s/one [s/Str] "col gss-code")
-                                     (s/one [s/Str] "col sex")
-                                     (s/one [s/Int] "col age")
-                                     (s/one [s/Int] "col year")
-                                     (s/one [s/Num] "col popn-last-yr")]
-                           s/Keyword s/Any})
+(def AtRiskThisYearSchema
+  (make-ds-schemas {:gss-code s/Str :sex s/Str :popn-this-yr s/Num :age s/Int}))
 
-(def BirthsPoolSchema {:column-names [(s/one (s/eq :age) ":age")
-                                      (s/one (s/eq :sex) ":sex")
-                                      (s/one (s/eq :year) ":year")
-                                      (s/one (s/eq :gss-code) ":gss-code")
-                                      (s/one (s/eq :birth-pool) ":birth-pool")]
-                       :columns [(s/one [s/Int] "col age")
-                                 (s/one [s/Str] "col sex")
-                                 (s/one [(s/maybe s/Int)] "col year") ;; Bypass missing values `nil`
-                                 (s/one [s/Str] "col gss-code")
-                                 (s/one [s/Num] "col birth-pool")]
-                       s/Keyword s/Any})
+(def AtRiskLastYearSchema
+  (make-ds-schemas {:gss-code s/Str :sex s/Str :age s/Int :year s/Int :popn-last-yr s/Num}))
 
+(def BirthsPoolSchema
+  (make-ds-schemas {:age s/Int :sex s/Str :year (s/maybe s/Int) :gss-code s/Str :birth-pool s/Num}))
 
-;; "Takes births-data dataset
-;; Returns maximum value in Year column of births-data"
 
 (defworkflowfn ->births-data-year
+  "Takes births-data dataset
+  Returns maximum value in Year column of births-data"
   {:witan/name :historic-births-data-yr
    :witan/version "1.0"
    :witan/input-schema {:births-data BirthsDataSchema}
@@ -86,11 +45,9 @@
             (i/$ :year)
             (reduce max))})
 
-
-;; "Filters ds for actualyear = yr, removes three columns
-;; and rename two columns."
-
 (defworkflowfn ->at-risk-this-year
+  "Filters ds for actualyear = yr, removes three columns
+   and rename two columns."
   {:witan/name :popn-at-risk-this-yr
    :witan/version "1.0"
    :witan/input-schema {:at-risk-popn AtRiskPopnSchema
@@ -103,10 +60,9 @@
                           (ds/rename-columns {:actualage :age :popn :popn-this-yr})
                           (ds/remove-columns [:year :actualyear]))})
 
- ;; "Filters ds for actualyear = yr - 1, removes three columns
- ;; and rename one column."
-
-(defworkflowfn ->at-risk-last-year
+ (defworkflowfn ->at-risk-last-year
+  "Filters ds for actualyear = yr - 1, removes three columns
+  and rename one column."
   {:witan/name :popn-at-risk-last-yr
    :witan/version "1.0"
    :witan/input-schema {:at-risk-popn AtRiskPopnSchema
@@ -118,11 +74,10 @@
                           (ds/rename-columns {:popn :popn-last-yr})
                           (ds/remove-columns [:actualage :actualyear]))})
 
-;; "Calculates birth pool as avg of at risk popn in births-data's max year & max year - 1
-;; Inputs:  at-risk-this-year ds and at-risk-last year ds
-;; Outputs: dataset with cols gss-code, sex, age, year, birth-pool"
-
 (defworkflowfn ->births-pool
+  "Calculates birth pool as avg of at risk popn in births-data's max year & max year - 1
+  Inputs:  at-risk-this-year ds and at-risk-last year ds
+  Outputs: dataset with cols gss-code, sex, age, year, birth-pool"
   {:witan/name :births-pool
    :witan/version "1.0"
    :witan/input-schema {:at-risk-this-year AtRiskThisYearSchema
@@ -140,12 +95,11 @@
                                                      [:popn-this-yr :popn-last-yr] ds-joined))
                   (ds/remove-columns [:popn-this-yr :popn-last-yr])))))
 
-;; "Calculates historic fertility rates using births by age of mother data
-;;  Inputs:  * map of datasets that incl. births-data, denominators, mye-coc
-;;           * map of parameters that incl. fert-last-yr
-;;  Outputs: * map of datasets containing historic-fert (calculated historic fertility rates)"
-
 (defworkflowfn ->historic-fertility
+  "Calculates historic fertility rates using births by age of mother data
+   Inputs:  * map of datasets that incl. births-data, denominators, mye-coc
+            * map of parameters that incl. fert-last-yr
+   Outputs: * map of datasets containing historic-fert (calculated historic fertility rates)"
   {:witan/name :hist-asfr
    :witan/version "1.0"
    :witan/input-schema {:births-data BirthsDataSchema
@@ -157,6 +111,6 @@
    :witan/exported? true}
   [inputs params]
   (-> (->births-data-year inputs)
-      ->at-risk-this-year
-      ->at-risk-last-year
+      (merge-> ->at-risk-this-year
+               ->at-risk-last-year)
       ->births-pool))

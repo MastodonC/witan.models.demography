@@ -22,8 +22,8 @@
                             (->at-risk-this-year from-births-data-year params)
                             (->at-risk-last-year from-births-data-year params)))
 
-(def from-births-pool (merge for-births-pool
-                             (->births-pool for-births-pool params)))
+;; (def from-births-pool (merge for-births-pool
+;;                              (->births-pool for-births-pool params)))
 ;; End of input data handling
 
 (defn- same-coll? [coll1 coll2]
@@ -70,7 +70,9 @@
 
 (deftest ->historic-fertility-test
   (testing "The intermediary outputs are added to the global map"
-    (is (contains? (->historic-fertility data-inputs params) :yr))
-    (is (contains? (->historic-fertility data-inputs params) :at-risk-this-year))
-    (is (contains? (->historic-fertility data-inputs params) :at-risk-last-year))
-    (is (contains? (->historic-fertility data-inputs params) :births-pool))))
+    (let [hist-asfr (->historic-fertility data-inputs params)]
+      (println (keys hist-asfr))
+      (is (contains? hist-asfr :yr))
+      (is (contains? hist-asfr :at-risk-this-year))
+      (is (contains? hist-asfr :at-risk-last-year))
+      (is (contains? hist-asfr :births-pool)))))
