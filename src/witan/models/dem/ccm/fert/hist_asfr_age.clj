@@ -11,26 +11,29 @@
 
 ;; Input schemas:
 ;; Automate schemas creation
-(defn make-ds-schemas [col-map]
-  {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-map)
-   :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-map)
+(defn make-ordered-ds-schema [col-vec]
+  {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-vec)
+   :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
    s/Keyword s/Any})
 
 (def BirthsDataSchema
-  (make-ds-schemas {:gss-code s/Str :sex s/Str :age s/Int :births s/Num :year s/Int}))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:births s/Num] [:year s/Int]]))
 
 (def AtRiskPopnSchema
-  (make-ds-schemas {:gss-code s/Str :sex s/Str :age s/Int :year s/Int
-                    :popn s/Num :actualyear s/Int :actualage s/Int}))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
+                           [:popn s/Num] [:actualyear s/Int] [:actualage s/Int]]))
 
 (def AtRiskThisYearSchema
-  (make-ds-schemas {:gss-code s/Str :sex s/Str :popn-this-yr s/Num :age s/Int}))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:popn-this-yr s/Num] [:age s/Int]]))
 
 (def AtRiskLastYearSchema
-  (make-ds-schemas {:gss-code s/Str :sex s/Str :age s/Int :year s/Int :popn-last-yr s/Num}))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
+                           [:popn-last-yr s/Num]]))
 
 (def BirthsPoolSchema
-  (make-ds-schemas {:age s/Int :sex s/Str :year (s/maybe s/Int) :gss-code s/Str :birth-pool s/Num}))
+  (make-ordered-ds-schema [[:age s/Int] [:sex s/Str] [:year (s/maybe s/Int)] [:gss-code s/Str]
+                           [:birth-pool s/Num]]))
 
 
 (defworkflowfn ->births-data-year

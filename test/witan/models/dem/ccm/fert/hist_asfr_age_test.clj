@@ -22,8 +22,8 @@
                             (->at-risk-this-year from-births-data-year params)
                             (->at-risk-last-year from-births-data-year params)))
 
-;; (def from-births-pool (merge for-births-pool
-;;                              (->births-pool for-births-pool params)))
+(def from-births-pool (merge for-births-pool
+                             (->births-pool for-births-pool params)))
 ;; End of input data handling
 
 (defn- same-coll? [coll1 coll2]
