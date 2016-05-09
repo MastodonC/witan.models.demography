@@ -27,49 +27,27 @@
        {:column-names (custom-keyword headers)
         :columns (vec parsed-data)}))))
 
-(def BirthsDataSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
-                                      (s/one (s/eq :sex) ":sex")
-                                      (s/one (s/eq :age) ":age")
-                                      (s/one (s/eq :births) ":births")
-                                      (s/one (s/eq :year) ":year")]
-                       :columns [(s/one [s/Str] "col gss-code")
-                                 (s/one [s/Str] "col sex")
-                                 (s/one [s/Int] "col age")
-                                 (s/one [s/Num] "col births")
-                                 (s/one [s/Int] "col year")]
-                       s/Keyword s/Any})
+;; Generate schemas:
+(defn make-ordered-ds-schema [col-vec]
+  {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-vec)
+   :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
+   s/Keyword s/Any})
 
-(def AtRiskPopnSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
-                                      (s/one (s/eq :sex) ":sex")
-                                      (s/one (s/eq :age) ":age")
-                                      (s/one (s/eq :year) ":year")
-                                      (s/one (s/eq :popn) ":popn")
-                                      (s/one (s/eq :actualyear) ":actualyear")
-                                      (s/one (s/eq :actualage) ":actualage")]
-                       :columns [(s/one [s/Str] "col gss-code")
-                                 (s/one [s/Str] "col sex")
-                                 (s/one [s/Int] "col age")
-                                 (s/one [s/Int] "col year")
-                                 (s/one [s/Num] "col popn")
-                                 (s/one [s/Int] "col actualyear")
-                                 (s/one [s/Int] "col actualage")]
-                       s/Keyword s/Any})
+(def BirthsDataSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:births s/Num] [:year s/Int]]))
 
-(def MyeCoCSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
-                                  (s/one (s/eq :district) ":district")
-                                  (s/one (s/eq :sex) ":sex")
-                                  (s/one (s/eq :age) ":age")
-                                  (s/one (s/eq :var) ":var")
-                                  (s/one (s/eq :year) ":year")
-                                  (s/one (s/eq :estimate) ":estimate")]
-                   :columns [(s/one [s/Str] "col gss-code")
-                             (s/one [s/Str] "col district")
-                             (s/one [s/Str] "col sex")
-                             (s/one [s/Int] "col age")
-                             (s/one [s/Str] "col var")
-                             (s/one [s/Int] "col year")
-                             (s/one [s/Num] "col estimate")]
-                   s/Keyword s/Any})
+(def AtRiskPopnSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
+                           [:popn s/Num] [:actualyear s/Int] [:actualage s/Int]]))
+
+(def MyeCoCSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
+                           [:var s/Str] [:year s/Int] [:estimate s/Num]]))
+
+(def MyeESTSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:popn s/Int]]))
 
 (defn make-row-schema
   [col-schema]
@@ -126,6 +104,11 @@
   [data-info csv-data]
   {:column-names (apply-col-names-schema MyeCoCSchema csv-data)
    :columns (vec (apply-row-schema MyeCoCSchema csv-data))})
+
+(defmethod apply-rec-coercion :historic-popn-estimates
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema MyeESTSchema csv-data)
+   :columns (vec (apply-row-schema MyeESTSchema csv-data))})
 
 (defn dataset-after-coercion
   [{:keys [column-names columns]}]
