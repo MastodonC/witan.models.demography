@@ -1,15 +1,11 @@
 (ns witan.models.dem.ccm.fert.hist-asfr-age
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [clojure.walk :as walk]
-            [clojure-csv.core :as csv]
-            [schema.coerce :as coerce]
+  (:require [clojure.string :as str]
             [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
             [witan.workspace-api :refer [defworkflowfn merge->]]))
 
-;; Input schemas:
+;; Schemas for data inputs/ouputs:
 ;; Automate schemas creation
 (defn make-ordered-ds-schema [col-vec]
   {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-vec)
@@ -35,7 +31,7 @@
   (make-ordered-ds-schema [[:age s/Int] [:sex s/Str] [:year (s/maybe s/Int)] [:gss-code s/Str]
                            [:birth-pool s/Num]]))
 
-
+;; Functions:
 (defworkflowfn ->births-data-year
   "Takes births-data dataset
   Returns maximum value in Year column of births-data"
