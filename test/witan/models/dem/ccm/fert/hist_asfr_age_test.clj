@@ -71,7 +71,6 @@
 (deftest ->historic-fertility-test
   (testing "The intermediary outputs are added to the global map"
     (let [hist-asfr (->historic-fertility data-inputs params)]
-      (println (keys hist-asfr))
       (is (contains? hist-asfr :yr))
       (is (contains? hist-asfr :at-risk-this-year))
       (is (contains? hist-asfr :at-risk-last-year))
