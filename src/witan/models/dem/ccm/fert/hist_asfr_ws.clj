@@ -7,8 +7,8 @@
 
 ;; GET DATA FOR ROOT NODES
 (def root-data-paths {:births-data "resources/test_data/bristol_births_data.csv"
-                 :at-risk-popn "resources/test_data/bristol_denominators.csv"
-                 :mye-coc "resources/test_data/bristol_mye_coc.csv"})
+                      :at-risk-popn "resources/test_data/bristol_denominators.csv"
+                      :hist-births-est "resources/test_data/bristol_hist_births_est.csv"})
 
 (def root-data (ld/load-datasets root-data-paths))
 
@@ -17,39 +17,21 @@
   (get root-data keyname))
 
 ;; SCHEMAS FOR OUTPUT DATSETS
-(def AtRiskThisYearSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
-                                          (s/one (s/eq :sex) ":sex")
-                                          (s/one (s/eq :popn-this-yr) ":popn-this-yr")
-                                          (s/one (s/eq :age) ":age")]
-                           :columns [(s/one [s/Str] "col gss-code")
-                                     (s/one [s/Str] "col sex")
-                                     (s/one [s/Num] "col popn-this-yr")
-                                     (s/one [s/Int] "col age")]
-                           s/Keyword s/Any})
+(defn make-ordered-ds-schema [col-vec]
+  {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-vec)
+   :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
+   s/Keyword s/Any})
 
-(def AtRiskLastYearSchema {:column-names [(s/one (s/eq :gss-code) ":gss-code")
-                                          (s/one (s/eq :sex) ":sex")
-                                          (s/one (s/eq :age) ":age")
-                                          (s/one (s/eq :year) ":year")
-                                          (s/one (s/eq :popn-last-yr) ":popn-last-yr")]
-                           :columns [(s/one [s/Str] "col gss-code")
-                                     (s/one [s/Str] "col sex")
-                                     (s/one [s/Int] "col age")
-                                     (s/one [s/Int] "col year")
-                                     (s/one [s/Num] "col popn-last-yr")]
-                           s/Keyword s/Any})
+(def AtRiskThisYearSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:popn-this-yr s/Num] [:age s/Int]]))
 
-(def BirthsPoolSchema {:column-names [(s/one (s/eq :age) ":age")
-                                      (s/one (s/eq :sex) ":sex")
-                                      (s/one (s/eq :year) ":year")
-                                      (s/one (s/eq :gss-code) ":gss-code")
-                                      (s/one (s/eq :birth-pool) ":birth-pool")]
-                       :columns [(s/one [s/Int] "col age")
-                                 (s/one [s/Str] "col sex")
-                                 (s/one [(s/maybe s/Int)] "col year") ;; Bypass missing values `nil`
-                                 (s/one [s/Str] "col gss-code")
-                                 (s/one [s/Num] "col birth-pool")]
-                       s/Keyword s/Any})
+(def AtRiskLastYearSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
+                           [:popn-last-yr s/Num]]))
+
+(def BirthsPoolSchema
+  (make-ordered-ds-schema [[:age s/Int] [:sex s/Str] [:year (s/maybe s/Int)] [:gss-code s/Str]
+                           [:birth-pool s/Num]]))
 
 ;; WORKFLOW
 ;; Running this workflow is the equivalent of calling asfr/->historic-fertility

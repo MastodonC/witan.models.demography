@@ -41,11 +41,11 @@
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
                            [:popn s/Num] [:actualyear s/Int] [:actualage s/Int]]))
 
-(def MyeCoCSchema
+(def HistBirthsEst
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
                            [:var s/Str] [:year s/Int] [:estimate s/Num]]))
 
-(def MyeESTSchema
+(def HistPopnEst
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:popn s/Int]]))
 
@@ -100,15 +100,15 @@
   {:column-names (apply-col-names-schema AtRiskPopnSchema csv-data)
    :columns (vec (apply-row-schema AtRiskPopnSchema csv-data))})
 
-(defmethod apply-rec-coercion :mye-coc
+(defmethod apply-rec-coercion :hist-births-est
   [data-info csv-data]
-  {:column-names (apply-col-names-schema MyeCoCSchema csv-data)
-   :columns (vec (apply-row-schema MyeCoCSchema csv-data))})
+  {:column-names (apply-col-names-schema HistBirthsEst csv-data)
+   :columns (vec (apply-row-schema HistBirthsEst csv-data))})
 
 (defmethod apply-rec-coercion :historic-popn-estimates
   [data-info csv-data]
-  {:column-names (apply-col-names-schema MyeESTSchema csv-data)
-   :columns (vec (apply-row-schema MyeESTSchema csv-data))})
+  {:column-names (apply-col-names-schema HistPopnEst csv-data)
+   :columns (vec (apply-row-schema HistPopnEst csv-data))})
 
 (defn dataset-after-coercion
   [{:keys [column-names columns]}]

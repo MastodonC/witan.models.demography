@@ -9,7 +9,7 @@
 ;; Load testing data
 (def test-data-paths {:births-data "resources/test_data/bristol_births_data.csv"
                       :at-risk-popn "resources/test_data/bristol_denominators.csv"
-                      :mye-coc "resources/test_data/bristol_mye_coc.csv"})
+                      :hist-births-est "resources/test_data/bristol_hist_births_est.csv"})
 
 (def data-inputs (ld/load-datasets test-data-paths))
 

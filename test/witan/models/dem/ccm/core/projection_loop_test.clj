@@ -10,7 +10,8 @@
 ;; Load testing data
 ;; NEED TO GET THE RIGHT INPUT -> mye.est
 (def data-inputs (ld/load-datasets
-                  {:historic-popn-estimates "resources/test_data/bristol_mye_est.csv"}))
+                  {:historic-popn-estimates
+                   "resources/test_data/bristol_hist_popn_est.csv"}))
 
 (def params {:first-proj-year 2014
              :last-proj-year 2040})
