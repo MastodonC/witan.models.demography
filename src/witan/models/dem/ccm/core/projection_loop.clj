@@ -3,7 +3,7 @@
             [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.workspace-api :refer [defworkflowfn merge->]]))
+            [witan.workspace-api :refer [defworkflowfn merge-> rename-keys]]))
 
 ;; Schemas for data inputs/ouputs:
 (defn make-ordered-ds-schema [col-vec]
@@ -25,10 +25,11 @@
    Returns a dataset ow/ the starting population."
   {:witan/name :get-starting-popn
    :witan/version "1.0"
-   :witan/input-schema {:historic-popn-estimates HistoricPopnEstimates
-                        :year s/Int}
+   :witan/input-schema {:historic-popn-estimates HistoricPopnEstimates}
+   :witan/param-schema {:year s/Int}
    :witan/output-schema {:starting-popn StartingPopn}}
-  [{:keys [historic-popn-estimates]} {:keys [year]}])
+  [{:keys [historic-popn-estimates]} {:keys [year]}]
+  {:starting-popn historic-popn-estimates})
 
 (defworkflowfn core-loop
   "Takes in a dataset of popn estimates, a first year
@@ -36,9 +37,11 @@
    for the range of years between the first and last year."
   {:witan/name :exec-core-loop
    :witan/version "1.0"
-   :witan/input-schema {:historic-popn-estimates HistoricPopnEstimates
-                        :first-proj-year s/Int
+   :witan/input-schema {:historic-popn-estimates HistoricPopnEstimates}
+   :witan/param-schema {:first-proj-year s/Int
                         :last-proj-year s/Int}
-   :witan/output-schema {:starting-popn StartingPopn}
+   :witan/output-schema {:starting-popn StartingPopn} ;; TO BE UPDATED
    :witan/exported? true}
-  [{:keys [historic-popn-estimates]} {:keys [first-proj-year last-proj-year]}])
+  [inputs params]
+  (let [new-params (rename-keys params {:first-proj-year :year})]
+    (->starting-popn inputs new-params)))
