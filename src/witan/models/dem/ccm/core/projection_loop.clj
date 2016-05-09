@@ -21,15 +21,15 @@
 
 ;; Functions:
 (defworkflowfn ->starting-popn
-  "Takes in a dataset of popn estimates and a year.
-   Returns a dataset ow/ the starting population."
+  "Takes in a dataset of popn estimates and a year for the projection.
+   Returns a dataset w/ the starting popn (popn for the previous year)."
   {:witan/name :get-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:historic-popn-estimates HistoricPopnEstimates}
    :witan/param-schema {:year s/Int}
    :witan/output-schema {:starting-popn StartingPopn}}
   [{:keys [historic-popn-estimates]} {:keys [year]}]
-  {:starting-popn historic-popn-estimates})
+  {:starting-popn (i/query-dataset historic-popn-estimates {:year (dec year)})})
 
 (defworkflowfn core-loop
   "Takes in a dataset of popn estimates, a first year

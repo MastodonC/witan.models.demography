@@ -28,7 +28,9 @@
     (let [get-start-popn (->starting-popn data-inputs params-2)]
       (is (same-coll? [:starting-popn :historic-popn-estimates] (keys get-start-popn)))
       (is (same-coll? [:gss-code :sex :age :year :popn]
-                      (ds/column-names (:starting-popn get-start-popn)))))))
+                      (ds/column-names (:starting-popn get-start-popn))))
+      (is (same-coll? [2013] (set (i/$ :year (:starting-popn
+                                              (->starting-popn data-inputs params-2)))))))))
 
 (deftest core-loop-test
   (testing "The intermediary outputs are added to the global map"
