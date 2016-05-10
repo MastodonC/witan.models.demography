@@ -4,7 +4,10 @@
             [clojure-csv.core :as csv]
             [schema.coerce :as coerce]
             [schema.core :as s]
-            [clojure.core.matrix.dataset :as ds]))
+            [clojure.core.matrix.dataset :as ds]
+            [witan.models.dem.ccm.core.projection-loop :refer [PopnSchema]]
+            [witan.models.dem.ccm.fert.hist-asfr-age :refer [BirthsDataSchema
+                                                             AtRiskPopnSchema ]]))
 
 (defn- custom-keyword [coll]
   (mapv #(-> %
@@ -33,21 +36,9 @@
    :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
    s/Keyword s/Any})
 
-(def BirthsDataSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:births s/Num] [:year s/Int]]))
-
-(def AtRiskPopnSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:popn s/Num] [:actualyear s/Int] [:actualage s/Int]]))
-
 (def HistBirthsEst
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
                            [:var s/Str] [:year s/Int] [:estimate s/Num]]))
-
-(def HistPopnEst
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:popn s/Int]]))
 
 (defn make-row-schema
   [col-schema]
@@ -105,10 +96,10 @@
   {:column-names (apply-col-names-schema HistBirthsEst csv-data)
    :columns (vec (apply-row-schema HistBirthsEst csv-data))})
 
-(defmethod apply-rec-coercion :historic-popn-estimates
+(defmethod apply-rec-coercion :popn
   [data-info csv-data]
-  {:column-names (apply-col-names-schema HistPopnEst csv-data)
-   :columns (vec (apply-row-schema HistPopnEst csv-data))})
+  {:column-names (apply-col-names-schema PopnSchema csv-data)
+   :columns (vec (apply-row-schema PopnSchema csv-data))})
 
 (defn dataset-after-coercion
   [{:keys [column-names columns]}]

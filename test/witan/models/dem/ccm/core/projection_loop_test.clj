@@ -10,14 +10,11 @@
 ;; Load testing data
 ;; NEED TO GET THE RIGHT INPUT -> mye.est
 (def data-inputs (ld/load-datasets
-                  {:historic-popn-estimates
+                  {:popn
                    "resources/test_data/bristol_hist_popn_est.csv"}))
 
 (def params {:first-proj-year 2014
-             :last-proj-year 2040})
-
-(def params-2 {:year 2014
-               :last-proj-year 2040})
+             :last-proj-year 2041})
 
 ;; Useful fn:
 (defn- same-coll? [coll1 coll2]
@@ -26,14 +23,14 @@
 ;; Tests:
 (deftest ->starting-popn-test
   (testing "The starting popn is returned"
-    (let [get-start-popn (->starting-popn data-inputs params-2)]
-      (is (same-coll? [:starting-popn :historic-popn-estimates] (keys get-start-popn)))
+    (let [get-start-popn (->starting-popn data-inputs params)]
+      (is (same-coll? [:starting-popn :popn] (keys get-start-popn)))
       (is (same-coll? [:gss-code :sex :age :year :popn]
                       (ds/column-names (:starting-popn get-start-popn))))
       (is (same-coll? [2013] (set (i/$ :year (:starting-popn
-                                              (->starting-popn data-inputs params-2)))))))))
+                                              (->starting-popn data-inputs params)))))))))
 
-(deftest core-loop-test
+(deftest ccm-core-test
   (testing "The intermediary outputs are added to the global map"
-    (let [exec-loop (core-loop data-inputs params)]
-      (is (contains? exec-loop :starting-popn)))))
+    (let [exec-core (ccm-core data-inputs params)]
+      (is (contains? exec-core :starting-popn)))))
