@@ -11,11 +11,7 @@
    :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
    s/Keyword s/Any})
 
-(def HistoricPopnEstimates
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:popn s/Int]]))
-
-(def StartingPopn
+(def PopnSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:popn s/Int]]))
 
@@ -23,25 +19,29 @@
 (defworkflowfn ->starting-popn
   "Takes in a dataset of popn estimates and a year for the projection.
    Returns a dataset w/ the starting popn (popn for the previous year)."
-  {:witan/name :get-starting-popn
+  {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
-   :witan/input-schema {:historic-popn-estimates HistoricPopnEstimates}
-   :witan/param-schema {:year s/Int}
-   :witan/output-schema {:starting-popn StartingPopn}}
-  [{:keys [historic-popn-estimates]} {:keys [year]}]
-  {:starting-popn (i/query-dataset historic-popn-estimates {:year (dec year)})})
+   :witan/input-schema {:popn PopnSchema}
+   :witan/param-schema {:first-proj-year s/Int}
+   :witan/output-schema {:starting-popn PopnSchema}}
+  [{:keys [popn]} {:keys [first-proj-year]}]
+  (let [latest-yr (reduce max (i/$ :year popn))]
+    (if (>= latest-yr first-proj-year)
+      {:starting-popn (i/query-dataset popn {:year (dec latest-yr)})}
+      (throw (Exception.
+              (format "The latest year in the base popn (%d) is expected to be greater than %d"
+                      latest-yr first-proj-year))))))
 
-(defworkflowfn core-loop
+(defworkflowfn ccm-core
   "Takes in a dataset of popn estimates, a first year
    and last year. Implement the looping to output the projections
    for the range of years between the first and last year."
-  {:witan/name :exec-core-loop
+  {:witan/name :ccm-core/exec-core-ccm
    :witan/version "1.0"
-   :witan/input-schema {:historic-popn-estimates HistoricPopnEstimates}
+   :witan/input-schema {:popn PopnSchema}
    :witan/param-schema {:first-proj-year s/Int
                         :last-proj-year s/Int}
-   :witan/output-schema {:starting-popn StartingPopn} ;; TO BE UPDATED
+   :witan/output-schema {:starting-popn PopnSchema} ;; TO BE UPDATED
    :witan/exported? true}
   [inputs params]
-  (let [new-params (rename-keys params {:first-proj-year :year})]
-    (->starting-popn inputs new-params)))
+  (->starting-popn inputs params))
