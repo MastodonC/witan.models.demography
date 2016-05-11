@@ -19,7 +19,7 @@
 (defworkflowfn ->starting-popn
   "Takes in a dataset of popn estimates and a year for the projection.
    Returns a dataset w/ the starting popn (popn for the previous year)."
-  {:witan/name :get-starting-popn
+  {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:popn PopnSchema}
    :witan/param-schema {:first-proj-year s/Int}
@@ -36,7 +36,7 @@
   "Takes in a dataset of popn estimates, a first year
    and last year. Implement the looping to output the projections
    for the range of years between the first and last year."
-  {:witan/name :exec-core-ccm
+  {:witan/name :ccm-core/exec-core-ccm
    :witan/version "1.0"
    :witan/input-schema {:popn PopnSchema}
    :witan/param-schema {:first-proj-year s/Int
