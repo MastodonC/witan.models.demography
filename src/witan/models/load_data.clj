@@ -11,7 +11,7 @@
 
 (defn- custom-keyword [coll]
   (mapv #(-> %
-             (clojure.string/replace #"[. ]" "-")
+             (clojure.string/replace #"[. /']" "-")
              keyword) coll))
 
 (defn- load-csv
@@ -110,13 +110,18 @@
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))
 
+(defn load-dataset
+  "Input is a keyword and a filepath to csv file
+   Output is map with keyword and core.matrix dataset"
+  [keyname filepath]
+  (->> (apply-rec-coercion {:type keyname} (load-csv filepath))
+       (dataset-after-coercion)
+       (hash-map keyname)))
+
 (defn load-datasets
   "Input should be a map with keys for each dataset and filepaths to csv
    files as the values. Output is a map of core.matrix datasets."
   [file-map]
   (->> file-map
-       (mapv (fn [[k path]]
-               (->> (apply-rec-coercion {:type k} (load-csv path))
-                    (dataset-after-coercion)
-                    (hash-map k))))
+       (mapv (fn [[k path]] (load-dataset k path)))
        (reduce merge)))
