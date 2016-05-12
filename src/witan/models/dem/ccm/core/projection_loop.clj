@@ -22,6 +22,17 @@
   [popn]
   (reduce max (i/$ :year popn)))
 
+(defworkflowfn keep-looping?
+  {:witan/name :ccm-core/ccm-loop-pred
+   :witan/version "1.0"
+   :witan/input-schema {:population PopulationSchema}
+   :witan/param-schema {:last-proj-year s/Int}
+   :witan/output-schema {:loop-predicate s/Bool}
+   ;; :witan/predicate? true
+   :witan/exported? true}
+  [{:keys [population]} {:keys [last-proj-year]}]
+  {:loop-predicate (< (get-last-yr-from-popn population) last-proj-year)})
+
 (defworkflowfn select-starting-popn
   "Takes in a dataset of popn estimates and a year for the projection.
    Returns a dataset w/ the starting popn (popn for the previous year)."
@@ -35,3 +46,7 @@
         last-yr-data (i/query-dataset population {:year latest-yr})
         update-yr (i/replace-column :year (i/$map inc :year last-yr-data) last-yr-data)]
     {:population (i/conj-rows population update-yr)}))
+
+;; (defn looping-test
+;;   [inputs  params]
+;;   (loop ))
