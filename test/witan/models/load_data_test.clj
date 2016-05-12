@@ -2,11 +2,11 @@
   (:require [witan.models.load-data :refer :all]
             [clojure.test :refer :all]
             [schema.core :as s]
-            [clojure.core.matrix.dataset :as ds]))
+            [clojure.core.matrix.dataset :as ds]
+            [witan.models.dem.ccm.fert.hist-asfr-age :refer [BirthsDataSchema]]))
 
 ;;Test data
 (def test-file-1 "resources/test_data/bristol_births_data.csv") ;;clean data
-(def test-file-2 "resources/test_data/bristol_denominators.csv") ;;clean data
 
 (def ColumnsSchema
   {:column-names [(s/one (s/eq :age) ":age")
