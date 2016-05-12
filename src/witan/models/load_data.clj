@@ -5,7 +5,7 @@
             [schema.coerce :as coerce]
             [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
-            [witan.models.dem.ccm.core.projection-loop :refer [PopnSchema]]
+            [witan.models.dem.ccm.core.projection-loop :refer [PopulationSchema]]
             [witan.models.dem.ccm.fert.hist-asfr-age :refer [BirthsDataSchema
                                                              AtRiskPopnSchema ]]))
 
@@ -96,10 +96,15 @@
   {:column-names (apply-col-names-schema HistBirthsEst csv-data)
    :columns (vec (apply-row-schema HistBirthsEst csv-data))})
 
-(defmethod apply-rec-coercion :popn
+(defmethod apply-rec-coercion :population
   [data-info csv-data]
-  {:column-names (apply-col-names-schema PopnSchema csv-data)
-   :columns (vec (apply-row-schema PopnSchema csv-data))})
+  {:column-names (apply-col-names-schema PopulationSchema csv-data)
+   :columns (vec (apply-row-schema PopulationSchema csv-data))})
+
+(defmethod apply-rec-coercion :hist-popn-estimates
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema PopulationSchema csv-data)
+   :columns (vec (apply-row-schema PopulationSchema csv-data))})
 
 (defn dataset-after-coercion
   [{:keys [column-names columns]}]
