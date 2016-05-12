@@ -47,6 +47,12 @@
         update-yr (i/replace-column :year (i/$map inc :year last-yr-data) last-yr-data)]
     {:population (i/conj-rows population update-yr)}))
 
-;; (defn looping-test
-;;   [inputs  params]
-;;   (loop ))
+(defn looping-test
+  [inputs params]
+  (loop [inputs inputs
+         params params]
+    (let [inputs' (select-starting-popn inputs params)]
+      (println (format "Projecting for year %d..." (get-last-yr-from-popn (:population inputs'))))
+      (if (:loop-predicate (keep-looping? inputs' params))
+        (recur inputs' params)
+        (:population inputs')))))
