@@ -59,7 +59,7 @@
                           (ds/rename-columns {:actualage :age :popn :popn-this-yr})
                           (ds/remove-columns [:year :actualyear]))})
 
- (defworkflowfn ->at-risk-last-year
+(defworkflowfn ->at-risk-last-year
   "Filters ds for actualyear = yr - 1, removes three columns
   and rename one column."
   {:witan/name :popn-at-risk-last-yr
