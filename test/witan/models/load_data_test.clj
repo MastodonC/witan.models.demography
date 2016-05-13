@@ -37,18 +37,13 @@
   (testing "Generate row shema from column schema"
     (is (= RowSchema (make-row-schema ColumnsSchema)))))
 
-(defn nils-in-map?
-  "Returns true if any values are nil, otherwise returns nil"
-  [m]
-  (some true? (map nil? (vals m))))
-
 (deftest load-dataset-test
   (let [data-map (load-dataset :births-data test-file-1)
         data (:births-data data-map)]
     (testing "Loaded dataset has correct column names"
       (is (= [:gss-code :sex :age :births :year] (ds/column-names data))))
     (testing "Dataset was loaded"
-      (is (= nil (nils-in-map? data-map))))
+      (is (every? identity (vals data-map))))
     (testing "Loaded dataset is a core.matrix dataset"
       (is (= clojure.core.matrix.impl.dataset.DataSet (type data))))
     (testing "Values correctly coerced"

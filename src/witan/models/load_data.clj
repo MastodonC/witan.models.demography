@@ -7,7 +7,7 @@
             [clojure.core.matrix.dataset :as ds]
             [witan.models.dem.ccm.core.projection-loop :refer [PopulationSchema]]
             [witan.models.dem.ccm.fert.hist-asfr-age :refer [BirthsDataSchema
-                                                             AtRiskPopnSchema ]]))
+                                                             AtRiskPopnSchema]]))
 
 (defn- custom-keyword [coll]
   (mapv #(-> %
