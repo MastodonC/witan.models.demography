@@ -24,7 +24,7 @@
 ;; Tests:
 (deftest select-starting-popn-test
   (testing "The starting popn is returned"
-    (let [get-start-popn (select-starting-popn data-inputs params)]
+    (let [get-start-popn (select-starting-popn data-inputs)]
       (is (same-coll? [:gss-code :sex :age :year :popn]
                       (ds/column-names (:population get-start-popn))))
       (is (= 2015 (get-last-yr-from-popn (:population get-start-popn)))))))
