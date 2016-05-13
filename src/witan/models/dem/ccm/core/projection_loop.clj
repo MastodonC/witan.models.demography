@@ -11,37 +11,48 @@
    :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
    s/Keyword s/Any})
 
-(def PopnSchema
+(def PopulationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:popn s/Int]]))
 
 ;; Functions:
-(defworkflowfn ->starting-popn
+(defn get-last-yr-from-popn
+  "Takes in a dataset. Select the latest year and returns it.
+  Note: expect a :year column."
+  [popn]
+  (reduce max (i/$ :year popn)))
+
+(defworkflowfn keep-looping?
+  {:witan/name :ccm-core/ccm-loop-pred
+   :witan/version "1.0"
+   :witan/input-schema {:population PopulationSchema}
+   :witan/param-schema {:last-proj-year s/Int}
+   :witan/output-schema {:loop-predicate s/Bool}
+   ;; :witan/predicate? true
+   :witan/exported? true}
+  [{:keys [population]} {:keys [last-proj-year]}]
+  {:loop-predicate (< (get-last-yr-from-popn population) last-proj-year)})
+
+(defworkflowfn select-starting-popn
   "Takes in a dataset of popn estimates and a year for the projection.
    Returns a dataset w/ the starting popn (popn for the previous year)."
   {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
-   :witan/input-schema {:popn PopnSchema}
+   :witan/input-schema {:population PopulationSchema}
    :witan/param-schema {:first-proj-year s/Int}
-   :witan/output-schema {:starting-popn PopnSchema}}
-  [{:keys [popn]} {:keys [first-proj-year]}]
-  (let [latest-yr (reduce max (i/$ :year popn))]
-    (if (>= latest-yr first-proj-year)
-      {:starting-popn (i/query-dataset popn {:year (dec latest-yr)})}
-      (throw (Exception.
-              (format "The latest year in the base popn (%d) is expected to be greater than %d"
-                      latest-yr first-proj-year))))))
+   :witan/output-schema {:population PopulationSchema}}
+  [{:keys [population]} {:keys [first-proj-year]}]
+  (let [latest-yr (get-last-yr-from-popn population)
+        last-yr-data (i/query-dataset population {:year latest-yr})
+        update-yr (i/replace-column :year (i/$map inc :year last-yr-data) last-yr-data)]
+    {:population (i/conj-rows population update-yr)}))
 
-(defworkflowfn ccm-core
-  "Takes in a dataset of popn estimates, a first year
-   and last year. Implement the looping to output the projections
-   for the range of years between the first and last year."
-  {:witan/name :ccm-core/exec-core-ccm
-   :witan/version "1.0"
-   :witan/input-schema {:popn PopnSchema}
-   :witan/param-schema {:first-proj-year s/Int
-                        :last-proj-year s/Int}
-   :witan/output-schema {:starting-popn PopnSchema} ;; TO BE UPDATED
-   :witan/exported? true}
+(defn looping-test
   [inputs params]
-  (->starting-popn inputs params))
+  (loop [inputs inputs
+         params params]
+    (let [inputs' (select-starting-popn inputs params)]
+      (println (format "Projecting for year %d..." (get-last-yr-from-popn (:population inputs'))))
+      (if (:loop-predicate (keep-looping? inputs' params))
+        (recur inputs' params)
+        (:population inputs')))))
