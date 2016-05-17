@@ -59,7 +59,7 @@
                  :witan/impl 'witan.models.dem.ccm.fert.hist-asfr-age/->births-data-year
                  :witan/version "1.0"
                  :witan/params-schema nil
-                 :witan/inputs [{:witan/schema witan.models.load-data/BirthsDataSchema
+                 :witan/inputs [{:witan/schema witan.models.dem.ccm.fert.hist-asfr-age/BirthsDataSchema
                                  :witan/key :births-data
                                  :witan/display-name "Births Data"}]
                  :witan/outputs [{:witan/schema s/Int
@@ -69,7 +69,7 @@
                  :witan/impl 'witan.models.dem.ccm.fert.hist-asfr-age/->at-risk-this-year
                  :witan/version "1.0"
                  :witan/params-schema nil
-                 :witan/inputs [{:witan/schema witan.models.load-data/AtRiskPopnSchema
+                 :witan/inputs [{:witan/schema witan.models.dem.ccm.fert.hist-asfr-age/AtRiskPopnSchema
                                  :witan/key :at-risk-popn
                                  :witan/display-name "At Risk Population"}
                                 {:witan/schema s/Int
@@ -82,7 +82,7 @@
                  :witan/impl 'witan.models.dem.ccm.fert.hist-asfr-age/->at-risk-last-year
                  :witan/version "1.0"
                  :witan/params-schema nil
-                 :witan/inputs [{:witan/schema witan.models.load-data/AtRiskPopnSchema
+                 :witan/inputs [{:witan/schema witan.models.dem.ccm.fert.hist-asfr-age/AtRiskPopnSchema
                                  :witan/key :at-risk-popn
                                  :witan/display-name "At Risk Population"}
                                 {:witan/schema s/Int
