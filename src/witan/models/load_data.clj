@@ -5,9 +5,7 @@
             [schema.coerce :as coerce]
             [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
-            [witan.models.dem.ccm.core.projection-loop :refer [PopulationSchema]]
-            [witan.models.dem.ccm.fert.hist-asfr-age :refer [BirthsDataSchema
-                                                             AtRiskPopnSchema]]))
+            [witan.models.dem.ccm.schemas :refer :all]))
 
 (defn- custom-keyword [coll]
   (mapv #(-> %
@@ -29,30 +27,6 @@
            headers (map str/lower-case (first parsed-csv))]
        {:column-names (custom-keyword headers)
         :columns (vec parsed-data)}))))
-
-;; Generate schemas:
-(defn make-ordered-ds-schema [col-vec]
-  {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-vec)
-   :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
-   s/Keyword s/Any})
-
-(def HistBirthsEst
-  (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
-                           [:var s/Str] [:year s/Int] [:estimate s/Num]]))
-
-(defn make-row-schema
-  [col-schema]
-  (mapv (fn [s] (let [datatype (-> s :schema first)
-                      fieldname (:name s)]
-                  (s/one datatype fieldname)))
-        (:columns col-schema)))
-
-(defn make-col-names-schema
-  [col-schema]
-  (mapv (fn [s] (let [datatype (:schema s)
-                      fieldname (:name s)]
-                  (s/one datatype fieldname)))
-        (:column-names col-schema)))
 
 (defn record-coercion
   "Coerce numbers by matching them to the
@@ -93,8 +67,8 @@
 
 (defmethod apply-rec-coercion :hist-births-est
   [data-info csv-data]
-  {:column-names (apply-col-names-schema HistBirthsEst csv-data)
-   :columns (vec (apply-row-schema HistBirthsEst csv-data))})
+  {:column-names (apply-col-names-schema HistBirthsEstSchema csv-data)
+   :columns (vec (apply-row-schema HistBirthsEstSchema csv-data))})
 
 (defmethod apply-rec-coercion :population
   [data-info csv-data]

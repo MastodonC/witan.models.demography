@@ -15,7 +15,7 @@
                    "resources/test_data/bristol_hist_popn_est.csv"}))
 
 (def params {:first-proj-year 2014
-             :last-proj-year 2015})
+             :last-proj-year 2017})
 
 ;; Useful fn:
 (defn- same-coll? [coll1 coll2]
