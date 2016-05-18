@@ -3,35 +3,9 @@
             [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.workspace-api :refer [defworkflowfn merge->]]))
+            [witan.workspace-api :refer [defworkflowfn merge->]]
+            [witan.models.dem.ccm.schemas :refer :all]))
 
-;; Schemas for data inputs/ouputs:
-;; Automate schemas creation
-(defn make-ordered-ds-schema [col-vec]
-  {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-vec)
-   :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
-   s/Keyword s/Any})
-
-(def BirthsDataSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:births s/Num] [:year s/Int]]))
-
-(def AtRiskPopnSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:popn s/Num] [:actualyear s/Int] [:actualage s/Int]]))
-
-(def AtRiskThisYearSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:popn-this-yr s/Num] [:age s/Int]]))
-
-(def AtRiskLastYearSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:popn-last-yr s/Num]]))
-
-(def BirthsPoolSchema
-  (make-ordered-ds-schema [[:age s/Int] [:sex s/Str] [:year (s/maybe s/Int)] [:gss-code s/Str]
-                           [:birth-pool s/Num]]))
-
-;; Functions:
 (defworkflowfn ->births-data-year
   "Takes births-data dataset
   Returns maximum value in Year column of births-data"

@@ -4,19 +4,9 @@
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
             [witan.workspace-api :refer [defworkflowfn merge-> rename-keys]]
-            [witan.datasets :as wds]))
+            [witan.datasets :as wds]
+            [witan.models.dem.ccm.schemas :refer :all]))
 
-;; Schemas for data inputs/ouputs:
-(defn make-ordered-ds-schema [col-vec]
-  {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-vec)
-   :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
-   s/Keyword s/Any})
-
-(def PopulationSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:popn s/Int]]))
-
-;; Functions:
 (defn get-last-yr-from-popn
   "Takes in a dataset. Select the latest year and returns it.
   Note: expect a :year column."

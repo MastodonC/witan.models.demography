@@ -3,7 +3,8 @@
             [witan.workspace-executor.core :as wex]
             [schema.core :as s]
             [witan.models.load-data :as ld]
-            [witan.workspace-api :as wapi]))
+            [witan.workspace-api :as wapi]
+            [witan.models.dem.ccm.schemas :refer :all]))
 
 ;; GET DATA FOR ROOT NODES
 (def root-data-paths {:births-data "resources/test_data/bristol_births_data.csv"
@@ -15,23 +16,6 @@
 (defn get-data
   [keyname]
   (get root-data keyname))
-
-;; SCHEMAS FOR OUTPUT DATSETS
-(defn make-ordered-ds-schema [col-vec]
-  {:column-names (mapv #(s/one (s/eq (first %)) (str (first %))) col-vec)
-   :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
-   s/Keyword s/Any})
-
-(def AtRiskThisYearSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:popn-this-yr s/Num] [:age s/Int]]))
-
-(def AtRiskLastYearSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:popn-last-yr s/Num]]))
-
-(def BirthsPoolSchema
-  (make-ordered-ds-schema [[:age s/Int] [:sex s/Str] [:year (s/maybe s/Int)] [:gss-code s/Str]
-                           [:birth-pool s/Num]]))
 
 ;; WORKFLOW
 ;; Running this workflow is the equivalent of calling asfr/->historic-fertility
@@ -59,7 +43,7 @@
                  :witan/impl 'witan.models.dem.ccm.fert.hist-asfr-age/->births-data-year
                  :witan/version "1.0"
                  :witan/params-schema nil
-                 :witan/inputs [{:witan/schema witan.models.dem.ccm.fert.hist-asfr-age/BirthsDataSchema
+                 :witan/inputs [{:witan/schema witan.models.dem.ccm.schemas/BirthsDataSchema
                                  :witan/key :births-data
                                  :witan/display-name "Births Data"}]
                  :witan/outputs [{:witan/schema s/Int
@@ -69,7 +53,7 @@
                  :witan/impl 'witan.models.dem.ccm.fert.hist-asfr-age/->at-risk-this-year
                  :witan/version "1.0"
                  :witan/params-schema nil
-                 :witan/inputs [{:witan/schema witan.models.dem.ccm.fert.hist-asfr-age/AtRiskPopnSchema
+                 :witan/inputs [{:witan/schema witan.models.dem.ccm.schemas/AtRiskPopnSchema
                                  :witan/key :at-risk-popn
                                  :witan/display-name "At Risk Population"}
                                 {:witan/schema s/Int
@@ -82,7 +66,7 @@
                  :witan/impl 'witan.models.dem.ccm.fert.hist-asfr-age/->at-risk-last-year
                  :witan/version "1.0"
                  :witan/params-schema nil
-                 :witan/inputs [{:witan/schema witan.models.dem.ccm.fert.hist-asfr-age/AtRiskPopnSchema
+                 :witan/inputs [{:witan/schema witan.models.dem.ccm.schemas/AtRiskPopnSchema
                                  :witan/key :at-risk-popn
                                  :witan/display-name "At Risk Population"}
                                 {:witan/schema s/Int
