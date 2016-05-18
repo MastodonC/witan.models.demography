@@ -30,7 +30,7 @@
 
 (def PopulationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:popn s/Int]]))
+                           [:year s/Int] [:popn s/Num]]))
 
 ;;For core CCM projection loop using fert/mort/mig inputs from files
 (def BirthsBySexSchema
