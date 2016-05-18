@@ -12,7 +12,13 @@
 ;; NEED TO GET THE RIGHT INPUT -> mye.est
 (def data-inputs (ld/load-datasets
                   {:population
-                   "resources/test_data/bristol_hist_popn_est.csv"}))
+                   "resources/test_data/bristol_hist_popn_est.csv"
+                   :births 
+                   "resources/test_data/handmade_outputs/bristol_fertility_module_handmade_output.csv"
+                   :deaths 
+                   "resources/test_data/handmade_outputs/bristol_mortality_module_handmade_output.csv"
+                   :net-migration 
+                   "resources/test_data/handmade/outputs/bristol_migration_module_handmade_output.csv"}))
 
 (def params {:first-proj-year 2014
              :last-proj-year 2017})

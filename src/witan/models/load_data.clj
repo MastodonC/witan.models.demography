@@ -80,6 +80,21 @@
   {:column-names (apply-col-names-schema PopulationSchema csv-data)
    :columns (vec (apply-row-schema PopulationSchema csv-data))})
 
+(defmethod apply-rec-coercion :births
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema BirthsBySexSchema csv-data)
+   :columns (vec (apply-row-schema BirthsBySexSchema csv-data))})
+
+(defmethod apply-rec-coercion :deaths
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema DeathsSchema csv-data)
+   :columns (vec (apply-row-schema DeathsSchema csv-data))})
+
+(defmethod apply-rec-coercion :net-migration
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema NetMigrationSchema csv-data)
+   :columns (vec (apply-row-schema NetMigrationSchema csv-data))})
+
 (defn dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))
