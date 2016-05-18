@@ -58,11 +58,31 @@
         grouped (wds/rollup :sum :popn [:gss-code :sex :age :year] aged-on)]
     {:population (ds/join-rows prev-yrs-data grouped)}))
 
+(defworkflowfn add-births
+  "Takes in dataset of aged on popn estimates and dataset of births 
+   by sex & gss code for latest year in popn dataset.
+   Returns a dataset where the births output from the fertility module is
+   appended to the latest year in the popn dataset."
+  {:witan/name :ccm-core/add-births
+   :witan/version "1.0"
+   :witan/input-schema {:population PopulationSchema :births BirthsBySexSchema}
+   :witan/param-schema {:_ nil}
+   :witan/output-schema {:population PopulationSchema}}
+  [{:keys [population births]} _]
+  (let [latest-yr (get-last-yr-from-popn population)
+        update-births (-> births
+                          (ds/add-column :age (repeat 0))
+                          (ds/add-column :year (repeat latest-yr))
+                          (ds/rename-columns {:births :popn}))]
+    {:population (ds/select-columns (ds/join-rows population update-births)
+                                    [:gss-code :sex :age :year :popn])}))
+
 (defn looping-test
   [inputs params]
   (loop [inputs inputs]
     (let [inputs' (->> (select-starting-popn inputs)
-                       (age-on))]
+                       (age-on)
+                       (add-births))]
       (println (format "Projecting for year %d..." (get-last-yr-from-popn (:population inputs'))))
       (if (:loop-predicate (keep-looping? inputs' params))
         (recur inputs')

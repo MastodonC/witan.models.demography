@@ -13,19 +13,27 @@
 (def data-inputs (ld/load-datasets
                   {:population
                    "resources/test_data/bristol_hist_popn_est.csv"
-                   :births 
+                   :births
                    "resources/test_data/handmade_outputs/bristol_fertility_module_handmade_output.csv"
-                   :deaths 
+                   :deaths
                    "resources/test_data/handmade_outputs/bristol_mortality_module_handmade_output.csv"
-                   :net-migration 
+                   :net-migration
                    "resources/test_data/handmade/outputs/bristol_migration_module_handmade_output.csv"}))
 
 (def params {:first-proj-year 2014
-             :last-proj-year 2017})
+             :last-proj-year 2015})
 
-;; Useful fn:
+;; Useful fns:
 (defn- same-coll? [coll1 coll2]
   (= (set coll1) (set coll2)))
+
+(defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
+
+;;get sum of population for particular year & age group in dataset with :popn column
+(def sum-popn (fn [popn year age]
+                (apply + (i/$ :popn (i/query-dataset popn
+                                                     {:year year :age age})))))
+
 
 ;; Tests:
 (deftest select-starting-popn-test
@@ -47,12 +55,18 @@
 (deftest age-on-test
   (testing "Popn is aged on correctly, 90 grouping is handled correctly."
     (let [starting-popn (:population (select-starting-popn data-inputs))
-          aged-popn (:population (age-on (select-starting-popn data-inputs)))
-          sum-popn (fn [popn year age]
-                     (apply + (i/$ :popn (i/query-dataset popn
-                                                          {:year year :age age}))))]
+          aged-popn (:population (age-on (select-starting-popn data-inputs)))]
       (is (= (sum-popn starting-popn 2015 15)
              (sum-popn aged-popn 2015 16)))
       (is (= (+ (sum-popn starting-popn 2015 89) (sum-popn starting-popn 2015 90))
              (sum-popn aged-popn 2015 90)))
       (is (= 2 (first (:shape (i/query-dataset aged-popn {:year 2015 :age 90}))))))))
+
+(deftest add-births-test
+  (testing "Newborns are correctly added to projection year popn."
+    (let [popn-with-births (:population (add-births (age-on (select-starting-popn data-inputs))))
+          latest-yr (get-last-yr-from-popn popn-with-births)
+          latest-newborns (i/query-dataset popn-with-births {:year latest-yr :age 0})]
+      (is (= 2 (first (:shape latest-newborns))))
+      (is (fp-equals? (+ 3185.29154299837 3344.55612014829)
+                      (#(apply + (i/$ :popn %)) latest-newborns) 0.00000000001)))))
