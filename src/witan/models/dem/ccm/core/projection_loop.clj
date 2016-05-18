@@ -26,64 +26,93 @@
 
 (defworkflowfn select-starting-popn
   "Takes in a dataset of popn estimates.
-   Returns a dataset where the last year's population from the input data
-   is appended as the starting population for the next year's projection"
+   Returns a dataset of the starting population for the next year's projection."
   {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:population PopulationSchema}
    :witan/param-schema {:_ nil}
-   :witan/output-schema {:population PopulationSchema}}
+   :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [population]} _]
   (let [latest-yr (get-last-yr-from-popn population)
         last-yr-data (i/query-dataset population {:year latest-yr})
         update-yr (i/replace-column :year (i/$map inc :year last-yr-data) last-yr-data)]
-    {:population (ds/join-rows population update-yr)}))
+    {:latest-yr-popn update-yr}))
 
 (defworkflowfn age-on
-  "Takes in a dataset of popn estimates.
-   Returns a dataset where the last year's population is aged on 1 year.
+  "Takes in a dataset with the starting-population.
+   Returns a dataset where the population is aged on 1 year.
    91 year olds are added to the 90 year olds in the aged-on popn."
   {:witan/name :ccm-cor/age-on
    :witan/version "1.0"
-   :witan/input-schema {:population PopulationSchema}
+   :witan/input-schema {:latest-yr-popn PopulationSchema}
    :witan/param-schema {:_ nil}
-   :witan/output-schema {:population PopulationSchema}}
-  [{:keys [population]} _]
-  (let [latest-yr (get-last-yr-from-popn population)
-        last-yr-data (i/query-dataset population {:year latest-yr})
-        prev-yrs-data (i/query-dataset population {:year {:$ne latest-yr}})
-        aged-on (i/replace-column :age (i/$map
+   :witan/output-schema {:latest-yr-popn PopulationSchema}}
+  [{:keys [latest-yr-popn]} _]
+  (let [aged-on (i/replace-column :age (i/$map
                                         (fn [v] (if (< v 90) (inc v) v))
-                                        :age last-yr-data) last-yr-data)
+                                        :age latest-yr-popn) latest-yr-popn)
         grouped (wds/rollup :sum :popn [:gss-code :sex :age :year] aged-on)]
-    {:population (ds/join-rows prev-yrs-data grouped)}))
+    {:latest-yr-popn grouped}))
 
 (defworkflowfn add-births
-  "Takes in dataset of aged on popn estimates and dataset of births 
-   by sex & gss code for latest year in popn dataset.
+  "Takes in a dataset of aged on popn and dataset of births by sex & gss code.
    Returns a dataset where the births output from the fertility module is
-   appended to the latest year in the popn dataset."
+   appended to the aged-on population, adding age groups 0."
   {:witan/name :ccm-core/add-births
    :witan/version "1.0"
-   :witan/input-schema {:population PopulationSchema :births BirthsBySexSchema}
+   :witan/input-schema {:latest-yr-popn PopulationSchema :births BirthsBySexSchema}
    :witan/param-schema {:_ nil}
-   :witan/output-schema {:population PopulationSchema}}
-  [{:keys [population births]} _]
-  (let [latest-yr (get-last-yr-from-popn population)
+   :witan/output-schema {:latest-yr-popn PopulationSchema}}
+  [{:keys [latest-yr-popn births]} _]
+  (let [latest-yr (get-last-yr-from-popn latest-yr-popn)
         update-births (-> births
                           (ds/add-column :age (repeat 0))
                           (ds/add-column :year (repeat latest-yr))
                           (ds/rename-columns {:births :popn}))]
-    {:population (ds/select-columns (ds/join-rows population update-births)
-                                    [:gss-code :sex :age :year :popn])}))
+    {:latest-yr-popn (ds/select-columns (ds/join-rows latest-yr-popn update-births)
+                                        [:gss-code :sex :age :year :popn])}))
+
+(defworkflowfn remove-deaths
+  "Takes in a dataset of aged on popn with births added, and a dataset
+   of deaths by sex.
+   Returns a dataset where the deaths output from the mortality module is
+   subtracted from the popn dataset."
+  {:witan/name :ccm-core/remove-deaths
+   :witan/version "1.0"
+   :witan/input-schema {:latest-yr-popn PopulationSchema :deaths DeathsSchema}
+   :witan/param-schema {:_ nil}
+   :witan/output-schema {:latest-yr-popn PopulationSchema}}
+  [{:keys [latest-yr-popn deaths]} _]
+  (let [deaths-ds (ds/select-columns deaths [:gss-code :sex :age :deaths])
+        popn-deaths (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
+                             latest-yr-popn deaths-ds)
+        survived-popn (-> (i/replace-column :popn (i/$map (fn [popn deaths] (- popn deaths))
+                                                          [:popn :deaths] popn-deaths) popn-deaths)
+                          (ds/select-columns [:gss-code :sex :age :year :popn]))]
+    {:latest-yr-popn survived-popn}))
+
+(defworkflowfn join-popn-latest-yr
+  "Takes in a dataset of popn for previous years and a dataset of
+   projected population for the next year of projection.
+   Returns a datasets that appends the second dataset to the first one."
+  {:witan/name :ccm-core/join-yrs
+   :witan/version "1.0"
+   :witan/input-schema {:latest-yr-popn PopulationSchema :population PopulationSchema}
+   :witan/param-schema {:_ nil}
+   :witan/output-schema {:population PopulationSchema}}
+  [{:keys [latest-yr-popn population]} _]
+  {:population (ds/join-rows population latest-yr-popn)})
 
 (defn looping-test
   [inputs params]
   (loop [inputs inputs]
     (let [inputs' (->> (select-starting-popn inputs)
                        (age-on)
-                       (add-births))]
-      (println (format "Projecting for year %d..." (get-last-yr-from-popn (:population inputs'))))
+                       (add-births)
+                       (remove-deaths)
+                       (join-popn-latest-yr))]
+      (println (format "Projecting for year %d..."
+                       (get-last-yr-from-popn (:latest-yr-popn inputs'))))
       (if (:loop-predicate (keep-looping? inputs' params))
         (recur inputs')
         (:population inputs')))))
