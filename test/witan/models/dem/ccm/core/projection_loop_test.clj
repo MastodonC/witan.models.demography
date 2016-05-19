@@ -46,7 +46,7 @@
     (let [get-start-popn (select-starting-popn data-inputs)]
       (is (same-coll? [:gss-code :sex :age :year :popn]
                       (ds/column-names (:latest-yr-popn get-start-popn))))
-      (is (= 2015 (get-last-yr-from-popn (:latest-yr-popn get-start-popn))))
+      (is (true? (every? #(= % 2015) (i/$ :year (:latest-yr-popn get-start-popn)))))
       ;; Total number of 15 yrs old in 2015:
       (is (= 4386 (apply + (i/$ :popn
                                 (i/query-dataset (:latest-yr-popn get-start-popn)
@@ -69,9 +69,9 @@
 
 (deftest add-births-test
   (testing "Newborns are correctly added to projection year popn."
-    (let [popn-with-births (:latest-yr-popn
-                            (add-births (age-on (select-starting-popn data-inputs))))
-          latest-yr (get-last-yr-from-popn popn-with-births)
+    (let [births-added (add-births (age-on (select-starting-popn data-inputs)))
+          popn-with-births (:latest-yr-popn births-added)
+          latest-yr (:loop-year births-added)
           latest-newborns (i/query-dataset popn-with-births {:year latest-yr :age 0})]
       (is (= 2 (first (:shape latest-newborns))))
       (is (fp-equals? (+ 3185.29154299837 3344.55612014829)
