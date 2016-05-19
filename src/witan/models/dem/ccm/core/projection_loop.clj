@@ -7,36 +7,39 @@
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]))
 
-(defn get-last-yr-from-popn
-  "Takes in a dataset. Select the latest year and returns it.
-  Note: expect a :year column."
-  [popn]
-  (reduce max (i/$ :year popn)))
-
 (defworkflowfn keep-looping?
   {:witan/name :ccm-core/ccm-loop-pred
    :witan/version "1.0"
    :witan/input-schema {:population PopulationSchema :loop-year s/Int}
    :witan/param-schema {:last-proj-year s/Int}
    :witan/output-schema {:loop-predicate s/Bool}
-   ;; :witan/predicate? true
    :witan/exported? true}
   [{:keys [loop-year]} {:keys [last-proj-year]}]
   {:loop-predicate (< loop-year last-proj-year)})
+
+(defworkflowfn prepare-inputs
+  {:witan/name :ccm-core/get-starting-popn
+   :witan/version "1.0"
+   :witan/input-schema {:population PopulationSchema}
+   :witan/param-schema {:_ nil}
+   :witan/output-schema {:loop-year s/Int :latest-yr-popn PopulationSchema}}
+  [{:keys [population]} _]
+  (let [last-yr (reduce max (i/$ :year population))
+        last-yr-popn (i/query-dataset population {:year last-yr})]
+    {:loop-year last-yr :latest-yr-popn last-yr-popn}))
 
 (defworkflowfn select-starting-popn
   "Takes in a dataset of popn estimates.
    Returns a dataset of the starting population for the next year's projection."
   {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
-   :witan/input-schema {:population PopulationSchema}
+   :witan/input-schema {:latest-yr-popn PopulationSchema :population PopulationSchema
+                        :loop-year s/Int}
    :witan/param-schema {:_ nil}
    :witan/output-schema {:latest-yr-popn PopulationSchema :loop-year s/Int}}
-  [{:keys [population]} _]
-  (let [latest-yr (get-last-yr-from-popn population)
-        last-yr-data (i/query-dataset population {:year latest-yr})
-        update-yr (i/replace-column :year (i/$map inc :year last-yr-data) last-yr-data)]
-    {:latest-yr-popn update-yr :loop-year (inc latest-yr)}))
+  [{:keys [latest-yr-popn population loop-year]} _]
+  (let [update-yr (i/replace-column :year (i/$map inc :year latest-yr-popn) latest-yr-popn)]
+    {:latest-yr-popn update-yr :loop-year (inc loop-year)}))
 
 (defworkflowfn age-on
   "Takes in a dataset with the starting-population.
@@ -121,16 +124,18 @@
   [{:keys [latest-yr-popn population]} _]
   {:population (ds/join-rows population latest-yr-popn)})
 
+
 (defn looping-test
   [inputs params]
-  (loop [inputs inputs]
-    (let [inputs' (->> (select-starting-popn inputs)
-                       (age-on)
-                       (add-births)
-                       (remove-deaths)
-                       (apply-migration)
-                       (join-popn-latest-yr))]
-      (println (format "Projecting for year %d..." (:loop-year inputs')))
-      (if (:loop-predicate (keep-looping? inputs' params))
-        (recur inputs')
-        (:population inputs')))))
+  (let [prepared-inputs (prepare-inputs inputs)]
+    (loop [inputs prepared-inputs]
+      (let [inputs' (->> (select-starting-popn inputs)
+                         (age-on)
+                         (add-births)
+                         (remove-deaths)
+                         (apply-migration)
+                         (join-popn-latest-yr))]
+        (println (format "Projecting for year %d..." (:loop-year inputs')))
+        (if (:loop-predicate (keep-looping? inputs' params))
+          (recur inputs')
+          (:population inputs'))))))
