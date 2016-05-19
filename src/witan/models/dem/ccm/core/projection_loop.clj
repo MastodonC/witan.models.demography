@@ -16,13 +16,13 @@
 (defworkflowfn keep-looping?
   {:witan/name :ccm-core/ccm-loop-pred
    :witan/version "1.0"
-   :witan/input-schema {:population PopulationSchema}
+   :witan/input-schema {:population PopulationSchema :loop-year s/Int}
    :witan/param-schema {:last-proj-year s/Int}
    :witan/output-schema {:loop-predicate s/Bool}
    ;; :witan/predicate? true
    :witan/exported? true}
-  [{:keys [population]} {:keys [last-proj-year]}]
-  {:loop-predicate (< (get-last-yr-from-popn population) last-proj-year)})
+  [{:keys [loop-year]} {:keys [last-proj-year]}]
+  {:loop-predicate (< loop-year last-proj-year)})
 
 (defworkflowfn select-starting-popn
   "Takes in a dataset of popn estimates.
@@ -31,12 +31,12 @@
    :witan/version "1.0"
    :witan/input-schema {:population PopulationSchema}
    :witan/param-schema {:_ nil}
-   :witan/output-schema {:latest-yr-popn PopulationSchema}}
+   :witan/output-schema {:latest-yr-popn PopulationSchema :loop-year s/Int}}
   [{:keys [population]} _]
   (let [latest-yr (get-last-yr-from-popn population)
         last-yr-data (i/query-dataset population {:year latest-yr})
         update-yr (i/replace-column :year (i/$map inc :year last-yr-data) last-yr-data)]
-    {:latest-yr-popn update-yr}))
+    {:latest-yr-popn update-yr :loop-year (inc latest-yr)}))
 
 (defworkflowfn age-on
   "Takes in a dataset with the starting-population.
@@ -60,14 +60,14 @@
    appended to the aged-on population, adding age groups 0."
   {:witan/name :ccm-core/add-births
    :witan/version "1.0"
-   :witan/input-schema {:latest-yr-popn PopulationSchema :births BirthsBySexSchema}
+   :witan/input-schema {:latest-yr-popn PopulationSchema :births BirthsBySexSchema
+                        :loop-year s/Int}
    :witan/param-schema {:_ nil}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
-  [{:keys [latest-yr-popn births]} _]
-  (let [latest-yr (get-last-yr-from-popn latest-yr-popn)
-        update-births (-> births
+  [{:keys [latest-yr-popn births loop-year]} _]
+  (let [update-births (-> births
                           (ds/add-column :age (repeat 0))
-                          (ds/add-column :year (repeat latest-yr))
+                          (ds/add-column :year (repeat loop-year))
                           (ds/rename-columns {:births :popn}))]
     {:latest-yr-popn (ds/select-columns (ds/join-rows latest-yr-popn update-births)
                                         [:gss-code :sex :age :year :popn])}))
@@ -91,6 +91,24 @@
                           (ds/select-columns [:gss-code :sex :age :year :popn]))]
     {:latest-yr-popn survived-popn}))
 
+(defworkflowfn apply-migration
+  "Takes in a dataset of popn estimates for the current year and a
+   dataset with the net migrants for the same year.
+   Returns a dataset where the migrants are added to the popn dataset"
+  {:witan/name :ccm-core/apply-migration
+   :witan/version "1.0"
+   :witan/input-schema {:latest-yr-popn PopulationSchema :net-migration NetMigrationSchema}
+   :witan/param-schema {:_ nil}
+   :witan/output-schema {:latest-yr-popn PopulationSchema}}
+  [{:keys [latest-yr-popn net-migration]} _]
+  (let [migration-ds (ds/select-columns net-migration [:gss-code :sex :age :net-mig])
+        popn-mig (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
+                          latest-yr-popn migration-ds)
+        popn-w-migrants (-> (i/replace-column :popn (i/$map (fn [popn mig] (+ popn mig))
+                                                            [:popn :net-mig] popn-mig) popn-mig)
+                            (ds/select-columns [:gss-code :sex :age :year :popn]))]
+    {:latest-yr-popn popn-w-migrants}))
+
 (defworkflowfn join-popn-latest-yr
   "Takes in a dataset of popn for previous years and a dataset of
    projected population for the next year of projection.
@@ -110,9 +128,9 @@
                        (age-on)
                        (add-births)
                        (remove-deaths)
+                       (apply-migration)
                        (join-popn-latest-yr))]
-      (println (format "Projecting for year %d..."
-                       (get-last-yr-from-popn (:latest-yr-popn inputs'))))
+      (println (format "Projecting for year %d..." (:loop-year inputs')))
       (if (:loop-predicate (keep-looping? inputs' params))
         (recur inputs')
         (:population inputs')))))
