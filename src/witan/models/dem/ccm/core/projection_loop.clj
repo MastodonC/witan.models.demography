@@ -44,7 +44,8 @@
 (defworkflowfn age-on
   "Takes in a dataset with the starting-population.
    Returns a dataset where the population is aged on 1 year.
-   91 year olds are added to the 90 year olds in the aged-on popn."
+   Last year's 89 year olds are aged on and added to this year's
+   90+ age group (represented in code as age 90)"
   {:witan/name :ccm-cor/age-on
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema}
