@@ -24,6 +24,10 @@
 (def params {:first-proj-year 2014
              :last-proj-year 2015})
 
+(def output-2015 (ld/load-datasets
+                  {:end-population
+                   "resources/test_data/handmade_outputs/bristol_end_population_2015.csv"}))
+
 ;; Useful fns:
 (defn- same-coll? [coll1 coll2]
   (= (set coll1) (set coll2)))
@@ -74,8 +78,8 @@
           latest-yr (:loop-year births-added)
           latest-newborns (i/query-dataset popn-with-births {:year latest-yr :age 0})]
       (is (= 2 (first (:shape latest-newborns))))
-      (is (fp-equals? (+ 3185.29154299837 3344.55612014829)
-                      (#(apply + (i/$ :popn %)) latest-newborns) 0.00000000001)))))
+      (is (fp-equals? (+ 3135.891642 3292.686224)
+                      (#(apply + (i/$ :popn %)) latest-newborns) 0.0001)))))
 
 (deftest remove-deaths-test
   (testing "The deaths are removed from the popn."
@@ -97,3 +101,13 @@
       (is (= (+ (get-popn (:latest-yr-popn popn-wo-deaths) :popn 2015 0 "F")
                 (get-popn (:net-migration popn-wo-deaths) :net-mig 0 "F"))
              (get-popn (:latest-yr-popn popn-with-mig) :popn 2015 0 "F"))))))
+
+(deftest looping-test-test
+  (testing "The output of the loop matches the R code."
+    (let [proj-clj-2015 (looping-test data-inputs {:first-proj-year 2014
+                                                   :last-proj-year 2015})
+          proj-r-2015 (:end-population output-2015)]
+      (is (fp-equals? (get-popn proj-r-2015 :popn 0 "F")
+                      (get-popn proj-clj-2015 :popn 2015 0 "F") 0.0001)
+          (fp-equals? (get-popn proj-r-2015 :popn 90 "M")
+                      (get-popn proj-clj-2015 :popn 2015 90 "M") 0.0001)))))

@@ -80,6 +80,11 @@
   {:column-names (apply-col-names-schema PopulationSchema csv-data)
    :columns (vec (apply-row-schema PopulationSchema csv-data))})
 
+(defmethod apply-rec-coercion :end-population
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema PopulationSchema csv-data)
+   :columns (vec (apply-row-schema PopulationSchema csv-data))})
+
 (defmethod apply-rec-coercion :births
   [data-info csv-data]
   {:column-names (apply-col-names-schema BirthsBySexSchema csv-data)
@@ -104,7 +109,7 @@
    Output is map with keyword and core.matrix dataset"
   [keyname filepath]
   (->> (apply-rec-coercion {:type keyname} (load-csv filepath))
-       (dataset-after-coercion)
+       dataset-after-coercion
        (hash-map keyname)))
 
 (defn load-datasets
