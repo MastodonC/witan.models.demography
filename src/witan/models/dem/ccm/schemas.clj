@@ -22,11 +22,11 @@
                   (s/one datatype fieldname)))
         (:column-names col-schema)))
 
-;;Define schemas 
-;;For core CCM projection loop      
+;;Define schemas
+;;For core CCM projection loop
 (def HistBirthsEstSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
-                           [:var s/Str] [:year s/Int] [:estimate s/Num]]))   
+                           [:var s/Str] [:year s/Int] [:estimate s/Num]]))
 
 (def PopulationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
@@ -38,7 +38,7 @@
 
 (def DeathsSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:death-rate s/Num] [:popn s/Int] [:deaths s/Num]]))
+                           [:death-rate s/Num] [:popn s/Num] [:deaths s/Num]]))
 
 (def NetMigrationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig s/Num]]))
