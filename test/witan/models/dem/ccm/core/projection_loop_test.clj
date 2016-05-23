@@ -104,10 +104,14 @@
 
 (deftest looping-test-test
   (testing "The output of the loop matches the R code."
-    (let [proj-clj-2015 (looping-test data-inputs {:first-proj-year 2014
-                                                   :last-proj-year 2015})
-          proj-r-2015 (:end-population output-2015)]
-      (is (fp-equals? (get-popn proj-r-2015 :popn 0 "F")
-                      (get-popn proj-clj-2015 :popn 2015 0 "F") 0.0001)
-          (fp-equals? (get-popn proj-r-2015 :popn 90 "M")
-                      (get-popn proj-clj-2015 :popn 2015 90 "M") 0.0001)))))
+    (let [proj-clj (looping-test data-inputs {:first-proj-year 2014
+                                              :last-proj-year 2015})
+          proj-clj-2015 (i/query-dataset proj-clj
+                                         {:year
+                                          {:$eq 2015}})
+          proj-r-2015 (:end-population output-2015)
+          clj-popn (i/$ :popn proj-clj-2015)
+          r-popn (i/$ :popn proj-r-2015)]
+      ;; Compare all values in the :popn column between the R and Clj results for 2015:
+      (is (every? #(fp-equals? (get (vec r-popn) %) (get (vec clj-popn) %) 0.0001)
+                  (range (count clj-popn)))))))
