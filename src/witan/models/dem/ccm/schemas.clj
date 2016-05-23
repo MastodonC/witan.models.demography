@@ -41,8 +41,7 @@
                            [:death-rate s/Num] [:popn s/Num] [:deaths s/Num]]))
 
 (def NetMigrationSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domin s/Num]
-                           [:intin s/Num] [:domout s/Num] [:intout s/Num] [:net-mig s/Num]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig s/Num]]))
 
 ;;For historic ASFR workflow & input data
 (def AtRiskThisYearSchema

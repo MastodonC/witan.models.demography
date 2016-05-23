@@ -105,9 +105,8 @@
    :witan/param-schema {:_ nil}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn net-migration]} _]
-  (let [migration-ds (ds/select-columns net-migration [:gss-code :sex :age :net-mig])
-        popn-mig (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
-                          latest-yr-popn migration-ds)
+  (let [popn-mig (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
+                          latest-yr-popn net-migration)
         popn-w-migrants (-> (i/replace-column :popn (i/$map (fn [popn mig] (+ popn mig))
                                                             [:popn :net-mig] popn-mig) popn-mig)
                             (ds/select-columns [:gss-code :sex :age :year :popn]))]
