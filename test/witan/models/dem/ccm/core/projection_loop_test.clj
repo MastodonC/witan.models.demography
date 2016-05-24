@@ -24,6 +24,10 @@
 (def params {:first-proj-year 2014
              :last-proj-year 2015})
 
+(def output-2015 (ld/load-datasets
+                  {:end-population
+                   "resources/test_data/handmade_outputs/bristol_end_population_2015.csv"}))
+
 ;; Useful fns:
 (defn- same-coll? [coll1 coll2]
   (= (set coll1) (set coll2)))
@@ -74,8 +78,8 @@
           latest-yr (:loop-year births-added)
           latest-newborns (i/query-dataset popn-with-births {:year latest-yr :age 0})]
       (is (= 2 (first (:shape latest-newborns))))
-      (is (fp-equals? (+ 3185.29154299837 3344.55612014829)
-                      (#(apply + (i/$ :popn %)) latest-newborns) 0.00000000001)))))
+      (is (fp-equals? (+ 3135.891642 3292.686224)
+                      (#(apply + (i/$ :popn %)) latest-newborns) 0.0001)))))
 
 (deftest remove-deaths-test
   (testing "The deaths are removed from the popn."
@@ -97,3 +101,21 @@
       (is (= (+ (get-popn (:latest-yr-popn popn-wo-deaths) :popn 2015 0 "F")
                 (get-popn (:net-migration popn-wo-deaths) :net-mig 0 "F"))
              (get-popn (:latest-yr-popn popn-with-mig) :popn 2015 0 "F"))))))
+
+(deftest looping-test-test
+  (testing "The output of the loop matches the R code."
+    (let [proj-clj (looping-test data-inputs {:first-proj-year 2014
+                                              :last-proj-year 2015})
+          proj-clj-2015 (ds/rename-columns
+                         (i/query-dataset proj-clj
+                                          {:year
+                                           {:$eq 2015}})
+                         {:popn :popn-clj})
+          proj-r-2015 (ds/rename-columns
+                       (:end-population output-2015) {:popn :popn-r})
+          r-clj-2015 (i/$join [[:gss-code :sex :age :year] [:gss-code :sex :age :year]]
+                              proj-r-2015 proj-clj-2015)]
+      ;; Compare all values in the :popn column between the R and Clj results for 2015:
+      (is (every? #(fp-equals? (i/sel r-clj-2015 :rows % :cols :popn-r)
+                               (i/sel r-clj-2015 :rows % :cols :popn-clj) 0.0001)
+                  (range (first (:shape r-clj-2015))))))))
