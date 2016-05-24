@@ -47,60 +47,60 @@
   (let [col-names-schema (make-col-names-schema col-schema)]
     (record-coercion col-names-schema (:column-names csv-data))))
 
-(defmulti apply-rec-coercion
+(defmulti apply-record-coercion
   (fn [data-info csv-data]
     (:type  data-info)))
 
-(defmethod apply-rec-coercion :default
+(defmethod apply-record-coercion :default
   [data-info csv-data]
   nil)
 
-(defmethod apply-rec-coercion :births-data
+(defmethod apply-record-coercion :births-data
   [data-info csv-data]
   {:column-names (apply-col-names-schema BirthsDataSchema csv-data)
    :columns (vec (apply-row-schema BirthsDataSchema csv-data))})
 
-(defmethod apply-rec-coercion :at-risk-popn
+(defmethod apply-record-coercion :at-risk-popn
   [data-info csv-data]
   {:column-names (apply-col-names-schema AtRiskPopnSchema csv-data)
    :columns (vec (apply-row-schema AtRiskPopnSchema csv-data))})
 
-(defmethod apply-rec-coercion :hist-births-est
+(defmethod apply-record-coercion :hist-births-est
   [data-info csv-data]
   {:column-names (apply-col-names-schema HistBirthsEstSchema csv-data)
    :columns (vec (apply-row-schema HistBirthsEstSchema csv-data))})
 
-(defmethod apply-rec-coercion :population
+(defmethod apply-record-coercion :population
   [data-info csv-data]
   {:column-names (apply-col-names-schema PopulationSchema csv-data)
    :columns (vec (apply-row-schema PopulationSchema csv-data))})
 
-(defmethod apply-rec-coercion :hist-popn-estimates
+(defmethod apply-record-coercion :hist-popn-estimates
   [data-info csv-data]
   {:column-names (apply-col-names-schema PopulationSchema csv-data)
    :columns (vec (apply-row-schema PopulationSchema csv-data))})
 
-(defmethod apply-rec-coercion :end-population
+(defmethod apply-record-coercion :end-population
   [data-info csv-data]
   {:column-names (apply-col-names-schema PopulationSchema csv-data)
    :columns (vec (apply-row-schema PopulationSchema csv-data))})
 
-(defmethod apply-rec-coercion :births
+(defmethod apply-record-coercion :births
   [data-info csv-data]
   {:column-names (apply-col-names-schema BirthsBySexSchema csv-data)
    :columns (vec (apply-row-schema BirthsBySexSchema csv-data))})
 
-(defmethod apply-rec-coercion :deaths
+(defmethod apply-record-coercion :deaths
   [data-info csv-data]
   {:column-names (apply-col-names-schema DeathsSchema csv-data)
    :columns (vec (apply-row-schema DeathsSchema csv-data))})
 
-(defmethod apply-rec-coercion :net-migration
+(defmethod apply-record-coercion :net-migration
   [data-info csv-data]
   {:column-names (apply-col-names-schema NetMigrationSchema csv-data)
    :columns (vec (apply-row-schema NetMigrationSchema csv-data))})
 
-(defn dataset-after-coercion
+(defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))
 
@@ -108,8 +108,8 @@
   "Input is a keyword and a filepath to csv file
    Output is map with keyword and core.matrix dataset"
   [keyname filepath]
-  (->> (apply-rec-coercion {:type keyname} (load-csv filepath))
-       dataset-after-coercion
+  (->> (apply-record-coercion {:type keyname} (load-csv filepath))
+       create-dataset-after-coercion
        (hash-map keyname)))
 
 (defn load-datasets
