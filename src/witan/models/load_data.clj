@@ -100,6 +100,11 @@
   {:column-names (apply-col-names-schema NetMigrationSchema csv-data)
    :columns (vec (apply-row-schema NetMigrationSchema csv-data))})
 
+(defmethod apply-record-coercion :migration-estimates
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema MigrationEstimatesSchema csv-data)
+   :columns (vec (apply-row-schema MigrationEstimatesSchema csv-data))})
+
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))

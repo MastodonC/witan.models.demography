@@ -13,4 +13,4 @@
         start-year (- last-yr-data nb-of-years)
         data-of-interest (i/query-dataset historical-data
                                           {:year {:$gte start-year :$lte last-yr-data}})]
-    ))
+    data-of-interest))
