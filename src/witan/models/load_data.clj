@@ -105,6 +105,11 @@
   {:column-names (apply-col-names-schema MigrationEstimatesSchema csv-data)
    :columns (vec (apply-row-schema MigrationEstimatesSchema csv-data))})
 
+(defmethod apply-record-coercion :dom-in-averages
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema DomInAverageSchema csv-data)
+   :columns (vec (apply-row-schema DomInAverageSchema csv-data))})
+
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))

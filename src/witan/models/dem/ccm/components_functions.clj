@@ -8,9 +8,9 @@
   "Takes in a dataset with historical data, a number of years to average on
   and the jumpoff year. Returns a datasets with a new column containing the
   averages for a specific component for all the years of interest."
-  [historical-data nb-of-years jumpoff-year]
+  [component historical-data nb-of-years jumpoff-year]
   (let [last-yr-data (dec jumpoff-year)
         start-year (- last-yr-data nb-of-years)
         data-of-interest (i/query-dataset historical-data
                                           {:year {:$gte start-year :$lte last-yr-data}})]
-    data-of-interest))
+    ))

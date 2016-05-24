@@ -67,3 +67,6 @@
 (def MigrationEstimatesSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
                            [:var s/Str] [:year s/Int] [:estimate s/Num]]))
+
+(def DomInAverageSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domin s/Num]]))

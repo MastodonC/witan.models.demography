@@ -7,7 +7,10 @@
 
 
 (def domestic-mig-in (ld/load-dataset :migration-estimates
-                      "resources/test_data/bristol_dom_in_mig.csv"))
+                                      "resources/test_data/bristol_dom_in_mig.csv"))
+
+(def dom-in-averages (ld/load-dataset :dom-in-averages
+                                      "resources/test_data/bristol_dom_in_avg.csv"))
 
 (deftest calculate-averages-test
   (testing "The fonction return the averages on the right year period"
