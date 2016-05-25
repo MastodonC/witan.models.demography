@@ -3,7 +3,8 @@
             [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.workspace-api :refer [defworkflowfn merge-> rename-keys]]
+            [witan.workspace-api :refer [defworkflowfn merge->]]
+            [witan.workspace-api.functions :refer [rename-keys]]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]))
 
