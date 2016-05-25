@@ -6,12 +6,15 @@
 ;; Calculate rates/values for alternative ways to project components of change:
 ;; 1) Calculate averages for fixed values/rates or trends:
 (defn calculate-averages
-  "Takes in a dataset with historical data, a number of years to average on
-  and the jumpoff year. Returns a datasets with a new column containing the
-  averages for the estimate column for all the years of interest."
-  [historical-data nb-of-years jumpoff-year]
+  "Takes in a dataset with historical data, a column name to be averaged,
+  a name to rename the average column, a number of years to average on
+  and the jumpoff year. Returns a dataset where the column to be averaged contains
+  the averages for all the years of interest and is renamed to avg-name."
+  [historical-data col-to-avg avg-name number-of-years jumpoff-year]
   (let [last-yr-data (dec jumpoff-year)
-        start-year (inc (- last-yr-data nb-of-years))
-        data-of-interest (i/query-dataset historical-data
-                                          {:year {:$gte start-year :$lte last-yr-data}})]
-    (wds/rollup :mean :estimate [:gss-code :sex :age :var] data-of-interest)))
+        start-year (inc (- last-yr-data number-of-years))
+        data-of-interest (i/rename-cols {col-to-avg avg-name}
+                                        (i/query-dataset historical-data
+                                                         {:year {:$gte start-year
+                                                                 :$lte last-yr-data}}))]
+    (wds/rollup :mean avg-name [:gss-code :sex :age] data-of-interest)))

@@ -7,7 +7,6 @@
    :columns (mapv #(s/one [(second %)] (format "col %s" (name (first %)))) col-vec)
    s/Keyword s/Any})
 
-
 (defn make-row-schema
   [col-schema]
   (mapv (fn [s] (let [datatype (-> s :schema first)
@@ -67,6 +66,22 @@
 (def ComponentMYESchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
                            [:var s/Str] [:year s/Int] [:estimate s/Num]]))
+
+(def ProjDomInSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:domestic-in s/Num]]))
+
+(def ProjDomOutSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:domestic-out s/Num]]))
+
+(def ProjInterInSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:international-in s/Num]]))
+
+(def ProjInterOutSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:international-out s/Num]]))
 
 (def DomInAverageSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domin s/Num]]))

@@ -123,17 +123,16 @@
   [{:keys [latest-yr-popn population]} _]
   {:population (ds/join-rows population latest-yr-popn)})
 
-
 (defn looping-test
   [inputs params]
   (let [prepared-inputs (prepare-inputs inputs)]
     (loop [inputs prepared-inputs]
-      (let [inputs' (->> (select-starting-popn inputs)
-                         (age-on)
-                         (add-births)
-                         (remove-deaths)
-                         (apply-migration)
-                         (join-popn-latest-yr))]
+      (let [inputs' (-> (select-starting-popn inputs)
+                        age-on
+                        add-births
+                        remove-deaths
+                        apply-migration
+                        join-popn-latest-yr)]
         (println (format "Projecting for year %d..." (:loop-year inputs')))
         (if (:loop-predicate (keep-looping? inputs' params))
           (recur inputs')
