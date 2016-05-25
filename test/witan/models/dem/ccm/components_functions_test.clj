@@ -18,7 +18,7 @@
     (let [r-results (:dom-in-averages dom-in-averages)
           clj-results (calculate-averages (:migration-mye domestic-mig-in) 12 2015)
           joined-averages (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
-                                 r-results clj-results)]
+                                   r-results clj-results)]
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :domin)
                                (i/sel joined-averages :rows % :cols :estimate) 0.0001)
                   (range (first (:shape joined-averages))))))))

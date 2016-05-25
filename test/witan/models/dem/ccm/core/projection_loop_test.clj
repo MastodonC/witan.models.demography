@@ -42,7 +42,7 @@
                 ([ds popn age sex]
                  (i/$ popn (i/query-dataset ds {:age age :sex sex})))
                 ([ds popn year age sex]
-                   (i/$ popn (i/query-dataset ds {:year year :age age :sex sex})))))
+                 (i/$ popn (i/query-dataset ds {:year year :age age :sex sex})))))
 
 ;; Tests:
 (deftest select-starting-popn-test
