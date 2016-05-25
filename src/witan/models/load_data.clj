@@ -100,10 +100,10 @@
   {:column-names (apply-col-names-schema NetMigrationSchema csv-data)
    :columns (vec (apply-row-schema NetMigrationSchema csv-data))})
 
-(defmethod apply-record-coercion :migration-estimates
+(defmethod apply-record-coercion :migration-mye
   [data-info csv-data]
-  {:column-names (apply-col-names-schema MigrationEstimatesSchema csv-data)
-   :columns (vec (apply-row-schema MigrationEstimatesSchema csv-data))})
+  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
+   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
 
 (defmethod apply-record-coercion :dom-in-averages
   [data-info csv-data]

@@ -64,7 +64,7 @@
                            [:popn s/Num] [:actualyear s/Int] [:actualage s/Int]]))
 
 ;; For the migration component
-(def MigrationEstimatesSchema
+(def ComponentMYESchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
                            [:var s/Str] [:year s/Int] [:estimate s/Num]]))
 
