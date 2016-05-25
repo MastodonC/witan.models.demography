@@ -100,6 +100,16 @@
   {:column-names (apply-col-names-schema NetMigrationSchema csv-data)
    :columns (vec (apply-row-schema NetMigrationSchema csv-data))})
 
+(defmethod apply-record-coercion :migration-mye
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
+   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
+
+(defmethod apply-record-coercion :dom-in-averages
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema DomInAverageSchema csv-data)
+   :columns (vec (apply-row-schema DomInAverageSchema csv-data))})
+
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))

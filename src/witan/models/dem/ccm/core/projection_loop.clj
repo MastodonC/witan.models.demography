@@ -3,7 +3,8 @@
             [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.workspace-api :refer [defworkflowfn merge-> rename-keys]]
+            [witan.workspace-api :refer [defworkflowfn merge->]]
+            [witan.workspace-api.functions :refer [rename-keys]]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]))
 
@@ -90,8 +91,7 @@
   (let [deaths-ds (ds/select-columns deaths [:gss-code :sex :age :deaths])
         popn-deaths (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
                              latest-yr-popn deaths-ds)
-        survived-popn (-> (i/replace-column :popn (i/$map (fn [popn deaths] (- popn deaths))
-                                                          [:popn :deaths] popn-deaths) popn-deaths)
+        survived-popn (-> (i/replace-column :popn (i/$map - [:popn :deaths] popn-deaths) popn-deaths)
                           (ds/select-columns [:gss-code :sex :age :year :popn]))]
     {:latest-yr-popn survived-popn}))
 
@@ -107,8 +107,7 @@
   [{:keys [latest-yr-popn net-migration]} _]
   (let [popn-mig (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
                           latest-yr-popn net-migration)
-        popn-w-migrants (-> (i/replace-column :popn (i/$map (fn [popn mig] (+ popn mig))
-                                                            [:popn :net-mig] popn-mig) popn-mig)
+        popn-w-migrants (-> (i/replace-column :popn (i/$map + [:popn :net-mig] popn-mig) popn-mig)
                             (ds/select-columns [:gss-code :sex :age :year :popn]))]
     {:latest-yr-popn popn-w-migrants}))
 
