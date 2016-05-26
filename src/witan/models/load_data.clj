@@ -130,6 +130,21 @@
   {:column-names (apply-col-names-schema DomInAverageSchema csv-data)
    :columns (vec (apply-row-schema DomInAverageSchema csv-data))})
 
+(defmethod apply-record-coercion :dom-out-averages
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema DomOutAverageSchema csv-data)
+   :columns (vec (apply-row-schema DomOutAverageSchema csv-data))})
+
+(defmethod apply-record-coercion :inter-in-averages
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema InterInAverageSchema csv-data)
+   :columns (vec (apply-row-schema InterInAverageSchema csv-data))})
+
+(defmethod apply-record-coercion :inter-out-averages
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema InterOutAverageSchema csv-data)
+   :columns (vec (apply-row-schema InterOutAverageSchema csv-data))})
+
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))

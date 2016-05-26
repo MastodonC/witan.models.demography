@@ -8,10 +8,19 @@
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
 (def domestic-mig-in (ld/load-dataset :migration-mye
-                                      "resources/test_data/bristol_dom_in_mig.csv"))
+                                      "resources/test_data/migration/bristol_dom_in_mig.csv"))
 
 (def dom-in-averages (ld/load-dataset :dom-in-averages
-                                      "resources/test_data/bristol_dom_in_avg.csv"))
+                                      "resources/test_data/migration/bristol_dom_in_avg.csv"))
+
+(def dom-out-averages (ld/load-dataset :dom-out-averages
+                                      "resources/test_data/migration/bristol_dom_out_avg.csv"))
+
+(def inter-in-averages (ld/load-dataset :inter-in-averages
+                                      "resources/test_data/migration/bristol_inter_in_avg.csv"))
+
+(def inter-out-averages (ld/load-dataset :inter-out-averages
+                                      "resources/test_data/migration/bristol_inter_out_avg.csv"))
 
 (deftest calculate-averages-test
   (testing "The function return the averages on the right year period"

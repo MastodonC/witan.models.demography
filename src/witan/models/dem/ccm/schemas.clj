@@ -85,3 +85,12 @@
 
 (def DomInAverageSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domin s/Num]]))
+
+(def DomOutAverageSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domout s/Num]]))
+
+(def InterInAverageSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intin s/Num]]))
+
+(def InterOutAverageSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intout s/Num]]))
