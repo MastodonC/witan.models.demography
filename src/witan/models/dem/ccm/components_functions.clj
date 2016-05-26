@@ -18,3 +18,17 @@
                                                          {:year {:$gte start-year
                                                                  :$lte last-yr-data}}))]
     (wds/rollup :mean avg-name [:gss-code :sex :age] data-of-interest)))
+
+
+(defn order-ds
+  [dataset col-key]
+  (cond (keyword? col-key) (->> dataset
+                                ds/row-maps
+                                vec
+                                (sort-by col-key)
+                                ds/dataset)
+        (vector? col-key) (->> dataset
+                               ds/row-maps
+                               vec
+                               (sort-by (reduce juxt col-key))
+                               ds/dataset)))
