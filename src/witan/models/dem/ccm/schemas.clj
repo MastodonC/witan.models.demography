@@ -25,72 +25,72 @@
 ;;For core CCM projection loop
 (def HistBirthsEstSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
-                           [:var s/Str] [:year s/Int] [:estimate s/Num]]))
+                           [:var s/Str] [:year s/Int] [:estimate double]]))
 
 (def PopulationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:popn s/Num]]))
+                           [:year s/Int] [:popn double]]))
 
 ;;For core CCM projection loop using fert/mort/mig inputs from files
 (def BirthsBySexSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:births s/Num]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:births double]]))
 
 (def DeathsSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:death-rate s/Num] [:popn s/Num] [:deaths s/Num]]))
+                           [:death-rate double] [:popn double] [:deaths double]]))
 
 (def NetMigrationSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig s/Num]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig double]]))
 
 ;;For historic ASFR workflow & input data
 (def AtRiskThisYearSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:popn-this-yr s/Num] [:age s/Int]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:popn-this-yr double] [:age s/Int]]))
 
 (def AtRiskLastYearSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:popn-last-yr s/Num]]))
+                           [:popn-last-yr double]]))
 
 (def BirthsPoolSchema
   (make-ordered-ds-schema [[:age s/Int] [:sex s/Str] [:year (s/maybe s/Int)] [:gss-code s/Str]
-                           [:birth-pool s/Num]]))
+                           [:birth-pool double]]))
 
 (def BirthsDataSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:births s/Num] [:year s/Int]]))
+                           [:births double] [:year s/Int]]))
 
 (def AtRiskPopnSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:popn s/Num] [:actualyear s/Int] [:actualage s/Int]]))
+                           [:popn double] [:actualyear s/Int] [:actualage s/Int]]))
 
 ;; For the migration component
 (def ComponentMYESchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
-                           [:var s/Str] [:year s/Int] [:estimate s/Num]]))
+                           [:var s/Str] [:year s/Int] [:estimate double]]))
 
 (def ProjDomInSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:domestic-in s/Num]]))
+                           [:domestic-in double]]))
 
 (def ProjDomOutSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:domestic-out s/Num]]))
+                           [:domestic-out double]]))
 
 (def ProjInterInSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:international-in s/Num]]))
+                           [:international-in double]]))
 
 (def ProjInterOutSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:international-out s/Num]]))
+                           [:international-out double]]))
 
 (def DomInAverageSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domin s/Num]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domin double]]))
 
 (def DomOutAverageSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domout s/Num]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domout double]]))
 
 (def InterInAverageSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intin s/Num]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intin double]]))
 
 (def InterOutAverageSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intout s/Num]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intout double]]))
