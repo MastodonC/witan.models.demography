@@ -120,7 +120,8 @@
   [inputs params]
   (let [prepared-inputs (prepare-inputs inputs)]
     (loop [inputs prepared-inputs]
-      (let [inputs' (-> (select-starting-popn inputs)
+      (let [inputs' (-> inputs
+                        select-starting-popn
                         age-on
                         add-births
                         remove-deaths

@@ -30,5 +30,5 @@
         (vector? col-key) (->> dataset
                                ds/row-maps
                                vec
-                               (sort-by (reduce juxt col-key))
+                               (sort-by (apply juxt col-key))
                                ds/dataset)))
