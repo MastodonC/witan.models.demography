@@ -68,7 +68,7 @@
         net-migrants (ds/select-columns (i/add-derived-column
                                          :net-mig
                                          [:domestic-in :domestic-out :international-in :international-out]
-                                         (fn [di do ii io] (+ di ii (* -1 (+ do io))))
+                                         (fn [di do ii io] (+ (- di do) (- ii io)))
                                          joined-migrants)
                                         [:gss-code :sex :age :net-mig])]
     {:net-migration net-migrants}))

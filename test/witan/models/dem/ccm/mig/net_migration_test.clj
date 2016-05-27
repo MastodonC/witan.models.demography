@@ -5,7 +5,9 @@
             [clojure.test :refer :all]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [schema.core :as s]
+            [witan.models.dem.ccm.schemas :refer :all]))
 
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
@@ -16,7 +18,7 @@
                                         :international-in-migrants
                                        "resources/test_data/migration/bristol_inter_in_mig.csv"
                                         :international-out-migrants
-                                       "resources/test_data/migration/bristol_inter_in_mig.csv"}))
+                                       "resources/test_data/migration/bristol_inter_out_mig.csv"}))
 
 (def net-migration-r (:net-migration (ld/load-dataset
                                       :net-migration
@@ -26,18 +28,17 @@
 
 (deftest combine-into-net-flows-test
   (testing "The net migration flows are calculated correctly."
-    (let [net-migration-clj (cf/order-ds (-> migration-data
-                                             (project-domestic-in-migrants params)
-                                             (project-domestic-out-migrants params)
-                                             (project-international-in-migrants params)
-                                             (project-international-out-migrants params)
-                                             combine-into-net-flows
-                                             :net-migration)
-                                         [:sex :age])
+    (let [net-migration-clj (-> migration-data
+                                (project-domestic-in-migrants params)
+                                (project-domestic-out-migrants params)
+                                (project-international-in-migrants params)
+                                (project-international-out-migrants params)
+                                combine-into-net-flows
+                                :net-migration)
           net-mig-r (ds/rename-columns net-migration-r {:net-mig :net-mig-r})
           joined-mig (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
                               net-migration-clj net-mig-r)]
       (is (every? #(fp-equals? (i/sel joined-mig :rows % :cols :net-mig-r)
-                              (i/sel joined-mig :rows % :cols :net-mig)
-                              0.0001)
+                               (i/sel joined-mig :rows % :cols :net-mig)
+                               0.0000000001)
                   (range (first (:shape joined-mig))))))))
