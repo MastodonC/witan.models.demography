@@ -80,7 +80,7 @@
    subtracted from the popn dataset."
   {:witan/name :ccm-core/remove-deaths
    :witan/version "1.0"
-   :witan/input-schema {:latest-yr-popn PopulationSchema :deaths DeathsSchema}
+   :witan/input-schema {:latest-yr-popn PopulationSchema :deaths DeathsOutputSchema}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn deaths]} _]
   (let [deaths-ds (ds/select-columns deaths [:gss-code :sex :age :deaths])

@@ -92,8 +92,8 @@
 
 (defmethod apply-record-coercion :deaths
   [data-info csv-data]
-  {:column-names (apply-col-names-schema DeathsSchema csv-data)
-   :columns (vec (apply-row-schema DeathsSchema csv-data))})
+  {:column-names (apply-col-names-schema DeathsOutputSchema csv-data)
+   :columns (vec (apply-row-schema DeathsOutputSchema csv-data))})
 
 (defmethod apply-record-coercion :net-migration
   [data-info csv-data]
@@ -144,6 +144,26 @@
   [data-info csv-data]
   {:column-names (apply-col-names-schema InterOutAverageSchema csv-data)
    :columns (vec (apply-row-schema InterOutAverageSchema csv-data))})
+
+(defmethod apply-record-coercion :historic-deaths
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema DeathsSchema csv-data)
+   :columns (vec (apply-row-schema DeathsSchema csv-data))})
+
+(defmethod apply-record-coercion :historic-births
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema BirthsBySexAgeYearSchema csv-data)
+   :columns (vec (apply-row-schema BirthsBySexAgeYearSchema csv-data))})
+
+(defmethod apply-record-coercion :historic-population
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema HistPopulationSchema csv-data)
+   :columns (vec (apply-row-schema HistPopulationSchema csv-data))})
+
+(defmethod apply-record-coercion :historic-asmr
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema HistASMRSchema csv-data)
+   :columns (vec (apply-row-schema HistASMRSchema csv-data))})
 
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
