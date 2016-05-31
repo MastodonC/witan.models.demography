@@ -23,7 +23,7 @@
 
 ;;Define schemas
 ;;For core CCM projection loop
-(def HistBirthsEstSchema
+(def ComponentMYESchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
                            [:var s/Str] [:year s/Int] [:estimate double]]))
 
@@ -63,10 +63,6 @@
                            [:popn double] [:actualyear s/Int] [:actualage s/Int]]))
 
 ;; For the migration component
-(def ComponentMYESchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
-                           [:var s/Str] [:year s/Int] [:estimate double]]))
-
 (def ProjDomInSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:domestic-in double]]))

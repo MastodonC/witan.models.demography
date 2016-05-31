@@ -67,8 +67,8 @@
 
 (defmethod apply-record-coercion :hist-births-est
   [data-info csv-data]
-  {:column-names (apply-col-names-schema HistBirthsEstSchema csv-data)
-   :columns (vec (apply-row-schema HistBirthsEstSchema csv-data))})
+  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
+   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
 
 (defmethod apply-record-coercion :population
   [data-info csv-data]
