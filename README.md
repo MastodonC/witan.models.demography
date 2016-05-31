@@ -6,7 +6,16 @@
 
 ## Description
 
-Clojure library to run demography models
+`witan.models.demography` is a Clojure library to run demographic models.
+
+Those models will be used on MastodonC's [Witan](http://www.mastodonc.com/products/witan/) city decision-making platform.
+They can also be used independently of Witan as a standalone demographic models library.
+
+Current status:
+* Population projections: First release of a minimal version coming soon!
+* Small area projections: Not started. Waiting to finish the population projections.
+
+See the [docs](doc/intro.md) for more info!
 
 ## Installation
 
