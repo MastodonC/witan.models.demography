@@ -67,8 +67,8 @@
 
 (defmethod apply-record-coercion :hist-births-est
   [data-info csv-data]
-  {:column-names (apply-col-names-schema HistBirthsEstSchema csv-data)
-   :columns (vec (apply-row-schema HistBirthsEstSchema csv-data))})
+  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
+   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
 
 (defmethod apply-record-coercion :population
   [data-info csv-data]
@@ -105,10 +105,45 @@
   {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
    :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
 
+(defmethod apply-record-coercion :domestic-in-migrants
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
+   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
+
+(defmethod apply-record-coercion :domestic-out-migrants
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
+   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
+
+(defmethod apply-record-coercion :international-in-migrants
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
+   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
+
+(defmethod apply-record-coercion :international-out-migrants
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
+   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
+
 (defmethod apply-record-coercion :dom-in-averages
   [data-info csv-data]
   {:column-names (apply-col-names-schema DomInAverageSchema csv-data)
    :columns (vec (apply-row-schema DomInAverageSchema csv-data))})
+
+(defmethod apply-record-coercion :dom-out-averages
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema DomOutAverageSchema csv-data)
+   :columns (vec (apply-row-schema DomOutAverageSchema csv-data))})
+
+(defmethod apply-record-coercion :inter-in-averages
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema InterInAverageSchema csv-data)
+   :columns (vec (apply-row-schema InterInAverageSchema csv-data))})
+
+(defmethod apply-record-coercion :inter-out-averages
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema InterOutAverageSchema csv-data)
+   :columns (vec (apply-row-schema InterOutAverageSchema csv-data))})
 
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]

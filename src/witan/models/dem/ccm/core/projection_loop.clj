@@ -22,7 +22,6 @@
   {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:population PopulationSchema}
-   :witan/param-schema {:_ nil}
    :witan/output-schema {:loop-year s/Int :latest-yr-popn PopulationSchema}}
   [{:keys [population]} _]
   (let [last-yr (reduce max (i/$ :year population))
@@ -36,7 +35,6 @@
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :population PopulationSchema
                         :loop-year s/Int}
-   :witan/param-schema {:_ nil}
    :witan/output-schema {:latest-yr-popn PopulationSchema :loop-year s/Int}}
   [{:keys [latest-yr-popn population loop-year]} _]
   (let [update-yr (i/replace-column :year (i/$map inc :year latest-yr-popn) latest-yr-popn)]
@@ -50,7 +48,6 @@
   {:witan/name :ccm-cor/age-on
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema}
-   :witan/param-schema {:_ nil}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn]} _]
   (let [aged-on (i/replace-column :age (i/$map
@@ -67,7 +64,6 @@
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :births BirthsBySexSchema
                         :loop-year s/Int}
-   :witan/param-schema {:_ nil}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn births loop-year]} _]
   (let [update-births (-> births
@@ -85,7 +81,6 @@
   {:witan/name :ccm-core/remove-deaths
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :deaths DeathsSchema}
-   :witan/param-schema {:_ nil}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn deaths]} _]
   (let [deaths-ds (ds/select-columns deaths [:gss-code :sex :age :deaths])
@@ -102,7 +97,6 @@
   {:witan/name :ccm-core/apply-migration
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :net-migration NetMigrationSchema}
-   :witan/param-schema {:_ nil}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn net-migration]} _]
   (let [popn-mig (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
@@ -118,22 +112,21 @@
   {:witan/name :ccm-core/join-yrs
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :population PopulationSchema}
-   :witan/param-schema {:_ nil}
    :witan/output-schema {:population PopulationSchema}}
   [{:keys [latest-yr-popn population]} _]
   {:population (ds/join-rows population latest-yr-popn)})
-
 
 (defn looping-test
   [inputs params]
   (let [prepared-inputs (prepare-inputs inputs)]
     (loop [inputs prepared-inputs]
-      (let [inputs' (->> (select-starting-popn inputs)
-                         (age-on)
-                         (add-births)
-                         (remove-deaths)
-                         (apply-migration)
-                         (join-popn-latest-yr))]
+      (let [inputs' (-> inputs
+                        select-starting-popn
+                        age-on
+                        add-births
+                        remove-deaths
+                        apply-migration
+                        join-popn-latest-yr)]
         (println (format "Projecting for year %d..." (:loop-year inputs')))
         (if (:loop-predicate (keep-looping? inputs' params))
           (recur inputs')
