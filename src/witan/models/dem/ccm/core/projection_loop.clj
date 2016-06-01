@@ -1,10 +1,8 @@
 (ns witan.models.dem.ccm.core.projection-loop
-  (:require [clojure.string :as str]
-            [schema.core :as s]
+  (:require [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.workspace-api :refer [defworkflowfn merge->]]
-            [witan.workspace-api.functions :refer [rename-keys]]
+            [witan.workspace-api :refer [defworkflowfn]]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]))
 
@@ -24,7 +22,7 @@
    :witan/input-schema {:population PopulationSchema}
    :witan/output-schema {:loop-year s/Int :latest-yr-popn PopulationSchema}}
   [{:keys [population]} _]
-  (let [last-yr (reduce max (i/$ :year population))
+  (let [last-yr (reduce max (ds/column population :year))
         last-yr-popn (i/query-dataset population {:year last-yr})]
     {:loop-year last-yr :latest-yr-popn last-yr-popn}))
 
@@ -37,7 +35,7 @@
                         :loop-year s/Int}
    :witan/output-schema {:latest-yr-popn PopulationSchema :loop-year s/Int}}
   [{:keys [latest-yr-popn population loop-year]} _]
-  (let [update-yr (i/replace-column :year (i/$map inc :year latest-yr-popn) latest-yr-popn)]
+  (let [update-yr (ds/emap-column latest-yr-popn :year inc)]
     {:latest-yr-popn update-yr :loop-year (inc loop-year)}))
 
 (defworkflowfn age-on
@@ -50,11 +48,10 @@
    :witan/input-schema {:latest-yr-popn PopulationSchema}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn]} _]
-  (let [aged-on (i/replace-column :age (i/$map
-                                        (fn [v] (if (< v 90) (inc v) v))
-                                        :age latest-yr-popn) latest-yr-popn)
-        grouped (wds/rollup aged-on :sum :popn [:gss-code :sex :age :year])]
-    {:latest-yr-popn grouped}))
+  (let [aged-on (-> latest-yr-popn
+                    (ds/emap-column :age (fn [v] (if (< v 90) (inc v) v)))
+                    (wds/rollup :sum :popn [:gss-code :sex :age :year]))]
+    {:latest-yr-popn aged-on}))
 
 (defworkflowfn add-births
   "Takes in a dataset of aged on popn and dataset of births by sex & gss code.
@@ -66,12 +63,13 @@
                         :loop-year s/Int}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn births loop-year]} _]
-  (let [update-births (-> births
-                          (ds/add-column :age (repeat 0))
-                          (ds/add-column :year (repeat loop-year))
-                          (ds/rename-columns {:births :popn}))]
-    {:latest-yr-popn (ds/select-columns (ds/join-rows latest-yr-popn update-births)
-                                        [:gss-code :sex :age :year :popn])}))
+  (let [aged-on-popn-with-births (-> births
+                                     (ds/add-column :age (repeat 0))
+                                     (ds/add-column :year (repeat loop-year))
+                                     (ds/rename-columns {:births :popn})
+                                     (ds/join-rows latest-yr-popn)
+                                     (ds/select-columns [:gss-code :sex :age :year :popn]))]
+    {:latest-yr-popn aged-on-popn-with-births}))
 
 (defworkflowfn remove-deaths
   "Takes in a dataset of aged on popn with births added, and a dataset
@@ -83,11 +81,12 @@
    :witan/input-schema {:latest-yr-popn PopulationSchema :deaths DeathsOutputSchema}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn deaths]} _]
-  (let [deaths-ds (ds/select-columns deaths [:gss-code :sex :age :deaths])
-        popn-deaths (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
-                             latest-yr-popn deaths-ds)
-        survived-popn (-> (i/replace-column :popn (i/$map - [:popn :deaths] popn-deaths) popn-deaths)
-                          (ds/select-columns [:gss-code :sex :age :year :popn]))]
+  (let [survived-popn (-> deaths
+                          (ds/select-columns [:gss-code :sex :age :deaths])
+                          (wds/join latest-yr-popn [:gss-code :sex :age])
+                          (wds/add-derived-column :popn-survived [:popn :deaths] -)
+                          (ds/select-columns [:gss-code :sex :age :year :popn-survived])
+                          (ds/rename-columns {:popn-survived :popn}))]
     {:latest-yr-popn survived-popn}))
 
 (defworkflowfn apply-migration
@@ -99,10 +98,11 @@
    :witan/input-schema {:latest-yr-popn PopulationSchema :net-migration NetMigrationSchema}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn net-migration]} _]
-  (let [popn-mig (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
-                          latest-yr-popn net-migration)
-        popn-w-migrants (-> (i/replace-column :popn (i/$map + [:popn :net-mig] popn-mig) popn-mig)
-                            (ds/select-columns [:gss-code :sex :age :year :popn]))]
+  (let [popn-w-migrants (-> latest-yr-popn
+                            (wds/join net-migration [:gss-code :sex :age])
+                            (wds/add-derived-column :popn-migrated [:popn :net-mig] +)
+                            (ds/select-columns [:gss-code :sex :age :year :popn-migrated])
+                            (ds/rename-columns {:popn-migrated :popn}))]
     {:latest-yr-popn popn-w-migrants}))
 
 (defworkflowfn join-popn-latest-yr

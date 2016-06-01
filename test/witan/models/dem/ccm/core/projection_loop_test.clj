@@ -1,15 +1,12 @@
 (ns witan.models.dem.ccm.core.projection-loop-test
   (:require [clojure.test :refer :all]
             [witan.models.dem.ccm.core.projection-loop :refer :all]
-            [clojure.test :as t]
-            [clojure.string :as str]
             [clojure.core.matrix.dataset :as ds]
-            [clojure.core.matrix :as m]
             [incanter.core :as i]
-            [witan.models.load-data :as ld]))
+            [witan.models.load-data :as ld]
+            [witan.datasets :as wds]))
 
 ;; Load testing data
-;; NEED TO GET THE RIGHT INPUT -> mye.est
 (def data-inputs (prepare-inputs
                   (ld/load-datasets
                    {:population
@@ -36,13 +33,14 @@
 
 ;;get sum of population for particular year & age group in dataset with :popn column
 (def sum-popn (fn [popn year age]
-                (apply + (i/$ :popn (i/query-dataset popn
-                                                     {:year year :age age})))))
+                (apply + (ds/column (i/query-dataset popn {:year year :age age}) :popn))))
+
+;;returns a vector
 (def get-popn (fn
-                ([ds popn age sex]
-                 (i/$ popn (i/query-dataset ds {:age age :sex sex})))
-                ([ds popn year age sex]
-                 (i/$ popn (i/query-dataset ds {:year year :age age :sex sex})))))
+                ([ds col-name age sex]
+                 (ds/column (i/query-dataset ds {:age age :sex sex}) col-name))                                
+                ([ds col-name year age sex]
+                 (ds/column (i/query-dataset ds {:year year :age age :sex sex}) col-name))))
 
 ;; Tests:
 (deftest select-starting-popn-test
@@ -50,16 +48,14 @@
     (let [get-start-popn (select-starting-popn data-inputs)]
       (is (same-coll? [:gss-code :sex :age :year :popn]
                       (ds/column-names (:latest-yr-popn get-start-popn))))
-      (is (true? (every? #(= % 2015) (i/$ :year (:latest-yr-popn get-start-popn)))))
+      (is (true? (every? #(= % 2015) (ds/column (:latest-yr-popn get-start-popn) :year))))
       ;; Total number of 15 yrs old in 2015:
-      (is (= 4386.0 (apply + (i/$ :popn
-                                  (i/query-dataset (:latest-yr-popn get-start-popn)
-                                                   {:year 2015 :age 15})))))
+      (is (= 4386.0 (apply + (ds/column (i/query-dataset (:latest-yr-popn get-start-popn)
+                                               {:year 2015 :age 15}) :popn))))
       ;; Total number of women aged between 40 and 43 in 2015:
-      (is (= 5394.0 (apply + (i/$ :popn
-                                  (i/query-dataset (:latest-yr-popn get-start-popn)
+      (is (= 5394.0 (apply + (ds/column (i/query-dataset (:latest-yr-popn get-start-popn)
                                                    {:sex "F" :age {:$gt 40 :lt 43}
-                                                    :year 2015}))))))))
+                                                    :year 2015}) :popn)))))))
 
 (deftest age-on-test
   (testing "Popn is aged on correctly, 90 grouping is handled correctly."
@@ -79,7 +75,7 @@
           latest-newborns (i/query-dataset popn-with-births {:year latest-yr :age 0})]
       (is (= 2 (first (:shape latest-newborns))))
       (is (fp-equals? (+ 3135.891642 3292.686224)
-                      (#(apply + (i/$ :popn %)) latest-newborns) 0.0001)))))
+                      (#(apply + (ds/column % :popn)) latest-newborns) 0.0001)))))
 
 (deftest remove-deaths-test
   (testing "The deaths are removed from the popn."
@@ -87,9 +83,9 @@
           aged-on-popn (age-on starting-popn)
           popn-with-births (add-births aged-on-popn)
           popn-wo-deaths (remove-deaths popn-with-births)]
-      (is (= (- (get-popn (:latest-yr-popn popn-with-births) :popn 2015 0 "F")
-                (get-popn (:deaths popn-with-births) :deaths 0 "F"))
-             (get-popn (:latest-yr-popn popn-wo-deaths) :popn 2015 0 "F"))))))
+      (is (= (apply - (concat (get-popn (:latest-yr-popn popn-with-births) :popn 2015 0 "F")
+                              (get-popn (:deaths popn-with-births) :deaths 0 "F")))
+             (nth (get-popn (:latest-yr-popn popn-wo-deaths) :popn 2015 0 "F") 0))))))
 
 (deftest apply-migration-test
   (testing "The migrants are added to the popn."
@@ -98,9 +94,9 @@
           popn-with-births (add-births aged-on-popn)
           popn-wo-deaths (remove-deaths popn-with-births)
           popn-with-mig (apply-migration popn-wo-deaths)]
-      (is (= (+ (get-popn (:latest-yr-popn popn-wo-deaths) :popn 2015 0 "F")
-                (get-popn (:net-migration popn-wo-deaths) :net-mig 0 "F"))
-             (get-popn (:latest-yr-popn popn-with-mig) :popn 2015 0 "F"))))))
+      (is (= (apply + (concat  (get-popn (:latest-yr-popn popn-wo-deaths) :popn 2015 0 "F")
+                               (get-popn (:net-migration popn-wo-deaths) :net-mig 0 "F")))
+             (nth (get-popn (:latest-yr-popn popn-with-mig) :popn 2015 0 "F") 0))))))
 
 (deftest looping-test-test
   (testing "The output of the loop matches the R code."
@@ -113,8 +109,7 @@
                          {:popn :popn-clj})
           proj-r-2015 (ds/rename-columns
                        (:end-population output-2015) {:popn :popn-r})
-          r-clj-2015 (i/$join [[:gss-code :sex :age :year] [:gss-code :sex :age :year]]
-                              proj-r-2015 proj-clj-2015)]
+          r-clj-2015 (wds/join proj-r-2015 proj-clj-2015 [:gss-code :sex :age :year])]
       ;; Compare all values in the :popn column between the R and Clj results for 2015:
       (is (every? #(fp-equals? (i/sel r-clj-2015 :rows % :cols :popn-r)
                                (i/sel r-clj-2015 :rows % :cols :popn-clj) 0.0001)

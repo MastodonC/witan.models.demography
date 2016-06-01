@@ -12,13 +12,12 @@
   the averages for all the years of interest and is renamed to avg-name."
   [historical-data col-to-avg avg-name number-of-years jumpoff-year]
   (let [last-yr-data (dec jumpoff-year)
-        start-year-data (inc (- last-yr-data number-of-years))
-        data-of-interest (i/rename-cols {col-to-avg avg-name}
-                                        (i/query-dataset historical-data
-                                                         {:year {:$gte start-year-data
-                                                                 :$lte last-yr-data}}))]
-    (wds/rollup data-of-interest :mean avg-name [:gss-code :sex :age])))
-
+        start-year-data (inc (- last-yr-data number-of-years))]
+    (-> (i/query-dataset historical-data
+                         {:year {:$gte start-year-data
+                                 :$lte last-yr-data}})
+        (ds/rename-columns {col-to-avg avg-name})
+        (wds/rollup :mean avg-name [:gss-code :sex :age]))))
 
 (defn order-ds
   [dataset col-key]

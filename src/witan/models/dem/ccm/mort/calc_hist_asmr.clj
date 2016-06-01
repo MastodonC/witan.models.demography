@@ -1,7 +1,6 @@
 (ns witan.models.dem.ccm.mort.calc-hist-asmr
   (:require [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [schema.core :as s]
             [witan.models.dem.ccm.schemas :refer :all]
             [witan.workspace-api :refer [defworkflowfn]]
             [witan.datasets :as wds]))

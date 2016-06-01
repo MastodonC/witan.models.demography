@@ -3,8 +3,8 @@
             [witan.models.dem.ccm.fert.hist-asfr-age :refer :all]
             [clojure.string :as str]
             [clojure.core.matrix.dataset :as ds]
-            [incanter.core :as i]
-            [witan.models.load-data :as ld]))
+            [witan.models.load-data :as ld]
+            [witan.datasets :as wds]))
 
 ;; Load testing data
 (def test-data-paths {:births-data "resources/test_data/bristol_births_data.csv"
@@ -41,19 +41,20 @@
                     (ds/column-names (:at-risk-this-year
                                       (->at-risk-this-year from-births-data-year params))))))
   (testing "The age column range is now 0-89 instead of 1-90"
-    (let [former-age-range (distinct (i/$ :age (:at-risk-popn data-inputs)))
+    (let [former-age-range (distinct (ds/column (:at-risk-popn data-inputs) :age))
           min-former-range (reduce min former-age-range)
           max-former-range (reduce max former-age-range)]
       (is (same-coll? (range (dec min-former-range) max-former-range)
-                      (distinct (i/$ :age (:at-risk-this-year
-                                           (->at-risk-this-year from-births-data-year
-                                                                params)))))))))
+                      (distinct (ds/column (:at-risk-this-year
+                                            (->at-risk-this-year from-births-data-year
+                                                                 params)) :age)))))))
 
 (deftest ->at-risk-last-year-test
   (testing "The data is filtered by the correct year"
     (is (same-coll? '(2013)
-                    (distinct (i/$ :year (:at-risk-last-year
-                                          (->at-risk-last-year from-births-data-year params)))))))
+                    (distinct (ds/column (:at-risk-last-year
+                                          (->at-risk-last-year from-births-data-year
+                                                               params)):year)))))
   (testing "The data transformation returns the correct columns"
     (is (same-coll? [:gss-code :sex :age :year :popn-last-yr]
                     (ds/column-names (:at-risk-last-year
@@ -64,9 +65,9 @@
     (is (same-coll? [:age :sex :gss-code :year :birth-pool]
                     (ds/column-names (:births-pool (->births-pool for-births-pool params))))))
   (testing "No nil or NaN in the birth-pool column"
-    (is (not-any? nil? (i/$ :birth-pool (:births-pool (->births-pool for-births-pool params)))))
+    (is (not-any? nil? (ds/column (:births-pool (->births-pool for-births-pool params)) :birth-pool)))
     (is (not-any? #(Double/isNaN %)
-                  (i/$ :birth-pool (:births-pool (->births-pool for-births-pool params)))))))
+                  (ds/column (:births-pool (->births-pool for-births-pool params)) :birth-pool)))))
 
 (deftest ->historic-fertility-test
   (testing "The intermediary outputs are added to the global map"

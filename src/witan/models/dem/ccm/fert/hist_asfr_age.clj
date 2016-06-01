@@ -1,10 +1,10 @@
 (ns witan.models.dem.ccm.fert.hist-asfr-age
-  (:require [clojure.string :as str]
-            [schema.core :as s]
+  (:require [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
             [witan.workspace-api :refer [defworkflowfn merge->]]
-            [witan.models.dem.ccm.schemas :refer :all]))
+            [witan.models.dem.ccm.schemas :refer :all]
+            [witan.datasets :as wds]))
 
 (defworkflowfn ->births-data-year
   "Takes births-data dataset

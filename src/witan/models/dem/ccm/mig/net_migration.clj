@@ -1,9 +1,9 @@
 (ns witan.models.dem.ccm.mig.net-migration
   (:require [witan.models.dem.ccm.components-functions :as cf]
             [witan.workspace-api :refer [defworkflowfn]]
+            [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
             [clojure.core.matrix.dataset :as ds]
-            [incanter.core :as i]
             [schema.core :as s]))
 
 (defworkflowfn project-domestic-in-migrants
@@ -60,15 +60,14 @@
    :witan/output-schema {:net-migration NetMigrationSchema}}
   [{:keys [projected-domestic-in-migrants projected-domestic-out-migrants
            projected-international-in-migrants projected-international-out-migrants]} _]
-  (let [joined-migrants (reduce #(i/$join [[:gss-code :sex :age] [:gss-code :sex :age]] %1 %2)
-                                [projected-domestic-in-migrants
-                                 projected-domestic-out-migrants
-                                 projected-international-in-migrants
-                                 projected-international-out-migrants])
-        net-migrants (ds/select-columns (i/add-derived-column
-                                         :net-mig
-                                         [:domestic-in :domestic-out :international-in :international-out]
-                                         (fn [di do ii io] (+ (- di do) (- ii io)))
-                                         joined-migrants)
-                                        [:gss-code :sex :age :net-mig])]
+  (let [net-migrants (-> (reduce #(wds/join %1 %2 [:gss-code :sex :age])
+                                 [projected-domestic-in-migrants
+                                  projected-domestic-out-migrants
+                                  projected-international-in-migrants
+                                  projected-international-out-migrants])
+                         (wds/add-derived-column
+                          :net-mig
+                          [:domestic-in :domestic-out :international-in :international-out]
+                          (fn [di do ii io] (+ (- di do) (- ii io))))
+                         (ds/select-columns [:gss-code :sex :age :net-mig]))]
     {:net-migration net-migrants}))

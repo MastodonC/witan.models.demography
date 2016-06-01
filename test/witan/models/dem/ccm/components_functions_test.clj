@@ -1,9 +1,9 @@
 (ns witan.models.dem.ccm.components-functions-test
   (:require [witan.models.dem.ccm.components-functions :refer :all]
             [clojure.test :refer :all]
-            [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.models.load-data :as ld]))
+            [witan.models.load-data :as ld]
+            [witan.datasets :as wds]))
 
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
@@ -36,32 +36,28 @@
     (let [r-results (:dom-in-averages dom-in-averages)
           clj-results (jumpoffyr-method-average (:domestic-in-migrants migration-data)
                                           :estimate :domestic-in 12 2015)
-          joined-averages (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
-                                   r-results clj-results)]
+          joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :domin)
                                (i/sel joined-averages :rows % :cols :domestic-in) 0.0000000001)
                   (range (first (:shape joined-averages))))))
     (let [r-results (:dom-out-averages dom-out-averages)
           clj-results (jumpoffyr-method-average (:domestic-out-migrants migration-data)
                                           :estimate :domestic-out 12 2015)
-          joined-averages (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
-                                   r-results clj-results)]
+          joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :domout)
                                (i/sel joined-averages :rows % :cols :domestic-out) 0.0000000001)
                   (range (first (:shape joined-averages))))))
     (let [r-results (:inter-out-averages inter-out-averages)
           clj-results (jumpoffyr-method-average (:international-out-migrants migration-data)
                                           :estimate :international-out 12 2015)
-          joined-averages (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
-                                   r-results clj-results)]
+          joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :intout)
                                (i/sel joined-averages :rows % :cols :international-out) 0.0000000001)
                   (range (first (:shape joined-averages))))))
     (let [r-results (:inter-in-averages inter-in-averages)
           clj-results (jumpoffyr-method-average (:international-in-migrants migration-data)
                                           :estimate :international-in 12 2015)
-          joined-averages (i/$join [[:gss-code :sex :age] [:gss-code :sex :age]]
-                                   r-results clj-results)]
+          joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :intin)
                                (i/sel joined-averages :rows % :cols :international-in) 0.0000000001)
                   (range (first (:shape joined-averages))))))))

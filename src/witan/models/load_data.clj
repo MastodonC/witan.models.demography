@@ -3,7 +3,6 @@
             [clojure.string :as str]
             [clojure-csv.core :as csv]
             [schema.coerce :as coerce]
-            [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [witan.models.dem.ccm.schemas :refer :all]))
 
