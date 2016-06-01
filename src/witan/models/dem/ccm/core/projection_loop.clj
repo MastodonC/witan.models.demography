@@ -53,7 +53,7 @@
   (let [aged-on (i/replace-column :age (i/$map
                                         (fn [v] (if (< v 90) (inc v) v))
                                         :age latest-yr-popn) latest-yr-popn)
-        grouped (wds/rollup :sum :popn [:gss-code :sex :age :year] aged-on)]
+        grouped (wds/rollup aged-on :sum :popn [:gss-code :sex :age :year])]
     {:latest-yr-popn grouped}))
 
 (defworkflowfn add-births
@@ -80,7 +80,7 @@
    subtracted from the popn dataset."
   {:witan/name :ccm-core/remove-deaths
    :witan/version "1.0"
-   :witan/input-schema {:latest-yr-popn PopulationSchema :deaths DeathsSchema}
+   :witan/input-schema {:latest-yr-popn PopulationSchema :deaths DeathsOutputSchema}
    :witan/output-schema {:latest-yr-popn PopulationSchema}}
   [{:keys [latest-yr-popn deaths]} _]
   (let [deaths-ds (ds/select-columns deaths [:gss-code :sex :age :deaths])

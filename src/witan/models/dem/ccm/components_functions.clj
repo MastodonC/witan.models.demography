@@ -17,7 +17,7 @@
                                         (i/query-dataset historical-data
                                                          {:year {:$gte start-year-data
                                                                  :$lte last-yr-data}}))]
-    (wds/rollup :mean avg-name [:gss-code :sex :age] data-of-interest)))
+    (wds/rollup data-of-interest :mean avg-name [:gss-code :sex :age])))
 
 
 (defn order-ds

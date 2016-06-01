@@ -22,7 +22,7 @@
         (:column-names col-schema)))
 
 ;;Define schemas
-;;For core CCM projection loop
+;;Historic data used in core loop & component modules
 (def ComponentMYESchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
                            [:var s/Str] [:year s/Int] [:estimate double]]))
@@ -31,11 +31,15 @@
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:popn double]]))
 
+(def DeathsSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:deaths double]]))
+
 ;;For core CCM projection loop using fert/mort/mig inputs from files
 (def BirthsBySexSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:births double]]))
 
-(def DeathsSchema
+(def DeathsOutputSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
                            [:death-rate double] [:popn double] [:deaths double]]))
 
@@ -90,3 +94,17 @@
 
 (def InterOutAverageSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intout double]]))
+
+;; For the mortality component
+
+(def HistPopulationSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:popn double]]))
+
+(def BirthsBySexAgeYearSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:births double]]))
+
+(def HistASMRSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:death-rate double]]))
