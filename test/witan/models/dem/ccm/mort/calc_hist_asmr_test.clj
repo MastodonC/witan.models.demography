@@ -3,7 +3,8 @@
             [witan.models.load-data :as ld]
             [clojure.test :refer :all]
             [incanter.core :as i]
-            [clojure.core.matrix.dataset :as ds]))
+            [clojure.core.matrix.dataset :as ds]
+            [witan.datasets :as wds]))
 
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
@@ -26,12 +27,12 @@
 
 (deftest calc-historic-asmr-test
   (testing "Death rates are calculated correctly."
-    (let [hist-asmr-clj (:historic-asmr (calc-historic-asmr hist-asmr-inputs))
-          hist-asmr-r (ds/rename-columns historic-asmr-r {:death-rate :death-rate-r})
-          joined-asmr (i/$join [[:gss-code :district :sex :age :year]
-                                [:gss-code :district :sex :age :year]]
-                               hist-asmr-clj hist-asmr-r)]
-         (is (every? #(fp-equals? (i/sel joined-asmr :rows % :cols :death-rate-r)
-                                  (i/sel joined-asmr :rows % :cols :death-rate)
-                                  0.0000000001)
-                     (range (first (:shape joined-asmr))))))))
+    (let [hist-asmr-r (ds/rename-columns historic-asmr-r {:death-rate :death-rate-r})
+          joined-asmr (-> hist-asmr-inputs
+                          (calc-historic-asmr)
+                          (:historic-asmr)
+                          (wds/join hist-asmr-r [:gss-code :district :sex :age :year]))]
+      (is (every? #(fp-equals? (i/sel joined-asmr :rows % :cols :death-rate-r)
+                               (i/sel joined-asmr :rows % :cols :death-rate)
+                               0.0000000001)
+                  (range (first (:shape joined-asmr))))))))
