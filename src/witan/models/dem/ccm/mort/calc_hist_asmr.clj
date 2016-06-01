@@ -8,12 +8,11 @@
 
 (defn create-popn-at-risk
   [popn-ds deaths-ds births-ds]
-  (let [max-yr-deaths (reduce max (i/$ :year deaths-ds))
-        popn-inc-yr (i/replace-column :year (i/$map inc :year popn-ds) popn-ds)
-        aged-on (i/replace-column :age (i/$map
-                                        (fn [v] (if (< v 90) (inc v) v))
-                                        :age popn-inc-yr) popn-inc-yr)
-        grouped (wds/rollup :sum :popn [:gss-code :district :sex :age :year] aged-on)
+  (let [max-yr-deaths (reduce max (ds/column deaths-ds :year))
+        inc-yr-aged-on (-> popn-ds
+                           (ds/emap-column :year inc)
+                           (ds/emap-column :age (fn [v] (if (< v 90) (inc v) v))))
+        grouped (wds/rollup :sum :popn [:gss-code :district :sex :age :year] inc-yr-aged-on)
         filtered (i/query-dataset grouped {:year {:$lte max-yr-deaths}})]
     (-> births-ds
         (ds/rename-columns {:births :popn})
