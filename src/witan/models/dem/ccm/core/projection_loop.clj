@@ -53,7 +53,7 @@
   (let [aged-on (i/replace-column :age (i/$map
                                         (fn [v] (if (< v 90) (inc v) v))
                                         :age latest-yr-popn) latest-yr-popn)
-        grouped (wds/rollup :sum :popn [:gss-code :sex :age :year] aged-on)]
+        grouped (wds/rollup aged-on :sum :popn [:gss-code :sex :age :year])]
     {:latest-yr-popn grouped}))
 
 (defworkflowfn add-births
