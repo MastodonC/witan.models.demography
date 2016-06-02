@@ -15,7 +15,7 @@
   [{:keys [domestic-in-migrants]} {:keys [number-of-years jumpoff-year]}]
   {:projected-domestic-in-migrants
    (cf/jumpoffyr-method-average domestic-in-migrants :estimate
-                          :domestic-in number-of-years jumpoff-year)})
+                                :domestic-in number-of-years jumpoff-year)})
 
 (defworkflowfn project-domestic-out-migrants
   {:witan/name :ccm-mig/proj-dom-out-mig
@@ -26,7 +26,7 @@
   [{:keys [domestic-out-migrants]} {:keys [number-of-years jumpoff-year]}]
   {:projected-domestic-out-migrants
    (cf/jumpoffyr-method-average domestic-out-migrants :estimate
-                          :domestic-out number-of-years jumpoff-year)})
+                                :domestic-out number-of-years jumpoff-year)})
 
 (defworkflowfn project-international-in-migrants
   {:witan/name :ccm-mig/proj-inter-in-mig
@@ -37,7 +37,7 @@
   [{:keys [international-in-migrants]} {:keys [number-of-years jumpoff-year]}]
   {:projected-international-in-migrants
    (cf/jumpoffyr-method-average international-in-migrants :estimate
-                          :international-in number-of-years jumpoff-year)})
+                                :international-in number-of-years jumpoff-year)})
 
 (defworkflowfn project-international-out-migrants
   {:witan/name :ccm-mig/proj-inter-out-mig
@@ -48,7 +48,7 @@
   [{:keys [international-out-migrants]} {:keys [number-of-years jumpoff-year]}]
   {:projected-international-out-migrants
    (cf/jumpoffyr-method-average international-out-migrants :estimate
-                          :international-out number-of-years jumpoff-year)})
+                                :international-out number-of-years jumpoff-year)})
 
 (defworkflowfn combine-into-net-flows
   {:witan/name :ccm-mig/combine-mig-flows

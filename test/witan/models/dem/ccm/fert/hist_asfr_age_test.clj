@@ -54,7 +54,7 @@
     (is (same-coll? '(2013)
                     (distinct (ds/column (:at-risk-last-year
                                           (->at-risk-last-year from-births-data-year
-                                                               params)):year)))))
+                                                               params)) :year)))))
   (testing "The data transformation returns the correct columns"
     (is (same-coll? [:gss-code :sex :age :year :popn-last-yr]
                     (ds/column-names (:at-risk-last-year

@@ -51,11 +51,11 @@
       (is (true? (every? #(= % 2015) (ds/column (:latest-yr-popn get-start-popn) :year))))
       ;; Total number of 15 yrs old in 2015:
       (is (= 4386.0 (apply + (ds/column (i/query-dataset (:latest-yr-popn get-start-popn)
-                                               {:year 2015 :age 15}) :popn))))
+                                                         {:year 2015 :age 15}) :popn))))
       ;; Total number of women aged between 40 and 43 in 2015:
       (is (= 5394.0 (apply + (ds/column (i/query-dataset (:latest-yr-popn get-start-popn)
-                                                   {:sex "F" :age {:$gt 40 :lt 43}
-                                                    :year 2015}) :popn)))))))
+                                                         {:sex "F" :age {:$gt 40 :lt 43}
+                                                          :year 2015}) :popn)))))))
 
 (deftest age-on-test
   (testing "Popn is aged on correctly, 90 grouping is handled correctly."

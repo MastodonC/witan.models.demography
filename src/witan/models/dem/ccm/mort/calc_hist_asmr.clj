@@ -9,10 +9,10 @@
   [popn-ds deaths-ds births-ds]
   (let [max-yr-deaths (reduce max (ds/column deaths-ds :year))
         popn-not-age-0 (-> popn-ds
-                         (ds/emap-column :year inc)
-                         (ds/emap-column :age (fn [v] (if (< v 90) (inc v) v)))
-                         (wds/rollup :sum :popn [:gss-code :district :sex :age :year])
-                         (i/query-dataset {:year {:$lte max-yr-deaths}}))]
+                           (ds/emap-column :year inc)
+                           (ds/emap-column :age (fn [v] (if (< v 90) (inc v) v)))
+                           (wds/rollup :sum :popn [:gss-code :district :sex :age :year])
+                           (i/query-dataset {:year {:$lte max-yr-deaths}}))]
     (-> births-ds
         (ds/rename-columns {:births :popn})
         (ds/join-rows popn-not-age-0))))
@@ -26,13 +26,13 @@
       (ds/select-columns [:gss-code :district :sex :age :year :death-rate])))
 
 (defworkflowfn calc-historic-asmr
-    {:witan/name :ccm-mort/calc-historic-asmr
-     :witan/version "1.0"
-     :witan/input-schema {:historic-deaths DeathsSchema
-                          :historic-births BirthsBySexAgeYearSchema
-                          :historic-population HistPopulationSchema} 
-     :witan/output-schema {:historic-asmr HistASMRSchema}} 
-    [{:keys [historic-deaths historic-births historic-population]} _]
-    (->> (create-popn-at-risk historic-population historic-deaths historic-births)
-         (calc-death-rates historic-deaths)
-         (hash-map :historic-asmr)))
+  {:witan/name :ccm-mort/calc-historic-asmr
+   :witan/version "1.0"
+   :witan/input-schema {:historic-deaths DeathsSchema
+                        :historic-births BirthsBySexAgeYearSchema
+                        :historic-population HistPopulationSchema} 
+   :witan/output-schema {:historic-asmr HistASMRSchema}} 
+  [{:keys [historic-deaths historic-births historic-population]} _]
+  (->> (create-popn-at-risk historic-population historic-deaths historic-births)
+       (calc-death-rates historic-deaths)
+       (hash-map :historic-asmr)))

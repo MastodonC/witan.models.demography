@@ -10,11 +10,11 @@
 
 (def migration-data (ld/load-datasets {:domestic-in-migrants
                                        "resources/test_data/migration/bristol_dom_in_mig.csv"
-                                        :domestic-out-migrants
+                                       :domestic-out-migrants
                                        "resources/test_data/migration/bristol_dom_out_mig.csv"
-                                        :international-in-migrants
+                                       :international-in-migrants
                                        "resources/test_data/migration/bristol_inter_in_mig.csv"
-                                        :international-out-migrants
+                                       :international-out-migrants
                                        "resources/test_data/migration/bristol_inter_out_mig.csv"}))
 
 (def net-migration-r (:net-migration (ld/load-dataset
