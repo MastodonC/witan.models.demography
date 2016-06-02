@@ -1,9 +1,7 @@
 (ns witan.models.dem.ccm.fert.hist-asfr-ws
-  (:require [witan.models.dem.ccm.fert.hist-asfr-age :as asfr]
-            [witan.workspace-executor.core :as wex]
+  (:require [witan.workspace-executor.core :as wex]
             [schema.core :as s]
             [witan.models.load-data :as ld]
-            [witan.workspace-api :as wapi]
             [witan.models.dem.ccm.schemas :refer :all]))
 
 ;; GET DATA FOR ROOT NODES

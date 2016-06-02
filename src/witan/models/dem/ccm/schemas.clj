@@ -96,7 +96,6 @@
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intout double]]))
 
 ;; For the mortality component
-
 (def HistPopulationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:popn double]]))
