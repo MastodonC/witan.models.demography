@@ -1,9 +1,11 @@
-(ns witan.models.dem.ccm.mort.calc-hist-asmr
-  (:require [clojure.core.matrix.dataset :as ds]
-            [incanter.core :as i]
-            [witan.models.dem.ccm.schemas :refer :all]
+(ns witan.models.dem.ccm.mort.mortality-mvp
+  (:require [witan.models.dem.ccm.components-functions :as cf]
             [witan.workspace-api :refer [defworkflowfn]]
-            [witan.datasets :as wds]))
+            [witan.datasets :as wds]
+            [witan.models.dem.ccm.schemas :refer :all]
+            [clojure.core.matrix.dataset :as ds]
+            [schema.core :as s]
+            [incanter.core :as i]))
 
 (defn create-popn-at-risk
   [popn-ds deaths-ds births-ds]
@@ -30,9 +32,22 @@
    :witan/version "1.0"
    :witan/input-schema {:historic-deaths DeathsSchema
                         :historic-births BirthsBySexAgeYearSchema
-                        :historic-population HistPopulationSchema} 
-   :witan/output-schema {:historic-asmr HistASMRSchema}} 
+                        :historic-population HistPopulationSchema}
+   :witan/output-schema {:historic-asmr HistASMRSchema}}
   [{:keys [historic-deaths historic-births historic-population]} _]
   (->> (create-popn-at-risk historic-population historic-deaths historic-births)
        (calc-death-rates historic-deaths)
        (hash-map :historic-asmr)))
+
+(defworkflowfn project-asmr
+  {:witan/name :ccm-mort/project-asmr
+   :witan/version "1.0"
+   :witan/input-schema {:historic-asmr HistASMRSchema}
+   :witan/param-schema {:number-of-years-mort s/Int :jumpoff-year-mort s/Int}
+   :witan/output-schema {:initial-projected-mortality-rates ProjFixedASMRSchema}}
+  [{:keys [historic-asmr]} {:keys [number-of-years-mort jumpoff-year-mort]}]
+  {:initial-projected-mortality-rates (cf/jumpoffyr-method-average historic-asmr
+                                                                   :death-rate
+                                                                   :proj-death-rate
+                                                                   number-of-years-mort
+                                                                   jumpoff-year-mort)})
