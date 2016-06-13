@@ -13,18 +13,24 @@
 ;;historic-deaths = deaths at start of R code
 ;;historic-births = historic.mort.age0 in R code
 ;;historic-popn = MYE-Est in R code
-(def hist-asmr-inputs (ld/load-datasets
-                       {:historic-deaths
-                        "resources/test_data/bristol_hist_deaths_mye.csv"
-                        :historic-births
-                        "resources/test_data/bristol_hist_births_mye.csv"
-                        :historic-population
-                        "resources/test_data/bristol_hist_popn_mye.csv"}))
+(def hist-asmr-inputs
+  (-> {:population
+       "resources/test_data/handmade_outputs/bristol_popn_at_risk_2015.csv"
+       :historic-deaths
+       "resources/test_data/bristol_hist_deaths_mye.csv"
+       :historic-births
+       "resources/test_data/bristol_hist_births_mye.csv"
+       :historic-population
+       "resources/test_data/bristol_hist_popn_mye.csv"}
+      ld/load-datasets
+      (clojure.set/rename-keys {:population :population-at-risk})))
 
 ;;Output from R calc-historic-asmr function for comparison
 (def historic-asmr-r (:historic-asmr (ld/load-dataset
                                       :historic-asmr
                                       "resources/test_data/mortality/bristol_historic_asmr.csv")))
+
+(def proj-deaths-r (ds/rename-columns (:deaths plt/data-inputs) {:deaths :deaths-r}))
 
 (deftest calc-historic-asmr-test
   (testing "Death rates are calculated correctly."
@@ -47,8 +53,21 @@
                              (project-asmr params)
                              :initial-projected-mortality-rates)]
       (is (fp-equals? 2.049763E-03
-                      (nth (plt/get-popn projected-asmr :proj-death-rate 0 "F") 0)
+                      (nth (plt/get-popn projected-asmr :death-rate 0 "F") 0)
                       0.000000001))
       (is (fp-equals? 0.2068731
-                      (nth (plt/get-popn projected-asmr :proj-death-rate 90 "M") 0)
+                      (nth (plt/get-popn projected-asmr :death-rate 90 "M") 0)
                       0.0000001)))))
+
+(deftest project-deaths-from-fixed-rates-test
+  (let [proj-deaths-clj (-> hist-asmr-inputs
+                            calc-historic-asmr
+                            (project-asmr params)
+                            project-deaths-from-fixed-rates
+                            :deaths)
+        joined-proj-deaths (wds/join proj-deaths-r proj-deaths-clj
+                                     [:gss-code :sex :age :year])]
+    (is (every? #(fp-equals? (i/sel joined-proj-deaths :rows % :cols :deaths-r)
+                             (i/sel joined-proj-deaths :rows % :cols :deaths)
+                             0.0001)
+                (range (first (:shape joined-proj-deaths)))))))

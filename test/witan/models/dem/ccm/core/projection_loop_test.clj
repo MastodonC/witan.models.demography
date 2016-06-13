@@ -19,7 +19,7 @@
                     "resources/test_data/handmade_outputs/bristol_migration_module_handmade_output.csv"})))
 
 (def params {:first-proj-year 2014
-             :last-proj-year 2015})
+             :last-proj-year 2016})
 
 (def output-2015 (ld/load-datasets
                   {:end-population
@@ -38,7 +38,7 @@
 ;;returns a vector
 (def get-popn (fn
                 ([ds col-name age sex]
-                 (ds/column (i/query-dataset ds {:age age :sex sex}) col-name))                                
+                 (ds/column (i/query-dataset ds {:age age :sex sex}) col-name))
                 ([ds col-name year age sex]
                  (ds/column (i/query-dataset ds {:year year :age age :sex sex}) col-name))))
 

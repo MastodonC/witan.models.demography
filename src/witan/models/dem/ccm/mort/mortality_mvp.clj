@@ -48,6 +48,18 @@
   [{:keys [historic-asmr]} {:keys [number-of-years-mort jumpoff-year-mort]}]
   {:initial-projected-mortality-rates (cf/jumpoffyr-method-average historic-asmr
                                                                    :death-rate
-                                                                   :proj-death-rate
+                                                                   :death-rate
                                                                    number-of-years-mort
                                                                    jumpoff-year-mort)})
+
+(defworkflowfn project-deaths-from-fixed-rates
+  {:witan/name :ccm-mort/project-deaths-fixed-rates
+   :witan/version "1.0"
+   :witan/input-schema {:initial-projected-mortality-rates ProjFixedASMRSchema
+                        :population-at-risk PopulationSchema}
+   :witan/output-schema {:deaths DeathsOutputSchema}}
+  [{:keys [initial-projected-mortality-rates population-at-risk]} _]
+  {:deaths
+   (cf/project-component-fixed-rates population-at-risk
+                                     initial-projected-mortality-rates
+                                     :death-rate :deaths)})

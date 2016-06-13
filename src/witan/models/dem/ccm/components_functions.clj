@@ -4,7 +4,8 @@
             [witan.datasets :as wds]))
 
 ;; Calculate rates/values for alternative ways to project components of change:
-;; 1) Calculate averages for fixed values/rates or trends:
+
+;; Calculate averages for fixed values/rates or trends:
 (defn jumpoffyr-method-average
   "Takes in a dataset with historical data, a column name to be averaged,
   a name to rename the average column, a number of years to average on
@@ -18,6 +19,19 @@
                                  :$lte last-yr-data}})
         (ds/rename-columns {col-to-avg avg-name})
         (wds/rollup :mean avg-name [:gss-code :sex :age]))))
+
+;; Project component for fixed rates:
+(defn project-component-fixed-rates
+  "Takes in a population at risk and fixed rates for a component.
+  Outputs the population at risk with new columns for the rates
+  and the result of applying the rates to that component."
+  [population-at-risk fixed-rates col-fixed-rates  col-result]
+  (-> fixed-rates
+      (wds/join population-at-risk [:gss-code :age :sex])
+      (wds/add-derived-column col-result [col-fixed-rates :popn] *)
+      (ds/select-columns [:gss-code :sex :age :year col-fixed-rates
+                          :popn col-result])))
+
 
 (defn order-ds
   [dataset col-key]

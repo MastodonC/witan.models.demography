@@ -109,4 +109,4 @@
                            [:year s/Int] [:death-rate double]]))
 
 (def ProjFixedASMRSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:proj-death-rate double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:death-rate double]]))
