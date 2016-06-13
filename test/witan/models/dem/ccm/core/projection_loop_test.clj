@@ -18,26 +18,6 @@
                     :net-migration
                     "resources/test_data/handmade_outputs/bristol_migration_module_handmade_output.csv"})))
 
-<<<<<<< ca5e75f523103badf14d7b348bb8b539d4b514b4
-<<<<<<< c150a7a6392cf5e77bea1349dcdf2aae3c6302a2
-<<<<<<< 22fd58dbdb39543a9d612d88c800dd4a5469a669
-<<<<<<< a5c82dedb4fdbf216cbba551bd708ec3752aef6e
-=======
-=======
-<<<<<<< 714670b98acacb981ffe76d96961f120349a7ff5
->>>>>>> Add death proj fn and test.
-<<<<<<< 5c36d251ad3aee473911c68cf70afdb000496529
->>>>>>> Add death proj fn and test.
-=======
-<<<<<<< e95f2578a088f0fe6b38ba469eefbbcc6be28d74
->>>>>>> Add death proj fn and test.
-=======
-(def params {:first-proj-year 2014
-             :last-proj-year 2016})
-
->>>>>>> Add death proj fn and test.
-=======
->>>>>>> Fix issues due to error when rebasing.
 (def output-2015 (ld/load-datasets
                   {:end-population
                    "resources/test_data/handmade_outputs/bristol_end_population_2015.csv"}))
