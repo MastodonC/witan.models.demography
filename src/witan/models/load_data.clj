@@ -164,6 +164,26 @@
   {:column-names (apply-col-names-schema HistASMRSchema csv-data)
    :columns (vec (apply-row-schema HistASMRSchema csv-data))})
 
+(defmethod apply-record-coercion :historic-asfr
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema HistASFRSchema csv-data)
+   :columns (vec (apply-row-schema HistASFRSchema csv-data))})
+
+(defmethod apply-record-coercion :projected-asfr-finalyrfixed
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema ProjFixedASFRSchema csv-data)
+   :columns (vec (apply-row-schema ProjFixedASFRSchema csv-data))})
+
+(defmethod apply-record-coercion :births-age-sex-mother
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema BirthsAgeSexMotherSchema csv-data)
+   :columns (vec (apply-row-schema BirthsAgeSexMotherSchema csv-data))})
+
+(defmethod apply-record-coercion :births-by-sex
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema BirthsBySexSchema csv-data)
+   :columns (vec (apply-row-schema  BirthsBySexSchema csv-data))})
+
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))
