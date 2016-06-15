@@ -15,17 +15,17 @@
 ;; historic-asmr = output of calc historic ASMR fn from R, to use until
 ;;                 a Clojure version exists
 
-;;proj-births-age-sex-mother = output of project.births.from.fixed.rates
+;;proj-births-by-age-sex-mother = output of project.births.from.fixed.rates
 ;;                             fn from R in fertility module, to use
 ;;                             until a Clojure version exists
 
 (def fertility-inputs (ld/load-datasets
                        {:historic-asfr
                         "resources/test_data/fertility/bristol_historic_asfr.csv"
-                        :births-age-sex-mother
+                        :births-by-age-sex-mother
                         "resources/test_data/fertility/bristol_proj_births_age_sex_mother_2015.csv"}))
 
-(def params {:fert-last-yr 2014 :pm (/ 105 205)})
+(def params {:fert-last-yr 2014 :pm (double (/ 105 205))})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; R outputs for comparison ;;
@@ -38,7 +38,7 @@
                            "resources/test_data/fertility/bristol_proj_births_by_sex_2015.csv"}))
 
 (deftest project-asfr-finalyrhist-fixed-test
-  (testing "Fertiliy rates are projected correctly."
+  (testing "Fertility rates are projected correctly."
     (let [proj-asfr-r (-> fertility-outputs-r
                           :projected-asfr-finalyrfixed
                           (ds/rename-columns {:fert-rate :fert-rate-r}))
@@ -58,8 +58,8 @@
                               :births-by-sex
                               (ds/rename-columns {:births :births-r}))
           joined-births-by-sex (-> fertility-inputs
-                                   :births-age-sex-mother
-                                   (combine-into-births-by-sex (:pm params))
+                                   (combine-into-births-by-sex params)
+                                   :births-by-sex
                                    (wds/join births-by-sex-r [:gss-code :sex]))]
       (is (every? #(fp-equals? (i/sel joined-births-by-sex :rows % :cols :births-r)
                                (i/sel joined-births-by-sex :rows % :cols :births)

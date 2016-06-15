@@ -174,7 +174,7 @@
   {:column-names (apply-col-names-schema ProjFixedASFRSchema csv-data)
    :columns (vec (apply-row-schema ProjFixedASFRSchema csv-data))})
 
-(defmethod apply-record-coercion :births-age-sex-mother
+(defmethod apply-record-coercion :births-by-age-sex-mother
   [data-info csv-data]
   {:column-names (apply-col-names-schema BirthsAgeSexMotherSchema csv-data)
    :columns (vec (apply-row-schema BirthsAgeSexMotherSchema csv-data))})

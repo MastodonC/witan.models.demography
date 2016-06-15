@@ -39,13 +39,23 @@
                      (ds/select-columns [:gss-code :sex :births]))]
     (ds/join-rows births-m births-f)))
 
-(defn combine-into-births-by-sex
-  "Takes a dataset with births by age and sex of mother, and pm, the fraction
-   of births that are male (from 0-1)"
-  [births-by-agesex pm]
-  (-> births-by-agesex
-      (wds/rollup :sum :births [:gss-code])
-      (wds/add-derived-column :m [:births] (fn [b] (* pm b)))
-      (wds/add-derived-column :f [:births] (fn [b] (* (- 1 pm) b)))
-      (ds/select-columns [:gss-code :m :f])
-      gather-births-by-sex))
+(defworkflowfn combine-into-births-by-sex
+  "Takes dataset of historic age specific fertility rates, and parameter
+   for the last year of fertility data. Returns dataset with projected
+   age specific fertility rates, calculated using the jumpoff year average
+   method (see docs)."
+  {:witan/name :ccm-fert/combine-into-births-by-sex
+   :witan/version "1.0"
+   :witan/input-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
+   :witan/param-schema {:pm double}
+   :witan/output-schema {:births-by-sex BirthsBySexSchema}}
+  [{:keys [births-by-age-sex-mother]} {:keys [pm]}]
+  (let [births-by-sex (-> births-by-age-sex-mother
+                          (wds/rollup :sum :births [:gss-code])
+                          (wds/add-derived-column :m [:births]
+                                                  (fn [b] (double (* pm b))))
+                          (wds/add-derived-column :f [:births]
+                                                  (fn [b] (double (* (- 1 pm) b))))
+                          (ds/select-columns [:gss-code :m :f])
+                          gather-births-by-sex)]
+    {:births-by-sex births-by-sex}))
