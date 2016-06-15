@@ -18,9 +18,6 @@
                     :net-migration
                     "resources/test_data/handmade_outputs/bristol_migration_module_handmade_output.csv"})))
 
-(def params {:first-proj-year 2014
-             :last-proj-year 2016})
-
 (def output-2015 (ld/load-datasets
                   {:end-population
                    "resources/test_data/handmade_outputs/bristol_end_population_2015.csv"}))

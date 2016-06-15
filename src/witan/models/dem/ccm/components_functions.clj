@@ -25,7 +25,7 @@
   "Takes in a population at risk and fixed rates for a component.
   Outputs the population at risk with new columns for the rates
   and the result of applying the rates to that component."
-  [population-at-risk fixed-rates col-fixed-rates  col-result]
+  [population-at-risk fixed-rates col-fixed-rates col-result]
   (-> fixed-rates
       (wds/join population-at-risk [:gss-code :age :sex])
       (wds/add-derived-column col-result [col-fixed-rates :popn] *)

@@ -69,5 +69,5 @@
                                      [:gss-code :sex :age :year])]
     (is (every? #(fp-equals? (i/sel joined-proj-deaths :rows % :cols :deaths-r)
                              (i/sel joined-proj-deaths :rows % :cols :deaths)
-                             0.0001)
+                             0.0000001)
                 (range (first (:shape joined-proj-deaths)))))))
