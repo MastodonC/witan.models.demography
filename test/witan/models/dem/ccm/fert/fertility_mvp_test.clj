@@ -63,5 +63,5 @@
                                    (wds/join births-by-sex-r [:gss-code :sex]))]
       (is (every? #(fp-equals? (i/sel joined-births-by-sex :rows % :cols :births-r)
                                (i/sel joined-births-by-sex :rows % :cols :births)
-                               0.0000000001)
+                               0.00000001)
                   (range (first (:shape joined-births-by-sex))))))))
