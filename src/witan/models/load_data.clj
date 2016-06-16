@@ -184,6 +184,16 @@
   {:column-names (apply-col-names-schema BirthsBySexSchema csv-data)
    :columns (vec (apply-row-schema  BirthsBySexSchema csv-data))})
 
+(defmethod apply-record-coercion :base-asfr
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema BaseAsfrSchema csv-data)
+   :columns (vec (apply-row-schema BaseAsfrSchema csv-data))})
+
+(defmethod apply-record-coercion :historic-total-births
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema BirthsSchema csv-data)
+   :columns (vec (apply-row-schema BirthsSchema csv-data))})
+
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))

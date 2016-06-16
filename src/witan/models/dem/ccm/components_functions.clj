@@ -29,9 +29,7 @@
   (-> fixed-rates
       (wds/join population-at-risk [:gss-code :age :sex])
       (wds/add-derived-column col-result [col-fixed-rates :popn] *)
-      (ds/select-columns [:gss-code :sex :age :year col-fixed-rates
-                          :popn col-result])))
-
+      (ds/select-columns [:gss-code :sex :age :year :popn col-result])))
 
 (defn order-ds
   [dataset col-key]

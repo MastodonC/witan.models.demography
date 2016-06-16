@@ -7,7 +7,7 @@
             [schema.core :as s]
             [incanter.core :as i]))
 
-(defn create-popn-at-risk
+(defn create-popn-at-risk-death
   "Creates population at risk for calculating historic age specific mortality rates.
   Takes datasets with population, deaths, and births. Returns a new dataset with
   population at risk in the :popn column. The population at risk is the births data
@@ -47,7 +47,7 @@
                         :historic-population HistPopulationSchema}
    :witan/output-schema {:historic-asmr HistASMRSchema}}
   [{:keys [historic-deaths historic-births historic-population]} _]
-  (->> (create-popn-at-risk historic-population historic-deaths historic-births)
+  (->> (create-popn-at-risk-death historic-population historic-deaths historic-births)
        (calc-death-rates historic-deaths)
        (hash-map :historic-asmr)))
 
