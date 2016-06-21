@@ -7,9 +7,9 @@
             [witan.datasets :as wds]))
 
 ;; Load testing data
-(def test-data-paths {:births-data "resources/test_data/bristol_births_data.csv"
-                      :at-risk-popn "resources/test_data/bristol_denominators.csv"
-                      :hist-births-est "resources/test_data/bristol_hist_births_est.csv"})
+(def test-data-paths {:births-data "dev-resources/test_data/bristol_births_data.csv"
+                      :at-risk-popn "dev-resources/test_data/bristol_denominators.csv"
+                      :hist-births-est "dev-resources/test_data/bristol_hist_births_est.csv"})
 
 (def data-inputs (ld/load-datasets test-data-paths))
 

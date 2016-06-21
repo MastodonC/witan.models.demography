@@ -11,5 +11,6 @@
                  [kixi/incanter-core "1.9.1-p0-3bf644a"]
                  [witan.workspace-api "0.1.4"]]
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}}
+  :profiles {:dev {:resource-paths ["dev-resources"]}
+             :uberjar {:aot :all}}
   :exclusions [prismatic/schema org.clojure/clojure])

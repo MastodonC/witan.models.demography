@@ -6,7 +6,7 @@
             [witan.models.dem.ccm.schemas :refer [BirthsDataSchema]]))
 
 ;;Test data
-(def test-file-1 "resources/test_data/bristol_births_data.csv") ;;clean data
+(def test-file-1 "dev-resources/test_data/bristol_births_data.csv") ;;clean data
 
 (deftest load-dataset-test
   (let [data-map (load-dataset :births-data test-file-1)

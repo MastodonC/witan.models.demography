@@ -20,13 +20,13 @@
 ;;                             until a Clojure version exists
 
 (def fertility-inputs (-> {:base-asfr
-                           "resources/test_data/fertility/bristol_base_ASFR.csv"
+                           "dev-resources/test_data/fertility/bristol_base_ASFR.csv"
                            :historic-total-births
-                           "resources/test_data/bristol_hist_births_mye.csv"
+                           "dev-resources/test_data/bristol_hist_births_mye.csv"
                            :historic-population
-                           "resources/test_data/bristol_hist_popn_mye.csv"
+                           "dev-resources/test_data/bristol_hist_popn_mye.csv"
                            :population
-                           "resources/test_data/handmade_outputs/bristol_popn_at_risk_2015.csv"}
+                           "dev-resources/test_data/handmade_outputs/bristol_popn_at_risk_2015.csv"}
                           ld/load-datasets
                           (clojure.set/rename-keys {:population :population-at-risk})))
 
@@ -38,13 +38,13 @@
 
 (def fertility-outputs-r (ld/load-datasets
                           {:projected-asfr-finalyrfixed
-                           "resources/test_data/fertility/bristol_initial_projected_fertility_rates_2015.csv"
+                           "dev-resources/test_data/fertility/bristol_initial_projected_fertility_rates_2015.csv"
                            :births-by-sex
-                           "resources/test_data/fertility/bristol_proj_births_by_sex_2015.csv"
+                           "dev-resources/test_data/fertility/bristol_proj_births_by_sex_2015.csv"
                            :historic-asfr
-                           "resources/test_data/fertility/bristol_historic_asfr.csv"
+                           "dev-resources/test_data/fertility/bristol_historic_asfr.csv"
                            :births-by-age-sex-mother
-                           "resources/test_data/fertility/bristol_proj_births_age_sex_mother_2015.csv"}))
+                           "dev-resources/test_data/fertility/bristol_proj_births_age_sex_mother_2015.csv"}))
 
 (deftest calculate-historic-asfr-test
   (testing "Historic ASFR calculation"

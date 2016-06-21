@@ -10,17 +10,17 @@
 (def data-inputs (prepare-inputs
                   (ld/load-datasets
                    {:population
-                    "resources/test_data/bristol_hist_popn_est.csv"
+                    "dev-resources/test_data/bristol_hist_popn_est.csv"
                     :births
-                    "resources/test_data/handmade_outputs/bristol_fertility_module_handmade_output.csv"
+                    "dev-resources/test_data/handmade_outputs/bristol_fertility_module_handmade_output.csv"
                     :deaths
-                    "resources/test_data/handmade_outputs/bristol_mortality_module_handmade_output.csv"
+                    "dev-resources/test_data/handmade_outputs/bristol_mortality_module_handmade_output.csv"
                     :net-migration
-                    "resources/test_data/handmade_outputs/bristol_migration_module_handmade_output.csv"})))
+                    "dev-resources/test_data/handmade_outputs/bristol_migration_module_handmade_output.csv"})))
 
 (def output-2015 (ld/load-datasets
                   {:end-population
-                   "resources/test_data/handmade_outputs/bristol_end_population_2015.csv"}))
+                   "dev-resources/test_data/handmade_outputs/bristol_end_population_2015.csv"}))
 
 ;; Useful fns:
 (defn- same-coll? [coll1 coll2]

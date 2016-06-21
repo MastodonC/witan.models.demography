@@ -9,17 +9,17 @@
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
 (def migration-data (ld/load-datasets {:domestic-in-migrants
-                                       "resources/test_data/migration/bristol_dom_in_mig.csv"
+                                       "dev-resources/test_data/migration/bristol_dom_in_mig.csv"
                                        :domestic-out-migrants
-                                       "resources/test_data/migration/bristol_dom_out_mig.csv"
+                                       "dev-resources/test_data/migration/bristol_dom_out_mig.csv"
                                        :international-in-migrants
-                                       "resources/test_data/migration/bristol_inter_in_mig.csv"
+                                       "dev-resources/test_data/migration/bristol_inter_in_mig.csv"
                                        :international-out-migrants
-                                       "resources/test_data/migration/bristol_inter_out_mig.csv"}))
+                                       "dev-resources/test_data/migration/bristol_inter_out_mig.csv"}))
 
 (def net-migration-r (:net-migration (ld/load-dataset
                                       :net-migration
-                                      "resources/test_data/handmade_outputs/bristol_migration_module_handmade_output.csv")))
+                                      "dev-resources/test_data/handmade_outputs/bristol_migration_module_handmade_output.csv")))
 
 (def params {:number-of-years 12 :jumpoff-year 2015})
 
