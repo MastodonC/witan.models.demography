@@ -9,27 +9,27 @@
 
 ;;Historical migration data
 (def migration-data (ld/load-datasets {:domestic-in-migrants
-                                       "resources/test_data/migration/bristol_dom_in_mig.csv"
+                                       "test_data/migration/bristol_dom_in_mig.csv"
                                        :domestic-out-migrants
-                                       "resources/test_data/migration/bristol_dom_out_mig.csv"
+                                       "test_data/migration/bristol_dom_out_mig.csv"
                                        :international-in-migrants
-                                       "resources/test_data/migration/bristol_inter_in_mig.csv"
+                                       "test_data/migration/bristol_inter_in_mig.csv"
                                        :international-out-migrants
-                                       "resources/test_data/migration/bristol_inter_out_mig.csv"}))
+                                       "test_data/migration/bristol_inter_out_mig.csv"}))
 
 ;;Following 4 datasets are averages of historical migration data calculated in the R model
 ;;using the equivalent of the jumpoffyr-method-average function
 (def dom-in-averages (ld/load-dataset :dom-in-averages
-                                      "resources/test_data/migration/bristol_dom_in_avg.csv"))
+                                      "test_data/migration/bristol_dom_in_avg.csv"))
 
 (def dom-out-averages (ld/load-dataset :dom-out-averages
-                                       "resources/test_data/migration/bristol_dom_out_avg.csv"))
+                                       "test_data/migration/bristol_dom_out_avg.csv"))
 
 (def inter-in-averages (ld/load-dataset :inter-in-averages
-                                        "resources/test_data/migration/bristol_inter_in_avg.csv"))
+                                        "test_data/migration/bristol_inter_in_avg.csv"))
 
 (def inter-out-averages (ld/load-dataset :inter-out-averages
-                                         "resources/test_data/migration/bristol_inter_out_avg.csv"))
+                                         "test_data/migration/bristol_inter_out_avg.csv"))
 
 (deftest jumpoffyr-method-average-test
   (testing "The function return the averages on the right year period"

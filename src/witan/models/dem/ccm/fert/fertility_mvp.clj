@@ -4,7 +4,76 @@
             [clojure.core.matrix.dataset :as ds]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
+            [incanter.core :as i]
             [schema.core :as s]))
+
+(defn create-popn-at-risk-birth
+  "Creates a population at risk for calculating historic age specific
+  fertility rates. Takes in the historic population and the base year
+  for the fertility projection."
+  [historic-population fert-last-yr]
+  (i/query-dataset historic-population
+                   {:year (dec fert-last-yr)}))
+
+(defn calc-estimated-births
+  "Takes in the population at risk and the dataset for base age
+  specific fertility rates data to calculate the estimated births
+  which is totalled by gss-code and year."
+  [popn-at-risk base-asfr]
+  (-> base-asfr
+      (wds/join popn-at-risk [:gss-code :sex :age])
+      (wds/add-derived-column :births [:popn :base-fert-rate]
+                              (fn [p b] (* ^double p b)))
+      (wds/add-derived-column :year [:year] inc)
+      (wds/rollup :sum :births [:gss-code :year])
+      (ds/rename-columns {:births :estimated-births})))
+
+(defn calc-actual-births
+  "Takes in the historic data of total births, filters for
+  the base year and totals the number of births for that year
+  and gss-code."
+  [historic-total-births fert-last-yr]
+  (-> historic-total-births
+      (i/query-dataset {:year fert-last-yr})
+      (wds/rollup :sum :births [:gss-code :year])
+      (ds/rename-columns {:births :actual-births})))
+
+(defn calc-scaling-factors
+  "Takes in the estimated and actual births. Divides them to get
+  the scaling factors for each year and gss-code."
+  [actual-births estimated-births]
+  (-> estimated-births
+      (wds/join actual-births [:gss-code :year])
+      (wds/add-derived-column :scaling-factor [:actual-births
+                                               :estimated-births]
+                              (fn [a e] (wds/safe-divide [a e])))
+      (ds/select-columns [:gss-code :year :scaling-factor])))
+
+(defworkflowfn calculate-historic-asfr
+  "Takes in three datasets: the historic total births, the historic
+   population, the base age-specific fertility rate and the base year.
+   Returns a dataset containing the historic age specific fertility rates."
+  {:witan/name :ccm-fert/calc-hist-asfr
+   :witan/version "1.0"
+   :witan/input-schema {:base-asfr BaseAsfrSchema
+                        :historic-population HistPopulationSchema
+                        :historic-total-births BirthsSchema}
+   :witan/param-schema {:fert-last-yr s/Int}
+   :witan/output-schema {:historic-asfr HistASFRSchema}}
+  [{:keys [base-asfr historic-population historic-total-births]}
+   {:keys [fert-last-yr]}]
+  (let [estimated-births (-> historic-population
+                             (create-popn-at-risk-birth fert-last-yr)
+                             (calc-estimated-births base-asfr))]
+    {:historic-asfr
+     (-> historic-total-births
+         (calc-actual-births fert-last-yr)
+         (calc-scaling-factors estimated-births)
+         (wds/join base-asfr [:gss-code])
+         (wds/add-derived-column :fert-rate [:scaling-factor
+                                             :base-fert-rate]
+                                 (fn [s b] (* ^double s b)))
+         (ds/select-columns [:gss-code :sex :age :year :fert-rate]))}))
 
 (defworkflowfn project-asfr-finalyrhist-fixed
   "Takes dataset of historic age specific fertility rates, and parameter
@@ -17,16 +86,33 @@
    :witan/param-schema {:fert-last-yr s/Int}
    :witan/output-schema {:initial-projected-fertility-rates ProjFixedASFRSchema}}
   [{:keys [historic-asfr]} {:keys [fert-last-yr]}]
-  {:initial-projected-fertility-rates (cf/jumpoffyr-method-average historic-asfr
-                                                                   :fert-rate
-                                                                   :fert-rate
-                                                                   1
-                                                                   (inc fert-last-yr))})
+  {:initial-projected-fertility-rates
+   (cf/jumpoffyr-method-average historic-asfr
+                                :fert-rate
+                                :fert-rate
+                                1
+                                (inc fert-last-yr))})
+
+(defworkflowfn project-births-from-fixed-rates
+  "Takes a dataset with population at risk from the current year of the projection
+  loop and another dataset with fixed fertility rates for the population. Returns a
+  dataset with a column of births, which are the product of popn at risk & the rates"
+  {:witan/name :ccm-fert/project-births-fixed-rates
+   :witan/version "1.0"
+   :witan/input-schema {:initial-projected-fertility-rates ProjFixedASFRSchema
+                        :population-at-risk PopulationSchema}
+   :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}}
+  [{:keys [initial-projected-fertility-rates population-at-risk]} _]
+  (let [projected-births (-> population-at-risk
+                             (cf/project-component-fixed-rates
+                              initial-projected-fertility-rates
+                              :fert-rate :births))]
+    {:births-by-age-sex-mother projected-births}))
 
 (defn- gather-births-by-sex
   "Given a dataset with columns :gss-code, :m, and :f (where :m and :f are
-   male and female births), gathers births data into :births column and 
-   sex into :sex column, returning a new dataset. Standin for a universal 
+   male and female births), gathers births data into :births column and
+   sex into :sex column, returning a new dataset. Standin for a universal
    gather function in witan.datasets similar to gather in tidyR"
   [births-by-mf]
   (let [births-f (-> births-by-mf

@@ -17,15 +17,16 @@
   ([filename]
    (load-csv filename nil))
   ([filename eol]
-   (when (.exists (io/as-file filename))
-     (let [normalised-data (-> (slurp filename)
-                               (str/replace "\r\n" "\n")
-                               (str/replace "\r" "\n"))
-           parsed-csv (csv/parse-csv normalised-data :end-of-line eol)
-           parsed-data (rest parsed-csv)
-           headers (map str/lower-case (first parsed-csv))]
-       {:column-names (custom-keyword headers)
-        :columns (vec parsed-data)}))))
+   (let [file (io/resource filename)]
+     (when (.exists (io/as-file file))
+       (let [normalised-data (-> (slurp file)
+                                 (str/replace "\r\n" "\n")
+                                 (str/replace "\r" "\n"))
+             parsed-csv (csv/parse-csv normalised-data :end-of-line eol)
+             parsed-data (rest parsed-csv)
+             headers (map str/lower-case (first parsed-csv))]
+         {:column-names (custom-keyword headers)
+          :columns (vec parsed-data)})))))
 
 (defn record-coercion
   "Coerce numbers by matching them to the
@@ -183,6 +184,16 @@
   [data-info csv-data]
   {:column-names (apply-col-names-schema BirthsBySexSchema csv-data)
    :columns (vec (apply-row-schema  BirthsBySexSchema csv-data))})
+
+(defmethod apply-record-coercion :base-asfr
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema BaseAsfrSchema csv-data)
+   :columns (vec (apply-row-schema BaseAsfrSchema csv-data))})
+
+(defmethod apply-record-coercion :historic-total-births
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema BirthsSchema csv-data)
+   :columns (vec (apply-row-schema BirthsSchema csv-data))})
 
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]

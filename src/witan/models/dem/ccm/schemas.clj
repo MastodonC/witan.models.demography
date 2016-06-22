@@ -35,13 +35,17 @@
   (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:deaths double]]))
 
+(def BirthsSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:district s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:births double]]))
+
 ;;For core CCM projection loop using fert/mort/mig inputs from files
 (def BirthsBySexSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:births double]]))
 
 (def DeathsOutputSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:death-rate double] [:popn double] [:deaths double]]))
+                           [:deaths double]]))
 
 (def NetMigrationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig double]]))
@@ -122,5 +126,8 @@
                            [:fert-rate double]]))
 (def BirthsAgeSexMotherSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:popn double]
-                           [:births double]]))
+                           [:year s/Int] [:births double]]))
+
+(def BaseAsfrSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:base-fert-rate double]]))
