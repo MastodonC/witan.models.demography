@@ -15,20 +15,20 @@
 ;;historic-popn = MYE-Est in R code
 (def hist-asmr-inputs
   (-> {:population
-       "dev-resources/test_data/handmade_outputs/bristol_popn_at_risk_2015.csv"
+       "test_data/handmade_outputs/bristol_popn_at_risk_2015.csv"
        :historic-deaths
-       "dev-resources/test_data/bristol_hist_deaths_mye.csv"
+       "test_data/bristol_hist_deaths_mye.csv"
        :historic-births
-       "dev-resources/test_data/bristol_hist_births_mye.csv"
+       "test_data/bristol_hist_births_mye.csv"
        :historic-population
-       "dev-resources/test_data/bristol_hist_popn_mye.csv"}
+       "test_data/bristol_hist_popn_mye.csv"}
       ld/load-datasets
       (clojure.set/rename-keys {:population :population-at-risk})))
 
 ;;Output from R calc-historic-asmr function for comparison
 (def historic-asmr-r (:historic-asmr (ld/load-dataset
                                       :historic-asmr
-                                      "dev-resources/test_data/mortality/bristol_historic_asmr.csv")))
+                                      "test_data/mortality/bristol_historic_asmr.csv")))
 
 (def proj-deaths-r (ds/rename-columns (:deaths plt/data-inputs) {:deaths :deaths-r}))
 
