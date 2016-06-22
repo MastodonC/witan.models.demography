@@ -16,8 +16,9 @@
                    {:year (dec fert-last-yr)}))
 
 (defn calc-estimated-births
-  "Takes in the population at risk and the dataset for base age specific
-  fertility rates data to calculate the estimated births."
+  "Takes in the population at risk and the dataset for base age
+  specific fertility rates data to calculate the estimated births
+  which is totalled by gss-code and year."
   [popn-at-risk base-asfr]
   (-> base-asfr
       (wds/join popn-at-risk [:gss-code :sex :age])
@@ -29,7 +30,7 @@
 
 (defn calc-actual-births
   "Takes in the historic data of total births, filters for
-  the base year and groups the number of births for that year
+  the base year and totals the number of births for that year
   and gss-code."
   [historic-total-births fert-last-yr]
   (-> historic-total-births
@@ -105,8 +106,7 @@
   (let [projected-births (-> population-at-risk
                              (cf/project-component-fixed-rates
                               initial-projected-fertility-rates
-                              :fert-rate :births)
-                             (ds/select-columns [:gss-code :sex :age :year :births]))]
+                              :fert-rate :births))]
     {:births-by-age-sex-mother projected-births}))
 
 (defn- gather-births-by-sex

@@ -45,7 +45,7 @@
 
 (def DeathsOutputSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:popn double] [:deaths double]]))
+                           [:deaths double]]))
 
 (def NetMigrationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig double]]))
