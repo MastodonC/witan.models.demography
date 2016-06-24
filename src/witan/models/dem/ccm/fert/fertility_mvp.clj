@@ -9,20 +9,31 @@
 
 (defn create-popn-at-risk-birth
   "Creates a population at risk for calculating historic age specific
-  fertility rates. Takes in the historic population and the base year
-  for the fertility projection."
-  [historic-population fert-last-yr]
+  fertility rates. Takes in the historic population and a base year."
+  [historic-population base-year]
   (i/query-dataset historic-population
-                   {:year (dec fert-last-yr)}))
+                   {:year (dec base-year)}))
+
+(defn calc-asfr-birth-data-yr
+  "Takes the population at risk for the birth data year and ONS
+  projections for births by age of mother. Returns fertility
+  rates for the birth data year."
+  [popn-at-risk-birth-data-yr ons-proj-births-by-age-mother]
+  (-> ons-proj-births-by-age-mother
+      (wds/join popn-at-risk-birth-data-yr [:gss-code :sex :age])
+      (wds/add-derived-column :births [:births] (fn [b] (or b 0.0)))
+      (wds/add-derived-column :fert-rate-birth-data-yr [:births :popn]
+                              (fn [b p] (wds/safe-divide [b p])))
+      (ds/select-columns [:gss-code :sex :age :fert-rate-birth-data-yr])))
 
 (defn calc-estimated-births
-  "Takes in the population at risk and the dataset for base age
-  specific fertility rates data to calculate the estimated births
-  which is totalled by gss-code and year."
-  [popn-at-risk base-asfr]
-  (-> base-asfr
-      (wds/join popn-at-risk [:gss-code :sex :age])
-      (wds/add-derived-column :births [:popn :base-fert-rate]
+  "Takes in the population at risk for fert-last-yr and the dataset
+  with asfr for the last year of the birth data, to calculate the
+  estimated births which is totalled by gss-code and year."
+  [popn-at-risk-fert-last-yr asfr-birth-data-yr]
+  (-> asfr-birth-data-yr
+      (wds/join popn-at-risk-fert-last-yr [:gss-code :sex :age])
+      (wds/add-derived-column :births [:popn :fert-rate-birth-data-yr]
                               (fn [p b] (* ^double p b)))
       (wds/add-derived-column :year [:year] inc)
       (wds/rollup :sum :births [:gss-code :year])
@@ -49,30 +60,44 @@
                               (fn [a e] (wds/safe-divide [a e])))
       (ds/select-columns [:gss-code :year :scaling-factor])))
 
+(defn calc-scaled-fert-rates
+  "Takes in scaling factor and base fertility rates to
+  return the scaled fertility rates."
+  [scaling-factors asfr-birth-data-yr]
+  (-> scaling-factors
+      (wds/join asfr-birth-data-yr [:gss-code])
+      (wds/add-derived-column :fert-rate [:scaling-factor
+                                          :fert-rate-birth-data-yr]
+                              (fn [s b] (* ^double s b)))))
+
 (defworkflowfn calculate-historic-asfr
   "Takes in three datasets: the historic total births, the historic
    population, the base age-specific fertility rate and the base year.
    Returns a dataset containing the historic age specific fertility rates."
   {:witan/name :ccm-fert/calc-hist-asfr
    :witan/version "1.0"
-   :witan/input-schema {:base-asfr BaseAsfrSchema
+   :witan/input-schema {:ons-proj-births-by-age-mother BirthsAgeSexMotherSchema
                         :historic-population HistPopulationSchema
                         :historic-total-births BirthsSchema}
    :witan/param-schema {:fert-last-yr s/Int}
    :witan/output-schema {:historic-asfr HistASFRSchema}}
-  [{:keys [base-asfr historic-population historic-total-births]}
+  [{:keys [base-asfr ons-proj-births-by-age-mother historic-population historic-total-births]}
    {:keys [fert-last-yr]}]
-  (let [estimated-births (-> historic-population
-                             (create-popn-at-risk-birth fert-last-yr)
-                             (calc-estimated-births base-asfr))]
+  (let [birth-data-yr (reduce max (ds/column
+                                   ons-proj-births-by-age-mother :year))
+        popn-at-risk-birth-data-yr (-> historic-population
+                                       (create-popn-at-risk-birth birth-data-yr)
+                                       (ds/select-columns
+                                        [:gss-code :sex :age :popn]))
+        asfr-birth-data-yr (calc-asfr-birth-data-yr popn-at-risk-birth-data-yr
+                                                    ons-proj-births-by-age-mother)
+        popn-at-risk-fert-proj-base-yr (create-popn-at-risk-birth historic-population fert-last-yr)
+        estimated-births (calc-estimated-births popn-at-risk-fert-proj-base-yr asfr-birth-data-yr)]
     {:historic-asfr
      (-> historic-total-births
          (calc-actual-births fert-last-yr)
          (calc-scaling-factors estimated-births)
-         (wds/join base-asfr [:gss-code])
-         (wds/add-derived-column :fert-rate [:scaling-factor
-                                             :base-fert-rate]
-                                 (fn [s b] (* ^double s b)))
+         (calc-scaled-fert-rates asfr-birth-data-yr)
          (ds/select-columns [:gss-code :sex :age :year :fert-rate]))}))
 
 (defworkflowfn project-asfr-finalyrhist-fixed
@@ -103,10 +128,10 @@
                         :population-at-risk PopulationSchema}
    :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}}
   [{:keys [initial-projected-fertility-rates population-at-risk]} _]
-  (let [projected-births (-> population-at-risk
-                             (cf/project-component-fixed-rates
-                              initial-projected-fertility-rates
-                              :fert-rate :births))]
+  (let [projected-births (cf/project-component-fixed-rates
+                          population-at-risk
+                          initial-projected-fertility-rates
+                          :fert-rate :births)]
     {:births-by-age-sex-mother projected-births}))
 
 (defn- gather-births-by-sex

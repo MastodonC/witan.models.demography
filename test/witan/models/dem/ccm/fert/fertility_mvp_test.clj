@@ -19,8 +19,8 @@
 ;;                             fn from R in fertility module, to use
 ;;                             until a Clojure version exists
 
-(def fertility-inputs (-> {:base-asfr
-                           "test_data/fertility/bristol_base_ASFR.csv"
+(def fertility-inputs (-> {:ons-proj-births-by-age-mother
+                           "test_data/fertility/bristol_ons_proj_births_age_mother.csv"
                            :historic-total-births
                            "test_data/bristol_hist_births_mye.csv"
                            :historic-population

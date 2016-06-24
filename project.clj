@@ -7,7 +7,6 @@
                  [prismatic/schema "1.1.0"]
                  [clojure-csv/clojure-csv "2.0.1"]
                  [net.mikera/core.matrix "0.51.0"]
-                 [witan.workspace-executor "0.1.3"]
                  [kixi/incanter-core "1.9.1-p0-3bf644a"]
                  [witan.workspace-api "0.1.4"]]
   :target-path "target/%s"

@@ -127,7 +127,3 @@
 (def BirthsAgeSexMotherSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:births double]]))
-
-(def BaseAsfrSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:base-fert-rate double]]))
