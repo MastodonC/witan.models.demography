@@ -13,13 +13,13 @@
 ;;;;;;;;;;;;;;;;;
 
 (def fertility-inputs (-> {:ons-proj-births-by-age-mother
-                           "test_data/fertility/bristol_ons_proj_births_age_mother.csv"
+                           "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
                            :historic-total-births
-                           "test_data/bristol_hist_births_mye.csv"
+                           "test_data/model_inputs/fert/bristol_hist_births_mye.csv"
                            :historic-population
-                           "test_data/bristol_hist_popn_mye.csv"
-                           :population
-                           "test_data/handmade_outputs/bristol_popn_at_risk_2015.csv"}
+                           "test_data/model_inputs/bristol_hist_popn_mye.csv"
+                           :population ;;this actually comes from the proj loop but for test use this csv
+                           "test_data/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"}
                           ld/load-datasets
                           (clojure.set/rename-keys {:population :population-at-risk})))
 
@@ -31,13 +31,13 @@
 
 (def fertility-outputs-r (ld/load-datasets
                           {:projected-asfr-finalyrfixed
-                           "test_data/fertility/bristol_initial_projected_fertility_rates_2015.csv"
-                           :births-by-sex
-                           "test_data/fertility/bristol_proj_births_by_sex_2015.csv"
+                           "test_data/r_outputs_for_testing/fert/bristol_initial_proj_asfr_finalyrfixed_2015.csv"
+                           :births
+                           "test_data/r_outputs_for_testing/fert/bristol_fertility_module_r_output_2015.csv"
                            :historic-asfr
-                           "test_data/fertility/bristol_historic_asfr.csv"
+                           "test_data/r_outputs_for_testing/fert/bristol_historic_asfr.csv"
                            :births-by-age-sex-mother
-                           "test_data/fertility/bristol_proj_births_age_sex_mother_2015.csv"}))
+                           "test_data/r_outputs_for_testing/fert/bristol_proj_births_age_sex_mother_2015.csv"}))
 
 (deftest calculate-historic-asfr-test
   (testing "Historic ASFR calculation"
@@ -87,14 +87,14 @@
 (deftest combine-into-births-by-sex-test
   (testing "Births by sex have been gathered correctly & match R output"
     (let [births-by-sex-r (-> fertility-outputs-r
-                              :births-by-sex
+                              :births
                               (ds/rename-columns {:births :births-r}))
           joined-births-by-sex (-> fertility-inputs
                                    (calculate-historic-asfr params)
                                    (project-asfr-finalyrhist-fixed params)
                                    project-births-from-fixed-rates
                                    (combine-into-births-by-sex params)
-                                   :births-by-sex
+                                   :births
                                    (wds/join births-by-sex-r [:gss-code :sex]))]
       (is (every? #(fp-equals? (i/sel joined-births-by-sex :rows % :cols :births-r)
                                (i/sel joined-births-by-sex :rows % :cols :births)

@@ -159,7 +159,7 @@
    :witan/version "1.0"
    :witan/input-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
    :witan/param-schema {:pm double}
-   :witan/output-schema {:births-by-sex BirthsBySexSchema}}
+   :witan/output-schema {:births BirthsBySexSchema}}
   [{:keys [births-by-age-sex-mother]} {:keys [pm]}]
   (let [births-by-sex (-> births-by-age-sex-mother
                           (wds/rollup :sum :births [:gss-code])
@@ -169,4 +169,4 @@
                                                   (fn [b] (double (* (- 1 pm) b))))
                           (ds/select-columns [:gss-code :m :f])
                           gather-births-by-sex)]
-    {:births-by-sex births-by-sex}))
+    {:births births-by-sex}))
