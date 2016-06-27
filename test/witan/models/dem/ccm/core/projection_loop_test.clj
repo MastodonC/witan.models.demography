@@ -10,17 +10,17 @@
 (def data-inputs (prepare-inputs
                   (ld/load-datasets
                    {:population
-                    "test_data/bristol_hist_popn_est.csv"
+                    "test_data/model_inputs/core/bristol_hist_popn_est.csv"
                     :births
-                    "test_data/handmade_outputs/bristol_fertility_module_handmade_output.csv"
+                    "test_data/r_outputs_for_testing/fert/bristol_fertility_module_r_output_2015.csv"
                     :deaths
-                    "test_data/handmade_outputs/bristol_mortality_module_handmade_output.csv"
+                    "test_data/r_outputs_for_testing/mort/bristol_mortality_module_r_output_2015.csv"
                     :net-migration
-                    "test_data/handmade_outputs/bristol_migration_module_handmade_output.csv"})))
+                    "test_data/r_outputs_for_testing/mig/bristol_migration_module_r_output_2015.csv"})))
 
 (def output-2015 (ld/load-datasets
                   {:end-population
-                   "test_data/handmade_outputs/bristol_end_population_2015.csv"}))
+                   "test_data/r_outputs_for_testing/core/bristol_end_population_2015.csv"}))
 
 ;; Useful fns:
 (defn- same-coll? [coll1 coll2]
@@ -71,7 +71,7 @@
           latest-yr (:loop-year births-added)
           latest-newborns (i/query-dataset popn-with-births {:year latest-yr :age 0})]
       (is (= 2 (first (:shape latest-newborns))))
-      (is (fp-equals? (+ 3135.891642 3292.686224)
+      (is (fp-equals? (+ 3189.57438270303 3349.0531018318)
                       (#(apply + (ds/column % :popn)) latest-newborns) 0.0001)))))
 
 (deftest remove-deaths-test
