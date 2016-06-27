@@ -60,22 +60,7 @@
   {:column-names (apply-col-names-schema BirthsDataSchema csv-data)
    :columns (vec (apply-row-schema BirthsDataSchema csv-data))})
 
-(defmethod apply-record-coercion :at-risk-popn
-  [data-info csv-data]
-  {:column-names (apply-col-names-schema AtRiskPopnSchema csv-data)
-   :columns (vec (apply-row-schema AtRiskPopnSchema csv-data))})
-
-(defmethod apply-record-coercion :hist-births-est
-  [data-info csv-data]
-  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
-   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
-
 (defmethod apply-record-coercion :population
-  [data-info csv-data]
-  {:column-names (apply-col-names-schema PopulationSchema csv-data)
-   :columns (vec (apply-row-schema PopulationSchema csv-data))})
-
-(defmethod apply-record-coercion :hist-popn-estimates
   [data-info csv-data]
   {:column-names (apply-col-names-schema PopulationSchema csv-data)
    :columns (vec (apply-row-schema PopulationSchema csv-data))})
@@ -99,11 +84,6 @@
   [data-info csv-data]
   {:column-names (apply-col-names-schema NetMigrationSchema csv-data)
    :columns (vec (apply-row-schema NetMigrationSchema csv-data))})
-
-(defmethod apply-record-coercion :migration-mye
-  [data-info csv-data]
-  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
-   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
 
 (defmethod apply-record-coercion :domestic-in-migrants
   [data-info csv-data]

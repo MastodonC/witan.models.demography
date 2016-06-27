@@ -50,25 +50,10 @@
 (def NetMigrationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig double]]))
 
-;;For historic ASFR workflow & input data
-(def AtRiskThisYearSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:popn-this-yr double] [:age s/Int]]))
-
-(def AtRiskLastYearSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:popn-last-yr double]]))
-
-(def BirthsPoolSchema
-  (make-ordered-ds-schema [[:age s/Int] [:sex s/Str] [:year (s/maybe s/Int)] [:gss-code s/Str]
-                           [:birth-pool double]]))
-
+;;For load-data test
 (def BirthsDataSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:births double] [:year s/Int]]))
-
-(def AtRiskPopnSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:popn double] [:actualyear s/Int] [:actualage s/Int]]))
 
 ;; For the migration component
 (def ProjDomInSchema
