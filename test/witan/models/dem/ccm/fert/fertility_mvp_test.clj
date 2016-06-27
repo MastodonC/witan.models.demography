@@ -12,13 +12,6 @@
 ;; Test inputs ;;
 ;;;;;;;;;;;;;;;;;
 
-;; historic-asmr = output of calc historic ASMR fn from R, to use until
-;;                 a Clojure version exists
-
-;;proj-births-by-age-sex-mother = output of project.births.from.fixed.rates
-;;                             fn from R in fertility module, to use
-;;                             until a Clojure version exists
-
 (def fertility-inputs (-> {:ons-proj-births-by-age-mother
                            "test_data/fertility/bristol_ons_proj_births_age_mother.csv"
                            :historic-total-births
