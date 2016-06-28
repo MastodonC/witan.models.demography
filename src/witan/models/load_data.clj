@@ -132,8 +132,8 @@
 
 (defmethod apply-record-coercion :historic-births
   [data-info csv-data]
-  {:column-names (apply-col-names-schema BirthsBySexAgeYearSchema csv-data)
-   :columns (vec (apply-row-schema BirthsBySexAgeYearSchema csv-data))})
+  {:column-names (apply-col-names-schema BirthsSchema csv-data)
+   :columns (vec (apply-row-schema BirthsSchema csv-data))})
 
 (defmethod apply-record-coercion :historic-population
   [data-info csv-data]
@@ -159,11 +159,6 @@
   [data-info csv-data]
   {:column-names (apply-col-names-schema BirthsAgeSexMotherSchema csv-data)
    :columns (vec (apply-row-schema BirthsAgeSexMotherSchema csv-data))})
-
-(defmethod apply-record-coercion :historic-total-births
-  [data-info csv-data]
-  {:column-names (apply-col-names-schema BirthsSchema csv-data)
-   :columns (vec (apply-row-schema BirthsSchema csv-data))})
 
 (defmethod apply-record-coercion :ons-proj-births-by-age-mother
   [data-info csv-data]

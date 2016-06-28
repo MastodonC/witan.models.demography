@@ -30,7 +30,10 @@
                                       :historic-asmr
                                       "test_data/r_outputs_for_testing/mort/bristol_historic_asmr.csv")))
 
-(def proj-deaths-r (ds/rename-columns (:deaths plt/data-inputs) {:deaths :deaths-r}))
+(def proj-deaths-r (-> :deaths
+                       (ld/load-dataset "test_data/r_outputs_for_testing/mort/bristol_mortality_module_r_output_2015.csv")
+                       :deaths
+                       (ds/rename-columns {:deaths :deaths-r})))
 
 (deftest calc-historic-asmr-test
   (testing "Death rates are calculated correctly."
@@ -38,7 +41,7 @@
           joined-asmr (-> hist-asmr-inputs
                           calc-historic-asmr
                           :historic-asmr
-                          (wds/join hist-asmr-r [:gss-code :district :sex :age :year]))]
+                          (wds/join hist-asmr-r [:gss-code :sex :age :year]))]
       (is (every? #(fp-equals? (i/sel joined-asmr :rows % :cols :death-rate-r)
                                (i/sel joined-asmr :rows % :cols :death-rate)
                                0.0000000001)

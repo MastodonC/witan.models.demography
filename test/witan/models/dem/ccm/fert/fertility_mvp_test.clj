@@ -14,7 +14,7 @@
 
 (def fertility-inputs (-> {:ons-proj-births-by-age-mother
                            "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
-                           :historic-total-births
+                           :historic-births
                            "test_data/model_inputs/fert/bristol_hist_births_mye.csv"
                            :historic-population
                            "test_data/model_inputs/bristol_hist_popn_mye.csv"
@@ -23,7 +23,7 @@
                           ld/load-datasets
                           (clojure.set/rename-keys {:population :population-at-risk})))
 
-(def params {:fert-last-yr 2014 :pm (double (/ 105 205))})
+(def params {:fert-last-yr 2014 :proportion-male-newborns (double (/ 105 205))})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; R outputs for comparison ;;

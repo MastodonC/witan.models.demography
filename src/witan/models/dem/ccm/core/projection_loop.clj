@@ -4,7 +4,10 @@
             [incanter.core :as i]
             [witan.workspace-api :refer [defworkflowfn]]
             [witan.datasets :as wds]
-            [witan.models.dem.ccm.schemas :refer :all]))
+            [witan.models.dem.ccm.schemas :refer :all]
+            [witan.models.dem.ccm.fert.fertility-mvp :as fert]
+            [witan.models.dem.ccm.mort.mortality-mvp :as mort]
+            [witan.models.dem.ccm.mig.net-migration :as mig]))
 
 (defworkflowfn keep-looping?
   {:witan/name :ccm-core/ccm-loop-pred
@@ -17,6 +20,11 @@
   {:loop-predicate (< loop-year last-proj-year)})
 
 (defworkflowfn prepare-inputs
+  "Step happening before the projection loop.
+   Takes in the historic population and outputs
+   the latest year and the population for that year.
+   Both those elements will be updated within the
+   projection loop."
   {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:population PopulationSchema}
@@ -33,10 +41,12 @@
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :population PopulationSchema
                         :loop-year s/Int}
-   :witan/output-schema {:latest-yr-popn PopulationSchema :loop-year s/Int}}
+   :witan/output-schema {:latest-yr-popn PopulationSchema :loop-year s/Int
+                         :population-at-risk PopulationSchema}}
   [{:keys [latest-yr-popn population loop-year]} _]
   (let [update-yr (ds/emap-column latest-yr-popn :year inc)]
-    {:latest-yr-popn update-yr :loop-year (inc loop-year)}))
+    {:latest-yr-popn update-yr :loop-year (inc loop-year)
+     :population-at-risk update-yr}))
 
 (defworkflowfn age-on
   "Takes in a dataset with the starting-population.
@@ -118,10 +128,16 @@
 
 (defn looping-test
   [inputs params]
-  (let [prepared-inputs (prepare-inputs inputs)]
+  (let [prepared-inputs (-> inputs
+                            prepare-inputs
+                            (fert/fertility-pre-projection params)
+                            (mort/mortality-pre-projection params)
+                            (mig/migration-pre-projection params))]
     (loop [inputs prepared-inputs]
       (let [inputs' (-> inputs
                         select-starting-popn
+                        (fert/births-projection params)
+                        (mort/project-deaths-from-fixed-rates)
                         age-on
                         add-births
                         remove-deaths

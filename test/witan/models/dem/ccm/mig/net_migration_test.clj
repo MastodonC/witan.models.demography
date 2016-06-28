@@ -21,7 +21,7 @@
                                       :net-migration
                                       "test_data/r_outputs_for_testing/mig/bristol_migration_module_r_output_2015.csv")))
 
-(def params {:number-of-years 12 :jumpoff-year 2015})
+(def params {:number-of-years-mig 12 :jumpoff-year-mig 2015})
 
 (deftest combine-into-net-flows-test
   (testing "The net migration flows are calculated correctly."
