@@ -1,58 +1,61 @@
 # Introduction to witan.models.demography
 
 
-`witan.models.demography` is a Clojure library to run demography models.
+`witan.models.demography` is a Clojure library to run demographic models, which may include:
 
-Ultimately it will be a tool to run:
-
-* population projections
-* school roll projections
-* small area projections
+* Population projections
+* Small area projections
 
 
-`witan.models.demography` proposes different ways to run each of those three types of projections.
-The different methodologies depend on your preferences and/or the data available to you.
+The aim of `witan.models.demography` is to offer "generic" models in the sense that our models will be adaptable to different methodologies and data inputs.
 
-Note: Both school roll projections and small area projections take as an input population projections.
+Current status:
+* Population projections: First release of a minimal version coming soon!
+* Small area projections: Not started. Waiting to finish the population projections.
+
+Note: The small area projections take as an input population projections.
 
 
-**The content of the library follows this structure:**
+## Glossary
+Let's define a few terms and acronyms we use throughout the library:
+
+* CCM: Cohort Component Model/Method
+
+* jumpoff year: the first year of projection
+
+* base year: the last year of historical data used
+
+
+## Content of the library
 * [Population projections](#population-projections)
   - [Trend-based Cohort Component Model](#trend-based-cohort-component-model)
 
-	1) Fertility
-	   * Historic fertility rates - births by age of the mother
-	   * Historic fertility rates - total births
-	   * Future fertility rates
+	* Fertility component module
 
-	2) Mortality
-	   * Historic mortality rates - deaths by age and by sex
-	   * Historic mortality rates - total deaths
-	   * Future mortality rates
+	* Mortality component module
 
-	3) Migration
-	   * Historic migration rates
-	   * Future migration rates
+	* Migration component module
 
-	4) Forward projection
+    * Core projection module
+
   - [Housing-led Cohort Component Model](#housing-led-cohort-component-model)
   - [Employment-led Cohort Component Model](#employment-led-cohort-component-model)
 
-* [School roll projections](#school-roll-projections)
 
 * [Small area projections](#small-area-projections)
 
 
 ## Population projections
 
-We have chosen to implement the cohort component method as it is the most commonly used method for simple population projections.
-More complex methods aren't currently supported in `witan.models.demography`.
+We have chosen to implement the cohort component method as it is the most commonly used method for generating population projections.
+
+Alternative methods aren't currently supported in `witan.models.demography`.
 
 <pre>Cohort component population projection:
 
-This method begins with a base population, usually categorised by age and sex.
-This base population evolves through the years by applying assumptions regarding mortality, fertility and migration.
-This procedure gives, for every year of the projection, a distribution of the population by age and sex. [1]
+This method begins with a starting population categorised by age and sex.
+For each yearly iteration of the model, the population is projected by applying assumptions regarding mortality, fertility and migration.
+This procedure gives, for every year of projection, a distribution of the population by age and sex. [1]
 
 The ideas behind this method can be represented as an equation:
 
@@ -61,45 +64,44 @@ P(t+n)= P(t) + B(t) − D(t) + I(t) − E(t)
 where:
     P(t) is the population at time t
     B(t) and D(t) are number of births and deaths occurring between t and t+n.
-    I(t) and E(t) are the number of immigrants and of emigrants from the country
+    I(t) and E(t) are the number of immigrants and of emigrants from the area
     during the period t to t+n.
 
 [2]
 </pre>
 
-Three alternatives are available to produce population projections:
 
 ### Trend-based Cohort Component Model
-<pre>    |
-    |--> Historic fertility rates          |--> Future fertility rates |
-    |    |--> Historic births/mother's age |                           |
-    |    |--> Total births                 |                           |
-    |                                                                  |
-    |--> Historic mortality rates          |--> Future mortality rates |--> Forward projection
-    |    |--> Historic deaths/age/sex      |                           |
-    |    |--> Total deaths                 |                           |
-    |                                                                  |
-    |--> Historic migration rates          |--> Future migration rates |
-</pre>
 
 This method involves projecting births, deaths and migrations by age and sex.
+
+See below the minimal cohort component method we aim to provide:
+
+![minimal CCM](images/MVP_generic_CCM_flowchart.png)
+
+Note:
+
+We will ultimately provide four alternatives for projecting the components of change (i.e. fertiliy, mortality and migration): projected values or rates can either be fixed, or determined by applying a national trend.
+See below:
+
+![CCM - projection alternatives](images/Component_projection_alternatives.png)
+
+For estimating the value or rate for the first year of projection (jump-off year or base year), we will provide three alternatives. See below:
+
+![CCM - base year alternatives](images/Jump_off_year_calculation_alternatives.png)
+
+
 
 1) Fertility
 
 The standard methodology for birth projections relies on applying age-specific fertility rates (ASFR)
 to the female population and splitting the estimated births into male and female using a standard ratio.
 
-* Historic data on births by mother's age
-
-
-* Total births data
 
 
 2) Mortality
 
-* Historic data on deaths by age and by sex
 
-* Total deaths data
 
 
 3) Migration
@@ -112,15 +114,8 @@ to the female population and splitting the estimated births into male and female
 
 <br>
 
-## School roll projections
-
-There is the possibility to produce school roll projections
-
-<br>
-
 ## Small area projections
 
-There are two alternatives to produce small area projections
 
 ### Area proportional distribution
 
