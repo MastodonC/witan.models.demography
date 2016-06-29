@@ -19,7 +19,7 @@
                            (ds/emap-column :year inc)
                            (i/query-dataset {:year {:$lte max-yr-deaths}})
                            (ds/emap-column :age (fn [v] (if (< v 90) (inc v) v)))
-                           (wds/rollup :sum :popn [:gss-code :district :sex :age :year]))]
+                           (wds/rollup :sum :popn [:gss-code :sex :age :year]))]
     (-> births-ds
         (ds/rename-columns {:births :popn})
         (ds/join-rows popn-not-age-0))))
@@ -31,10 +31,10 @@
   with death-rate column added."
   [deaths-ds popn-at-risk]
   (-> deaths-ds
-      (wds/join popn-at-risk [:gss-code :district :sex :age :year])
+      (wds/join popn-at-risk [:gss-code :sex :age :year])
       (wds/add-derived-column :death-rate [:deaths :popn]
                               (fn [d p] (wds/safe-divide [d p])))
-      (ds/select-columns [:gss-code :district :sex :age :year :death-rate])))
+      (ds/select-columns [:gss-code :sex :age :year :death-rate])))
 
 (defworkflowfn calc-historic-asmr
   "Takes datasets with historic births, deaths, and
@@ -43,7 +43,7 @@
   {:witan/name :ccm-mort/calc-historic-asmr
    :witan/version "1.0"
    :witan/input-schema {:historic-deaths DeathsSchema
-                        :historic-births BirthsBySexAgeYearSchema
+                        :historic-births BirthsSchema
                         :historic-population HistPopulationSchema}
    :witan/output-schema {:historic-asmr HistASMRSchema}}
   [{:keys [historic-deaths historic-births historic-population]} _]
@@ -83,3 +83,20 @@
    (cf/project-component-fixed-rates population-at-risk
                                      initial-projected-mortality-rates
                                      :death-rate :deaths)})
+
+(defworkflowfn mortality-pre-projection
+  "Handles the steps of the mortality module happening outside of the loop.
+   Takes in the historic input data and params maps and returns the
+   projected ASMR."
+  {:witan/name :ccm-mort/mort-pre-proj
+   :witan/version "1.0"
+   :witan/input-schema {:historic-deaths DeathsSchema
+                        :historic-births BirthsSchema
+                        :historic-population HistPopulationSchema}
+   :witan/param-schema {:number-of-years-mort s/Int :jumpoff-year-mort s/Int}
+   :witan/output-schema {:historic-asmr HistASMRSchema
+                         :initial-projected-mortality-rates ProjFixedASMRSchema}}
+  [input-data params]
+  (-> input-data
+      calc-historic-asmr
+      (project-asmr params)))

@@ -43,8 +43,8 @@
   "Takes in the historic data of total births, filters for
   the base year and totals the number of births for that year
   and gss-code."
-  [historic-total-births fert-last-yr]
-  (-> historic-total-births
+  [historic-births fert-last-yr]
+  (-> historic-births
       (i/query-dataset {:year fert-last-yr})
       (wds/rollup :sum :births [:gss-code :year])
       (ds/rename-columns {:births :actual-births})))
@@ -78,10 +78,10 @@
    :witan/version "1.0"
    :witan/input-schema {:ons-proj-births-by-age-mother BirthsAgeSexMotherSchema
                         :historic-population HistPopulationSchema
-                        :historic-total-births BirthsSchema}
+                        :historic-births BirthsSchema}
    :witan/param-schema {:fert-last-yr s/Int}
    :witan/output-schema {:historic-asfr HistASFRSchema}}
-  [{:keys [base-asfr ons-proj-births-by-age-mother historic-population historic-total-births]}
+  [{:keys [base-asfr ons-proj-births-by-age-mother historic-population historic-births]}
    {:keys [fert-last-yr]}]
   (let [birth-data-yr (reduce max (ds/column
                                    ons-proj-births-by-age-mother :year))
@@ -94,7 +94,7 @@
         popn-at-risk-fert-proj-base-yr (create-popn-at-risk-birth historic-population fert-last-yr)
         estimated-births (calc-estimated-births popn-at-risk-fert-proj-base-yr asfr-birth-data-yr)]
     {:historic-asfr
-     (-> historic-total-births
+     (-> historic-births
          (calc-actual-births fert-last-yr)
          (calc-scaling-factors estimated-births)
          (calc-scaled-fert-rates asfr-birth-data-yr)
@@ -137,7 +137,7 @@
 (defn- gather-births-by-sex
   "Given a dataset with columns :gss-code, :m, and :f (where :m and :f are
    male and female births), gathers births data into :births column and
-   sex into :sex column, returning a new dataset. Standin for a universal
+   sex into :sex column, returning a new dataset. Standing for a universal
    gather function in witan.datasets similar to gather in tidyR"
   [births-by-mf]
   (let [births-f (-> births-by-mf
@@ -158,15 +158,49 @@
   {:witan/name :ccm-fert/combine-into-births-by-sex
    :witan/version "1.0"
    :witan/input-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
-   :witan/param-schema {:pm double}
+   :witan/param-schema {:proportion-male-newborns double}
    :witan/output-schema {:births BirthsBySexSchema}}
-  [{:keys [births-by-age-sex-mother]} {:keys [pm]}]
+  [{:keys [births-by-age-sex-mother]} {:keys [proportion-male-newborns]}]
   (let [births-by-sex (-> births-by-age-sex-mother
                           (wds/rollup :sum :births [:gss-code])
                           (wds/add-derived-column :m [:births]
-                                                  (fn [b] (double (* pm b))))
+                                                  (fn [b] (double (* proportion-male-newborns b))))
                           (wds/add-derived-column :f [:births]
-                                                  (fn [b] (double (* (- 1 pm) b))))
+                                                  (fn [b] (double
+                                                           (* (- 1 proportion-male-newborns) b))))
                           (ds/select-columns [:gss-code :m :f])
                           gather-births-by-sex)]
     {:births births-by-sex}))
+
+(defworkflowfn fertility-pre-projection
+  "Handles the steps of the fertility module happening outside of the loop.
+   Takes in the historic input data and params maps and returns the
+   projected ASFR."
+  {:witan/name :ccm-fert/fert-pre-proj
+   :witan/version "1.0"
+   :witan/input-schema {:ons-proj-births-by-age-mother BirthsAgeSexMotherSchema
+                        :historic-population HistPopulationSchema
+                        :historic-births BirthsSchema}
+   :witan/param-schema {:fert-last-yr s/Int}
+   :witan/output-schema {:historic-asfr HistASFRSchema
+                         :initial-projected-fertility-rates ProjFixedASFRSchema}}
+  [input-data params]
+  (-> input-data
+      (calculate-historic-asfr params)
+      (project-asfr-finalyrhist-fixed params)))
+
+(defworkflowfn births-projection
+  "Handles the steps of the fertility module happening inside of the loop.
+   Takes in the projected ASFR and the population at risk from the loop.
+   Returns the number of births by sex for projection year."
+  {:witan/name :ccm-fert/births-projection
+   :witan/version "1.0"
+   :witan/input-schema {:initial-projected-fertility-rates ProjFixedASFRSchema
+                        :population-at-risk PopulationSchema}
+   :witan/param-schema {:proportion-male-newborns double}
+   :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema
+                         :births BirthsBySexSchema}}
+  [input-data params]
+  (-> input-data
+      project-births-from-fixed-rates
+      (combine-into-births-by-sex params)))
