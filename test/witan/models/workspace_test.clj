@@ -13,6 +13,10 @@
    (assoc :contracts (or contracts []))
    (assoc :catalog (or catalog []))))
 
+(def config
+  {:redis-config {:redis/uri "redis"}
+   :batch-settings {:onyx/batch-size 1}})
+
 (deftest run-workspace-test
   (testing "Run model as a workspace"
     (is (= {:workflow [[:in :inc]
@@ -21,7 +25,7 @@
             :catalog [{:onyx/name :inc
                        :onyx/fn   :witan.workspace.function-catalog/my-inc
                        :onyx/type :function
-                       :onyx/batch-size 1}]
+                       :onyx/batch-size (get-in config [:batch-settings :onyx/batch-size])}]
             :flow-conditions []
             :lifecycles []
             :task-scheduler :onyx.task-scheduler/balanced}
