@@ -60,15 +60,15 @@
   {:column-names (apply-col-names-schema BirthsDataSchema csv-data)
    :columns (vec (apply-row-schema BirthsDataSchema csv-data))})
 
-(defmethod apply-record-coercion :population
+(defmethod apply-record-coercion :historic-population
   [data-info csv-data]
-  {:column-names (apply-col-names-schema PopulationSchema csv-data)
-   :columns (vec (apply-row-schema PopulationSchema csv-data))})
+  {:column-names (apply-col-names-schema HistPopulationSchema csv-data)
+   :columns (vec (apply-row-schema HistPopulationSchema csv-data))})
 
 (defmethod apply-record-coercion :end-population
   [data-info csv-data]
-  {:column-names (apply-col-names-schema PopulationSchema csv-data)
-   :columns (vec (apply-row-schema PopulationSchema csv-data))})
+  {:column-names (apply-col-names-schema HistPopulationSchema csv-data)
+   :columns (vec (apply-row-schema HistPopulationSchema csv-data))})
 
 (defmethod apply-record-coercion :births
   [data-info csv-data]
@@ -136,6 +136,11 @@
    :columns (vec (apply-row-schema BirthsSchema csv-data))})
 
 (defmethod apply-record-coercion :historic-population
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema HistPopulationSchema csv-data)
+   :columns (vec (apply-row-schema HistPopulationSchema csv-data))})
+
+(defmethod apply-record-coercion :population-at-risk
   [data-info csv-data]
   {:column-names (apply-col-names-schema HistPopulationSchema csv-data)
    :columns (vec (apply-row-schema HistPopulationSchema csv-data))})

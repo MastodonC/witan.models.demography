@@ -76,7 +76,7 @@
   {:witan/name :ccm-mort/project-deaths-fixed-rates
    :witan/version "1.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjFixedASMRSchema
-                        :population-at-risk PopulationSchema}
+                        :population-at-risk HistPopulationSchema}
    :witan/output-schema {:deaths DeathsOutputSchema}}
   [{:keys [initial-projected-mortality-rates population-at-risk]} _]
   {:deaths

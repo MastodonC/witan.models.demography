@@ -11,9 +11,7 @@
 
 ;; Load testing data
 (def data-inputs (ld/load-datasets
-                  {:population
-                   "test_data/model_inputs/core/bristol_hist_popn_est.csv"
-                   :ons-proj-births-by-age-mother
+                  {:ons-proj-births-by-age-mother
                    "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
                    :historic-births
                    "test_data/model_inputs/fert/bristol_hist_births_mye.csv"

@@ -27,10 +27,6 @@
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:var s/Str] [:year s/Int] [:estimate double]]))
 
-(def PopulationSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:popn double]]))
-
 (def DeathsSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:deaths double]]))

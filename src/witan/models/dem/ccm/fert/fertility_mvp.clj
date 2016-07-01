@@ -125,7 +125,7 @@
   {:witan/name :ccm-fert/project-births-fixed-rates
    :witan/version "1.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjFixedASFRSchema
-                        :population-at-risk PopulationSchema}
+                        :population-at-risk HistPopulationSchema}
    :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}}
   [{:keys [initial-projected-fertility-rates population-at-risk]} _]
   (let [projected-births (cf/project-component-fixed-rates
@@ -196,7 +196,7 @@
   {:witan/name :ccm-fert/births-projection
    :witan/version "1.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjFixedASFRSchema
-                        :population-at-risk PopulationSchema}
+                        :population-at-risk HistPopulationSchema}
    :witan/param-schema {:proportion-male-newborns double}
    :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema
                          :births BirthsBySexSchema}}
