@@ -32,19 +32,24 @@
              :proportion-male-newborns (double (/ 105 205))
              :first-proj-year 2014
              :last-proj-year 2015
-             :number-of-years-mort 5
-             :jumpoff-year-mort 2015
-             :number-of-years-mig 12
-             :jumpoff-year-mig 2015})
+             :start-yr-avg-mort 2010 ;; should be >= earliest year in deaths data
+             :end-yr-avg-mort 2014 ;; should be <= mortality jumpoff year-1
+             :start-yr-avg-dom-mig 2003 ;; should be >=earliest year in domestic migrants data
+             :end-yr-avg-dom-mig 2014 ;; should be <= migration jumpoff year-1
+             :start-yr-avg-inter-mig 2003 ;; should be >=earliest year in international migrants data
+             :end-yr-avg-inter-mig 2014 ;; should be <= migration jumpoff year-1
+             })
 
 (def params-2040 {:fert-last-yr 2014
                   :proportion-male-newborns (double (/ 105 205))
                   :first-proj-year 2014
                   :last-proj-year 2040
-                  :number-of-years-mort 5
-                  :jumpoff-year-mort 2015
-                  :number-of-years-mig 12
-                  :jumpoff-year-mig 2015})
+                  :start-yr-avg-mort 2010
+                  :end-yr-avg-mort 2014
+                  :start-yr-avg-dom-mig 2003
+                  :end-yr-avg-dom-mig 2014
+                  :start-yr-avg-inter-mig 2003
+                  :end-yr-avg-inter-mig 2014})
 
 (def prepared-inputs (-> data-inputs
                          prepare-inputs

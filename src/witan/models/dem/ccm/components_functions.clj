@@ -11,14 +11,14 @@
   a name to rename the average column, a number of years to average on
   and the jumpoff year. Returns a dataset where the column to be averaged contains
   the averages for all the years of interest and is renamed to avg-name."
-  [historical-data col-to-avg avg-name number-of-years jumpoff-year]
-  (let [last-yr-data (dec jumpoff-year)
-        start-year-data (inc (- last-yr-data number-of-years))]
-    (-> (i/query-dataset historical-data
-                         {:year {:$gte start-year-data
-                                 :$lte last-yr-data}})
-        (ds/rename-columns {col-to-avg avg-name})
-        (wds/rollup :mean avg-name [:gss-code :sex :age]))))
+  [historical-data col-to-avg avg-name start-yr-avg end-yr-avg]
+  ;; start-yr-range should be >= than the earliest year in historical-data
+  ;; end-yr-range should be <= than the latest year in historical-data
+  (-> (i/query-dataset historical-data
+                       {:year {:$gte start-yr-avg
+                               :$lte end-yr-avg}})
+      (ds/rename-columns {col-to-avg avg-name})
+      (wds/rollup :mean avg-name [:gss-code :sex :age])))
 
 ;; Project component for fixed rates:
 (defn project-component-fixed-rates

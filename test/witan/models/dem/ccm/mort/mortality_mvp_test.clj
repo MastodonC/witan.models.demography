@@ -45,7 +45,8 @@
                                0.0000000001)
                   (range (first (:shape joined-asmr))))))))
 
-(def params {:number-of-years-mort 5 :jumpoff-year-mort 2015})
+(def params {:start-yr-avg-mort 2010
+             :end-yr-avg-mort 2014})
 
 (deftest project-asmr-test
   (testing "mortality rates projected correctly"

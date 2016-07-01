@@ -115,8 +115,8 @@
    (cf/jumpoffyr-method-average historic-asfr
                                 :fert-rate
                                 :fert-rate
-                                1
-                                (inc fert-last-yr))})
+                                2013
+                                2014)})
 
 (defworkflowfn project-births-from-fixed-rates
   "Takes a dataset with population at risk from the current year of the projection
