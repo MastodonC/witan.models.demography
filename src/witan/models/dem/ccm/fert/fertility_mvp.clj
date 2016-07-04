@@ -108,15 +108,16 @@
   {:witan/name :ccm-fert/project-asfr-finalyrhist-fixed
    :witan/version "1.0"
    :witan/input-schema {:historic-asfr HistASFRSchema}
-   :witan/param-schema {:fert-last-yr s/Int}
+   :witan/param-schema {:fert-last-yr s/Int :start-yr-avg-fert s/Int
+                        :end-yr-avg-fert s/Int}
    :witan/output-schema {:initial-projected-fertility-rates ProjFixedASFRSchema}}
-  [{:keys [historic-asfr]} {:keys [fert-last-yr]}]
+  [{:keys [historic-asfr]} {:keys [fert-last-yr start-yr-avg-fert end-yr-avg-fert]}]
   {:initial-projected-fertility-rates
    (cf/jumpoffyr-method-average historic-asfr
                                 :fert-rate
                                 :fert-rate
-                                2013
-                                2014)})
+                                start-yr-avg-fert
+                                end-yr-avg-fert)})
 
 (defworkflowfn project-births-from-fixed-rates
   "Takes a dataset with population at risk from the current year of the projection
@@ -181,7 +182,8 @@
    :witan/input-schema {:ons-proj-births-by-age-mother BirthsAgeSexMotherSchema
                         :historic-population HistPopulationSchema
                         :historic-births BirthsSchema}
-   :witan/param-schema {:fert-last-yr s/Int}
+   :witan/param-schema {:fert-last-yr s/Int :start-yr-avg-fert s/Int
+                        :end-yr-avg-fert s/Int}
    :witan/output-schema {:historic-asfr HistASFRSchema
                          :initial-projected-fertility-rates ProjFixedASFRSchema}}
   [input-data params]

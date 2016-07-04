@@ -12,8 +12,8 @@
   and the jumpoff year. Returns a dataset where the column to be averaged contains
   the averages for all the years of interest and is renamed to avg-name."
   [historical-data col-to-avg avg-name start-yr-avg end-yr-avg]
-  ;; start-yr-range should be >= than the earliest year in historical-data
-  ;; end-yr-range should be <= than the latest year in historical-data
+  ;; (s/validate (s/pred (>= % historical-data-earliest-yr)) start-yr-range)
+  ;; (s/validate (s/pred (<= % historical-data-latest-yr)) end-yr-range)
   (-> (i/query-dataset historical-data
                        {:year {:$gte start-yr-avg
                                :$lte end-yr-avg}})

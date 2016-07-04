@@ -33,6 +33,9 @@
                        :deaths
                        (ds/rename-columns {:deaths :deaths-r})))
 
+(def params {:start-yr-avg-mort 2010
+             :end-yr-avg-mort 2014})
+
 (deftest calc-historic-asmr-test
   (testing "Death rates are calculated correctly."
     (let [hist-asmr-r (ds/rename-columns historic-asmr-r {:death-rate :death-rate-r})
@@ -44,9 +47,6 @@
                                (i/sel joined-asmr :rows % :cols :death-rate)
                                0.0000000001)
                   (range (first (:shape joined-asmr))))))))
-
-(def params {:start-yr-avg-mort 2010
-             :end-yr-avg-mort 2014})
 
 (deftest project-asmr-test
   (testing "mortality rates projected correctly"
