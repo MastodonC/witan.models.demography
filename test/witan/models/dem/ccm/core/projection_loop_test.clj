@@ -33,7 +33,7 @@
              :last-proj-year 2015
              ;; Fertility module
              :fert-last-yr 2014
-             :start-yr-avg-fert 2013
+             :start-yr-avg-fert 2014
              :end-yr-avg-fert 2014 ;; (s/validate (s/eq :fert-last-yr) :end-yr-avg-fert)
              :proportion-male-newborns (double (/ 105 205))
              ;; Mortality module
@@ -56,7 +56,7 @@
                   :last-proj-year 2040
                   ;; Fertility module
                   :fert-last-yr 2014
-                  :start-yr-avg-fert 2013
+                  :start-yr-avg-fert 2014
                   :end-yr-avg-fert 2014
                   :proportion-male-newborns (double (/ 105 205))
                   ;; Mortality module

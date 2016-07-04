@@ -1,7 +1,8 @@
 (ns witan.models.dem.ccm.components-functions
   (:require [incanter.core :as i]
             [clojure.core.matrix.dataset :as ds]
-            [witan.datasets :as wds]))
+            [witan.datasets :as wds]
+            [schema.core :as s]))
 
 ;; Calculate rates/values for alternative ways to project components of change:
 
@@ -12,13 +13,15 @@
   and the jumpoff year. Returns a dataset where the column to be averaged contains
   the averages for all the years of interest and is renamed to avg-name."
   [historical-data col-to-avg avg-name start-yr-avg end-yr-avg]
-  ;; (s/validate (s/pred (>= % historical-data-earliest-yr)) start-yr-range)
-  ;; (s/validate (s/pred (<= % historical-data-latest-yr)) end-yr-range)
-  (-> (i/query-dataset historical-data
-                       {:year {:$gte start-yr-avg
-                               :$lte end-yr-avg}})
-      (ds/rename-columns {col-to-avg avg-name})
-      (wds/rollup :mean avg-name [:gss-code :sex :age])))
+  (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
+        hist-latest-yr (reduce max (ds/column historical-data :year))
+        start-yr (s/validate (s/pred #(>= % hist-earliest-yr)) start-yr-avg)
+        end-yr (s/validate (s/pred #(<= % hist-latest-yr)) end-yr-avg)]
+    (-> (i/query-dataset historical-data
+                         {:year {:$gte start-yr
+                                 :$lte end-yr}})
+        (ds/rename-columns {col-to-avg avg-name})
+        (wds/rollup :mean avg-name [:gss-code :sex :age]))))
 
 ;; Project component for fixed rates:
 (defn project-component-fixed-rates

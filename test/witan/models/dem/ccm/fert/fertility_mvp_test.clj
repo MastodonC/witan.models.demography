@@ -22,7 +22,7 @@
                            "test_data/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"}))
 
 (def params {:fert-last-yr 2014
-             :start-yr-avg-fert 2013
+             :start-yr-avg-fert 2014
              :end-yr-avg-fert 2014
              :proportion-male-newborns (double (/ 105 205))})
 
