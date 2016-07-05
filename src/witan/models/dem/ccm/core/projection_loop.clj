@@ -39,11 +39,11 @@
    Returns a dataset of the starting population for the next year's projection."
   {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
-   :witan/input-schema {:latest-yr-popn HistPopulationSchema :historic-population HistPopulationSchema
+   :witan/input-schema {:latest-yr-popn HistPopulationSchema
                         :loop-year s/Int}
    :witan/output-schema {:latest-yr-popn HistPopulationSchema :loop-year s/Int
                          :population-at-risk HistPopulationSchema}}
-  [{:keys [latest-yr-popn population loop-year]} _]
+  [{:keys [latest-yr-popn loop-year]} _]
   (let [update-yr (ds/emap-column latest-yr-popn :year inc)]
     {:latest-yr-popn update-yr :loop-year (inc loop-year)
      :population-at-risk update-yr}))
@@ -121,7 +121,8 @@
    Returns a datasets that appends the second dataset to the first one."
   {:witan/name :ccm-core/join-yrs
    :witan/version "1.0"
-   :witan/input-schema {:latest-yr-popn HistPopulationSchema :historic-population HistPopulationSchema}
+   :witan/input-schema {:latest-yr-popn HistPopulationSchema
+                        :historic-population HistPopulationSchema}
    :witan/output-schema {:historic-population HistPopulationSchema}}
   [{:keys [latest-yr-popn historic-population]} _]
   {:historic-population (ds/join-rows historic-population latest-yr-popn)})
