@@ -28,23 +28,45 @@
                    :international-out-migrants
                    "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"}))
 
-(def params {:fert-last-yr 2014
-             :proportion-male-newborns (double (/ 105 205))
+(def params {;; Core module
              :first-proj-year 2014
              :last-proj-year 2015
-             :number-of-years-mort 5
-             :jumpoff-year-mort 2015
-             :number-of-years-mig 12
-             :jumpoff-year-mig 2015})
+             ;; Fertility module
+             :fert-last-yr 2014
+             :start-yr-avg-fert 2014
+             :end-yr-avg-fert 2014 ;; (s/validate (s/eq :fert-last-yr) :end-yr-avg-fert)
+             :proportion-male-newborns (double (/ 105 205))
+             ;; Mortality module
+             ;; (s/validate (s/pred (>= % earliest-mort-yr)) :start-yr-avg-mort)
+             :start-yr-avg-mort 2010
+             ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mort))) :end-yr-avg-mort)
+             :end-yr-avg-mort 2014
+             ;; Migration module
+             ;; (s/validate (s/pred (>= % earliest-dom-mig-yr)) :start-yr-avg-dom-mig)
+             :start-yr-avg-dom-mig 2003
+             ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-dom-mig)
+             :end-yr-avg-dom-mig 2014
+             ;; (s/validate (s/pred (>= % earliest-inter-mig-yr)) :start-yr-avg-inter-mig)
+             :start-yr-avg-inter-mig 2003
+             ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-inter-mig)
+             :end-yr-avg-inter-mig 2014})
 
-(def params-2040 {:fert-last-yr 2014
-                  :proportion-male-newborns (double (/ 105 205))
+(def params-2040 {;; Core module
                   :first-proj-year 2014
                   :last-proj-year 2040
-                  :number-of-years-mort 5
-                  :jumpoff-year-mort 2015
-                  :number-of-years-mig 12
-                  :jumpoff-year-mig 2015})
+                  ;; Fertility module
+                  :fert-last-yr 2014
+                  :start-yr-avg-fert 2014
+                  :end-yr-avg-fert 2014
+                  :proportion-male-newborns (double (/ 105 205))
+                  ;; Mortality module
+                  :start-yr-avg-mort 2010
+                  :end-yr-avg-mort 2014
+                  ;; Migration module
+                  :start-yr-avg-dom-mig 2003
+                  :end-yr-avg-dom-mig 2014
+                  :start-yr-avg-inter-mig 2003
+                  :end-yr-avg-inter-mig 2014})
 
 (def prepared-inputs (-> data-inputs
                          prepare-inputs

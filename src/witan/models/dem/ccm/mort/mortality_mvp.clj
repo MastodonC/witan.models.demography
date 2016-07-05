@@ -60,14 +60,14 @@
   {:witan/name :ccm-mort/project-asmr
    :witan/version "1.0"
    :witan/input-schema {:historic-asmr HistASMRSchema}
-   :witan/param-schema {:number-of-years-mort s/Int :jumpoff-year-mort s/Int}
+   :witan/param-schema {:start-yr-avg-mort s/Int :end-yr-avg-mort s/Int}
    :witan/output-schema {:initial-projected-mortality-rates ProjFixedASMRSchema}}
-  [{:keys [historic-asmr]} {:keys [number-of-years-mort jumpoff-year-mort]}]
+  [{:keys [historic-asmr]} {:keys [start-yr-avg-mort end-yr-avg-mort]}]
   {:initial-projected-mortality-rates (cf/jumpoffyr-method-average historic-asmr
                                                                    :death-rate
                                                                    :death-rate
-                                                                   number-of-years-mort
-                                                                   jumpoff-year-mort)})
+                                                                   start-yr-avg-mort
+                                                                   end-yr-avg-mort)})
 
 (defworkflowfn project-deaths-from-fixed-rates
   "Takes a dataset with population at risk from the current year of the projection
@@ -93,7 +93,7 @@
    :witan/input-schema {:historic-deaths DeathsSchema
                         :historic-births BirthsSchema
                         :historic-population HistPopulationSchema}
-   :witan/param-schema {:number-of-years-mort s/Int :jumpoff-year-mort s/Int}
+   :witan/param-schema {:start-yr-avg-mort s/Int :end-yr-avg-mort s/Int}
    :witan/output-schema {:historic-asmr HistASMRSchema
                          :initial-projected-mortality-rates ProjFixedASMRSchema}}
   [input-data params]

@@ -1,7 +1,6 @@
 # witan.models.demography
 
-
-[![circle-ci shield](https://circleci.com/gh/:owner/:repo.svg?style=shield&circle-token=:circle-token)](https://github.com/MastodonC/witan.models.demography)
+[![Build Status](https://circleci.com/gh/MastodonC/witan.models.demography.svg?style=shield)](https://circleci.com/gh/MastodonC/witan.models.demography) [![Dependencies Status](https://jarkeeper.com/MastodonC/witan.models.demography/status.svg)](https://jarkeeper.com/MastodonC/witan.models.demography)
 
 
 ## Description

@@ -35,28 +35,28 @@
   (testing "The function return the averages on the right year period"
     (let [r-results (:dom-in-averages dom-in-averages)
           clj-results (jumpoffyr-method-average (:domestic-in-migrants migration-data)
-                                                :estimate :domestic-in 12 2015)
+                                                :estimate :domestic-in 2003 2014)
           joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :domin)
                                (i/sel joined-averages :rows % :cols :domestic-in) 0.0000000001)
                   (range (first (:shape joined-averages))))))
     (let [r-results (:dom-out-averages dom-out-averages)
           clj-results (jumpoffyr-method-average (:domestic-out-migrants migration-data)
-                                                :estimate :domestic-out 12 2015)
+                                                :estimate :domestic-out 2003 2014)
           joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :domout)
                                (i/sel joined-averages :rows % :cols :domestic-out) 0.0000000001)
                   (range (first (:shape joined-averages))))))
     (let [r-results (:inter-out-averages inter-out-averages)
           clj-results (jumpoffyr-method-average (:international-out-migrants migration-data)
-                                                :estimate :international-out 12 2015)
+                                                :estimate :international-out 2003 2014)
           joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :intout)
                                (i/sel joined-averages :rows % :cols :international-out) 0.0000000001)
                   (range (first (:shape joined-averages))))))
     (let [r-results (:inter-in-averages inter-in-averages)
           clj-results (jumpoffyr-method-average (:international-in-migrants migration-data)
-                                                :estimate :international-in 12 2015)
+                                                :estimate :international-in 2003 2014)
           joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :intin)
                                (i/sel joined-averages :rows % :cols :international-in) 0.0000000001)
