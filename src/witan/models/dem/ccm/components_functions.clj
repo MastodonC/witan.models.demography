@@ -2,16 +2,18 @@
   (:require [incanter.core :as i]
             [clojure.core.matrix.dataset :as ds]
             [witan.datasets :as wds]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [incanter.stats :as st]
+            [clojure.string :as str]))
 
 ;; Calculate rates/values for alternative ways to project components of change:
 
 ;; Calculate averages for fixed values/rates or trends:
 (defn jumpoffyr-method-average
   "Takes in a dataset with historical data, a column name to be averaged,
-  a name to rename the average column, a number of years to average on
-  and the jumpoff year. Returns a dataset where the column to be averaged contains
-  the averages for all the years of interest and is renamed to avg-name."
+  a name for the average column, and years to start and end averaging for. 
+  Returns a dataset where the column to be averaged contains the averages 
+  for all the years of interest and is named to avg-name."
   [historical-data col-to-avg avg-name start-yr-avg end-yr-avg]
   (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
         hist-latest-yr (reduce max (ds/column historical-data :year))
@@ -22,6 +24,35 @@
                                  :$lte end-yr}})
         (ds/rename-columns {col-to-avg avg-name})
         (wds/rollup :mean avg-name [:gss-code :sex :age]))))
+
+(defn jumpoffyr-method-trend
+  "Takes in a dataset with historical data, a column name for a trend to be 
+  calculated for, a name for the trend col and years to start and end to
+  calculate the trend for. Returns a dataset with a new col for the calculated trend"
+  [historical-data trend-col trend-out start-yr-avg end-yr-avg]
+  (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
+        hist-latest-yr (reduce max (ds/column historical-data :year))
+        start-yr (s/validate (s/pred #(>= % hist-earliest-yr)) start-yr-avg)
+        end-yr (s/validate (s/pred #(<= % hist-latest-yr)) end-yr-avg)
+        grouped-data (->> historical-data
+                          (#(i/query-dataset % {:year {:$gte start-yr
+                                                       :$lte end-yr}}))
+                          (i/$group-by [:sex :gss-code :age]))
+        lm (map (fn [[k v]]
+                  (-> (st/linear-model (i/$ trend-col v) (i/$ :year v))
+                      :coefs)) grouped-data)
+        newest-data (mapv (fn [[k v] i] (assoc k
+                                              :intercept (first i) 
+                                              :regres-coef (second i))) grouped-data lm)]
+    (-> newest-data
+        ds/dataset
+        (wds/add-derived-column trend-out
+                                [:regres-coef :intercept]
+                                (fn [y i] (let [t (+ i (* y (inc end-yr)))]
+                                            (if (< t 0)
+                                              0
+                                              t))))
+        (ds/select-columns [:gss-code :sex :age trend-out]))))
 
 ;; Project component for fixed rates:
 (defn project-component-fixed-rates
