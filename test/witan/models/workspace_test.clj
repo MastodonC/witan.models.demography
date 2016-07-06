@@ -207,7 +207,9 @@
                                          :end-yr-avg-inter-mig 2014}}
    :proj-intl-out-migrants     {:var #'witan.models.dem.ccm.mig.net-migration/project-international-out-migrants
                                 :params {:start-yr-avg-inter-mig 2003
-                                         :end-yr-avg-inter-mig 2014}}})
+                                         :end-yr-avg-inter-mig 2014}}
+   :keep-looping?              {:var #'witan.models.dem.ccm.core.projection-loop/keep-looping?
+                                :params {:last-proj-year 2015}}})
 
 (def inputs
   {:in-historic-popn                  {:chan (chan)
@@ -305,10 +307,11 @@
    [:project-births       :age-on]
    [:age-on               :add-births]
    [:add-births           :remove-deaths]
-   [:project-deaths       :remove-deaths]
+   [:project-deaths       :remove-deaths] ;; TODO MERGE NO WORKY
    [:remove-deaths        :apply-migration]
    [:apply-migration      :join-popn-latest-yr]
-   [:join-popn-latest-yr  [:not-last-year? :select-starting-popn :out]]
+   ;;[:join-popn-latest-yr  [:keep-looping? :select-starting-popn :out]]
+   [:join-popn-latest-yr  :out]
    ;; --- end loop
    ])
 

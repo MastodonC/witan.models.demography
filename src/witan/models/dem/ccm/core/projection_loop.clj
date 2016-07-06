@@ -9,7 +9,7 @@
             [witan.models.dem.ccm.mort.mortality-mvp :as mort]
             [witan.models.dem.ccm.mig.net-migration :as mig]))
 
-(defworkflowfn keep-looping?
+(defworkflowpred keep-looping?
   {:witan/name :ccm-core/ccm-loop-pred
    :witan/version "1.0"
    :witan/input-schema {:historic-population HistPopulationSchema :loop-year s/Int}
