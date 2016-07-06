@@ -24,30 +24,6 @@
    :fn-wrapper :witan.workspace-api.onyx/default-fn-wrapper
    :pred-wrapper :witan.workspace-api.onyx/default-pred-wrapper})
 
-#_(deftest run-workspace-test
-    (testing "Run model as a workspace"
-      (is (= {:workflow [[:in :inc]
-                         [:inc :out]]
-                                        ;   :contracts []
-              :catalog [{:onyx/name :inc
-                         :onyx/fn   :witan.workspace.function-catalog/my-inc
-                         :onyx/type :function
-                         :onyx/batch-size (get-in config [:batch-settings :onyx/batch-size])}]
-              :flow-conditions []
-              :lifecycles []
-              :task-scheduler :onyx.task-scheduler/balanced}
-             (o/workspace->onyx-job
-              (workspace
-               {:workflow [[:in :inc]
-                           [:inc :out]]
-                :catalog [{:witan/name :inc
-                           :witan/fn :witan.workspace.function-catalog/my-inc
-                           :witan/version "1.0"
-                           :witan/inputs [{:witan/input-src-fn   :clojure.core/identity
-                                           :witan/input-src-key  1
-                                           :witan/input-dest-key :number}]}]})
-              config)))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def id (java.util.UUID/randomUUID))
@@ -114,38 +90,7 @@
    :onyx/max-peers 1
    :onyx/doc "Writes segments to a core.async channel"})
 
-#_(deftest onyx-job
-    (testing "Run local onyx job"
-
-      (doseq [segment input-segments]
-        (>!! input-chan segment))
-      (close! input-chan)
-      (let [env        (onyx.api/start-env env-config)
-            peer-group (onyx.api/start-peer-group peer-config)
-            n-peers    (count (set (mapcat identity workflow)))
-            v-peers    (onyx.api/start-peers n-peers peer-group)
-            _          (onyx.api/submit-job
-                        peer-config
-                        {:catalog catalog :workflow workflow :lifecycles lifecycles
-                         :task-scheduler :onyx.task-scheduler/balanced})
-            results (take-segments! output-chan)]
-        (clojure.pprint/pprint results)
-
-        (doseq [v-peer v-peers]
-          (onyx.api/shutdown-peer v-peer))
-        (onyx.api/shutdown-peer-group peer-group)
-        (onyx.api/shutdown-env env)
-
-        (is (= results [{:n 1}
-                        {:n 2}
-                        {:n 3}
-                        {:n 4}
-                        {:n 5}
-                        {:n 6}
-                        :done])))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 (defworkflowfn inc-test
   "This is a test function which will increment a number
@@ -220,3 +165,53 @@
                         {:number 5 :foo 5}
                         {:number 6 :foo 6}
                         :done]))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Real Model Test
+
+(def ccm-workflow
+  [;; inputs for asfr
+   [:in-historic-popn                 :calc-historic-asfr]
+   [:in-projd-births-by-age-of-mother :calc-historic-asfr]
+   [:in-historic-total-births         :calc-historic-asfr]
+
+   ;; inputs for asmr
+   [:in-historic-popn                  :calc-historic-asmr]
+   [:in-historic-deaths-by-age-and-sex :calc-historic-asmr]
+
+   ;; inputs for mig
+   [:in-historic-dom-in-migrants   :proj-domestic-in-migrants]
+   [:in-historic-dom-out-migrants  :proj-domestic-out-migrants]
+   [:in-historic-intl-in-migrants  :proj-intl-in-migrants]
+   [:in-historic-intl-out-migrants :proj-intl-out-migrants]
+
+   ;; asfr/asmr projections
+   [:calc-historic-asfr :proj-historic-asfr]
+   [:calc-historic-asmr :proj-historic-asmr]
+
+   ;; migration projections
+   [:proj-domestic-in-migrants  :mig-net-flows]
+   [:proj-domestic-out-migrants :mig-net-flows]
+   [:proj-intl-in-migrants      :mig-net-flows]
+   [:proj-intl-out-migrants     :mig-net-flows]
+
+   ;; pre-loop merge
+   [:proj-historic-asfr :select-starting-popn]
+   [:proj-historic-asmr :select-starting-popn]
+   [:mig-net-flows      :select-starting-popn]
+   ;; - inputs for popn
+   [:in-historic-popn   :select-starting-popn]
+
+   ;; --- start popn loop
+   [:select-starting-popn :project-births]
+   [:select-starting-popn :project-deaths]
+   [:project-births       :age-on]
+   [:age-on               :add-births]
+   [:add-births           :remove-deaths]
+   [:project-deaths       :remove-deaths]
+   [:remove-deaths        :apply-migration]
+   [:apply-migration      :join-popn-latest-yr]
+   [:join-popn-latest-yr  [:not-last-year? :incr-year :out]]
+   [:incr-year            :select-starting-popn]
+   ;; --- end loop
+   ])
