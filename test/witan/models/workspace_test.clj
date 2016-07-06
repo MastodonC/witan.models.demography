@@ -193,9 +193,7 @@
                       (assoc :lifecycles lifecycles
                              :flow-conditions [])
                       (update :catalog conj catalog-entry-in)
-                      (update :catalog conj catalog-entry-out))
-        _ (clojure.pprint/pprint onyx-job')
-        ]
+                      (update :catalog conj catalog-entry-out))]
 
     (testing "Run local onyx job"
       (doseq [segment input-segments]
@@ -209,7 +207,6 @@
                         peer-config
                         onyx-job')
             results (take-segments! output-chan)]
-        (clojure.pprint/pprint results)
 
         (doseq [v-peer v-peers]
           (onyx.api/shutdown-peer v-peer))
