@@ -39,11 +39,12 @@
    Returns a dataset of the starting population for the next year's projection."
   {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
+   ;;:witan/param-schema (s/maybe {:initial-yr s/Int})
    :witan/input-schema {:latest-yr-popn HistPopulationSchema
                         :loop-year s/Int}
    :witan/output-schema {:latest-yr-popn HistPopulationSchema :loop-year s/Int
                          :population-at-risk HistPopulationSchema}}
-  [{:keys [latest-yr-popn loop-year]} _]
+  [{:keys [latest-yr-popn loop-year]} {:keys [initial-yr]}]
   (let [update-yr (ds/emap-column latest-yr-popn :year inc)]
     {:latest-yr-popn update-yr :loop-year (inc loop-year)
      :population-at-risk update-yr}))

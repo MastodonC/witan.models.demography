@@ -7,7 +7,12 @@
              [witan.workspace.onyx :as o]
              [witan.workspace-api :refer [defworkflowfn]]
              [witan.workspace-api.onyx :refer [default-fn-wrapper
-                                               default-pred-wrapper]]))
+                                               default-pred-wrapper]]
+             ;;
+             [witan.models.dem.ccm.fert.fertility-mvp]
+             [witan.models.dem.ccm.mort.mortality-mvp]
+             [witan.models.dem.ccm.mig.net-migration]
+             [witan.models.dem.ccm.core.projection-loop]))
 
 (defn workspace
   [{:keys [workflow contracts catalog] :as raw}]
@@ -79,6 +84,7 @@
    :onyx/medium :core.async
    :onyx/batch-size batch-size
    :onyx/max-peers 1
+   :in/chan "foo"
    :onyx/doc "Reads segments from a core.async channel"})
 
 (def catalog-entry-out
@@ -169,6 +175,100 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Real Model Test
 
+(def tasks
+  {:proj-historic-asfr         {:var #'witan.models.dem.ccm.fert.fertility-mvp/project-asfr-finalyrhist-fixed
+                                :params {:fert-last-yr 2014
+                                         :start-yr-avg-fert 2014
+                                         :end-yr-avg-fert 2014}}
+   :join-popn-latest-yr        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-yr}
+   :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
+   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality-mvp/project-deaths-from-fixed-rates}
+   :proj-domestic-in-migrants  {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-in-migrants
+                                :params {:start-yr-avg-dom-mig 2003
+                                         :end-yr-avg-dom-mig 2014}}
+   ;;:incr-year                  {:var nil}
+   :calc-historic-asmr         {:var #'witan.models.dem.ccm.mort.mortality-mvp/calc-historic-asmr}
+   :proj-domestic-out-migrants {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-out-migrants
+                                :params {:start-yr-avg-dom-mig 2003
+                                         :end-yr-avg-dom-mig 2014}}
+   :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
+   :age-on                     {:var #'witan.models.dem.ccm.core.projection-loop/age-on}
+   :project-births             {:var #'witan.models.dem.ccm.fert.fertility-mvp/births-projection
+                                :params {:proportion-male-newborns (double (/ 105 205))}}
+   :proj-historic-asmr         {:var #'witan.models.dem.ccm.mort.mortality-mvp/project-asmr
+                                :params {:start-yr-avg-mort 2010
+                                         :end-yr-avg-mort 2014}}
+   :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
+   :calc-historic-asfr         {:var #'witan.models.dem.ccm.fert.fertility-mvp/calculate-historic-asfr
+                                :params {:fert-last-yr 2014}}
+   :apply-migration            {:var #'witan.models.dem.ccm.core.projection-loop/apply-migration}
+   :proj-intl-in-migrants      {:var #'witan.models.dem.ccm.mig.net-migration/project-international-in-migrants
+                                :params {:start-yr-avg-inter-mig 2003
+                                         :end-yr-avg-inter-mig 2014}}
+   :proj-intl-out-migrants     {:var #'witan.models.dem.ccm.mig.net-migration/project-international-out-migrants
+                                :params {:start-yr-avg-inter-mig 2003
+                                         :end-yr-avg-inter-mig 2014}}})
+
+(def inputs
+  {:in-historic-popn                  {:chan (chan)
+                                       :src "test_data/model_inputs/bristol_hist_popn_mye.csv"}
+   :in-projd-births-by-age-of-mother  {:chan (chan)
+                                       :src "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"}
+   :in-historic-total-births          {:chan (chan)
+                                       :src "test_data/model_inputs/fert/bristol_hist_births_mye.csv"}
+   :in-historic-deaths-by-age-and-sex {:chan (chan)
+                                       :src "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"}
+   :in-historic-dom-in-migrants       {:chan (chan)
+                                       :src "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"}
+   :in-historic-dom-out-migrants      {:chan (chan)
+                                       :src "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"}
+   :in-historic-intl-in-migrants      {:chan (chan)
+                                       :src "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"}
+   :in-historic-intl-out-migrants     {:chan (chan)
+                                       :src "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"}})
+
+(defn inject-channel [event lifecycle]
+  {:core.async/chan (get-in event [:onyx.core/task-map :in/chan])})
+
+(def input-calls
+  {:lifecycle/before-task-start inject-channel})
+
+(defn input-to-lifecycle
+  [input]
+  [{:lifecycle/task input
+    :lifecycle/calls :witan.models.workspace-test/input-calls}
+   {:lifecycle/task input
+    :lifecycle/calls :onyx.plugin.core-async/reader-calls}])
+
+(defn input-to-catalog
+  [ch batch-size input]
+  {:onyx/name input
+   :onyx/plugin :onyx.plugin.core-async/input
+   :onyx/type :input
+   :onyx/medium :core.async
+   :onyx/batch-size batch-size
+   :onyx/max-peers 1
+   :in/chan ch
+   :onyx/doc "Reads segments from a core.async channel"})
+
+(defn workflow-fn-to-catalog
+  "Take a defworkflowfn var and convert to a witan workspace catalog entry"
+  ([task-name var params]
+   (let [{:keys [witan/doc witan/param-schema]} (get (meta var) :witan/workflowfn)]
+     (merge
+      (when params {:witan/params (s/validate param-schema params)})
+      {:witan/name task-name
+       :witan/fn (-> var (str) (subs 2) (keyword))})))
+  ([task-name var]
+   (workflow-fn-to-catalog task-name var nil)))
+
+(def ccm-batch-size 1)
+
+(def ccm-catalog
+  (mapv (fn [[k {:keys [var params]}]] (workflow-fn-to-catalog k var params)) tasks))
+
+;; (mapv (fn [[k v]] (input-to-catalog (:chan v) ccm-batch-size k)) inputs)
+
 (def ccm-workflow
   [;; inputs for asfr
    [:in-historic-popn                 :calc-historic-asfr]
@@ -189,18 +289,15 @@
    [:calc-historic-asfr :proj-historic-asfr]
    [:calc-historic-asmr :proj-historic-asmr]
 
-   ;; migration projections
-   [:proj-domestic-in-migrants  :mig-net-flows]
-   [:proj-domestic-out-migrants :mig-net-flows]
-   [:proj-intl-in-migrants      :mig-net-flows]
-   [:proj-intl-out-migrants     :mig-net-flows]
-
    ;; pre-loop merge
-   [:proj-historic-asfr :select-starting-popn]
-   [:proj-historic-asmr :select-starting-popn]
-   [:mig-net-flows      :select-starting-popn]
+   [:proj-historic-asfr         :select-starting-popn]
+   [:proj-historic-asmr         :select-starting-popn]
+   [:proj-domestic-in-migrants  :select-starting-popn]
+   [:proj-domestic-out-migrants :select-starting-popn]
+   [:proj-intl-in-migrants      :select-starting-popn]
+   [:proj-intl-out-migrants     :select-starting-popn]
    ;; - inputs for popn
-   [:in-historic-popn   :select-starting-popn]
+   [:in-historic-popn           :select-starting-popn]
 
    ;; --- start popn loop
    [:select-starting-popn :project-births]
@@ -211,7 +308,44 @@
    [:project-deaths       :remove-deaths]
    [:remove-deaths        :apply-migration]
    [:apply-migration      :join-popn-latest-yr]
-   [:join-popn-latest-yr  [:not-last-year? :incr-year :out]]
-   [:incr-year            :select-starting-popn]
+   [:join-popn-latest-yr  [:not-last-year? :select-starting-popn :out]]
    ;; --- end loop
    ])
+
+(deftest testing-a-model
+  (let [state {}
+        onyx-job (o/workspace->onyx-job
+                  (workspace
+                   {:workflow ccm-workflow
+                    :catalog ccm-catalog}) config)
+        onyx-job' (-> onyx-job
+                      (assoc :lifecycles lifecycles
+                             :flow-conditions [])
+                      (update :catalog conj catalog-entry-in)
+                      (update :catalog conj catalog-entry-out))]
+
+    #_(testing "Run local onyx job"
+        (doseq [segment input-segments]
+          (>!! input-chan segment))
+        (close! input-chan)
+        (let [env        (onyx.api/start-env env-config)
+              peer-group (onyx.api/start-peer-group peer-config)
+              n-peers    (count (set (mapcat identity workflow)))
+              v-peers    (onyx.api/start-peers n-peers peer-group)
+              _          (onyx.api/submit-job
+                          peer-config
+                          onyx-job')
+              results (take-segments! output-chan)]
+
+          (doseq [v-peer v-peers]
+            (onyx.api/shutdown-peer v-peer))
+          (onyx.api/shutdown-peer-group peer-group)
+          (onyx.api/shutdown-env env)
+
+          (is (= results [{:number 1 :foo 1}
+                          {:number 2 :foo 2}
+                          {:number 3 :foo 3}
+                          {:number 4 :foo 4}
+                          {:number 5 :foo 5}
+                          {:number 6 :foo 6}
+                          :done]))))))
