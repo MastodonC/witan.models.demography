@@ -208,8 +208,8 @@
    :proj-intl-out-migrants     {:var #'witan.models.dem.ccm.mig.net-migration/project-international-out-migrants
                                 :params {:start-yr-avg-inter-mig 2003
                                          :end-yr-avg-inter-mig 2014}}
-   :keep-looping?              {:var #'witan.models.dem.ccm.core.projection-loop/keep-looping?
-                                :params {:last-proj-year 2015}}})
+   :finish-looping?              {:var #'witan.models.dem.ccm.core.projection-loop/finish-looping?
+                                  :params {:last-proj-year 2015}}})
 
 (def inputs
   {:in-historic-popn                  {:chan (chan)
@@ -256,9 +256,13 @@
 (defn workflow-fn-to-catalog
   "Take a defworkflowfn var and convert to a witan workspace catalog entry"
   ([task-name var params]
-   (let [{:keys [witan/doc witan/param-schema]} (get (meta var) :witan/workflowfn)]
+   (let [{:keys [witan/doc witan/param-schema]} (or (get (meta var) :witan/workflowfn)
+                                                    (get (meta var) :witan/workflowpred))]
      (merge
-      (when params {:witan/params (s/validate param-schema params)})
+      (when params
+        (if param-schema
+          {:witan/params (s/validate param-schema params)}
+          (throw (Exception. (str task-name " has params but no param-schema")))))
       {:witan/name task-name
        :witan/fn (-> var (str) (subs 2) (keyword))})))
   ([task-name var]
@@ -307,10 +311,10 @@
    [:project-births       :age-on]
    [:age-on               :add-births]
    [:add-births           :remove-deaths]
-   [:project-deaths       :remove-deaths] ;; TODO MERGE NO WORKY
+   [:project-deaths       :remove-deaths]
    [:remove-deaths        :apply-migration]
    [:apply-migration      :join-popn-latest-yr]
-   ;;[:join-popn-latest-yr  [:keep-looping? :select-starting-popn :out]]
+   [:join-popn-latest-yr  [:finish-looping? :out :select-starting-popn]]
    [:join-popn-latest-yr  :out]
    ;; --- end loop
    ])
@@ -322,10 +326,10 @@
                    {:workflow ccm-workflow
                     :catalog ccm-catalog}) config)
         onyx-job' (-> onyx-job
-                      (assoc :lifecycles lifecycles
-                             :flow-conditions [])
+                      (assoc :lifecycles lifecycles)
                       (update :catalog conj catalog-entry-in)
                       (update :catalog conj catalog-entry-out))]
+    (clojure.pprint/pprint onyx-job')
 
     #_(testing "Run local onyx job"
         (doseq [segment input-segments]

@@ -12,7 +12,7 @@
   :target-path "target/%s"
   :profiles {:dev {:resource-paths ["dev-resources"]
                    :dependencies [[commons-codec "1.10"]
-                                  [witan.workspace "0.1.0" :exclusions [org.clojure/clojure clj-kafka commons-codec prismatic/schema]]
+                                  [witan.workspace "0.1.1" :exclusions [org.clojure/clojure clj-kafka commons-codec prismatic/schema]]
                                   [org.onyxplatform/onyx "0.9.4" :exclusions [commons-codec]]]}
              :uberjar {:aot :all}}
   :exclusions [prismatic/schema org.clojure/clojure])
