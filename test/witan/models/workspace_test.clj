@@ -8,6 +8,7 @@
              [witan.workspace-api :refer [defworkflowfn]]
              [witan.workspace-api.onyx :refer [default-fn-wrapper
                                                default-pred-wrapper]]
+             [witan.models.load-data :refer [load-dataset]]
              ;;
              [witan.models.dem.ccm.fert.fertility-mvp]
              [witan.models.dem.ccm.mort.mortality-mvp]
@@ -33,6 +34,8 @@
 
 (def id (java.util.UUID/randomUUID))
 
+(def ccm-batch-size 1)
+
 (def env-config
   {:zookeeper/address "127.0.0.1:2188"
    :zookeeper/server? true
@@ -49,131 +52,28 @@
 
 (def capacity 1000)
 
-(def input-chan (chan capacity))
-
 (def output-chan (chan capacity))
-
-(defn inject-in-ch [event lifecycle]
-  {:core.async/chan input-chan})
 
 (defn inject-out-ch [event lifecycle]
   {:core.async/chan output-chan})
-
-(def in-calls
-  {:lifecycle/before-task-start inject-in-ch})
 
 (def out-calls
   {:lifecycle/before-task-start inject-out-ch})
 
 (def lifecycles
-  [{:lifecycle/task :in
-    :lifecycle/calls :witan.models.workspace-test/in-calls}
-   {:lifecycle/task :in
-    :lifecycle/calls :onyx.plugin.core-async/reader-calls}
-   {:lifecycle/task :out
+  [{:lifecycle/task :out
     :lifecycle/calls :witan.models.workspace-test/out-calls}
    {:lifecycle/task :out
     :lifecycle/calls :onyx.plugin.core-async/writer-calls}])
-
-(def batch-size 10)
-
-(def catalog-entry-in
-  {:onyx/name :in
-   :onyx/plugin :onyx.plugin.core-async/input
-   :onyx/type :input
-   :onyx/medium :core.async
-   :onyx/batch-size batch-size
-   :onyx/max-peers 1
-   :in/chan "foo"
-   :onyx/doc "Reads segments from a core.async channel"})
 
 (def catalog-entry-out
   {:onyx/name :out
    :onyx/plugin :onyx.plugin.core-async/output
    :onyx/type :output
    :onyx/medium :core.async
-   :onyx/batch-size batch-size
+   :onyx/batch-size ccm-batch-size
    :onyx/max-peers 1
    :onyx/doc "Writes segments to a core.async channel"})
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defworkflowfn inc-test
-  "This is a test function which will increment a number
-  passed into it."
-  {:witan/name :_
-   :witan/version "1.0"
-   :witan/input-schema {:number s/Int}
-   :witan/output-schema {:number s/Int}}
-  [{:keys [number]} _]
-  {:number (inc number)})
-
-(defworkflowfn duplicate-test
-  "This is a test function which will duplicate a key
-  into another key"
-  {:witan/name :_
-   :witan/version "1.0"
-   :witan/input-schema {:* s/Any}
-   :witan/param-schema {:from s/Keyword
-                        :to s/Keyword}
-   :witan/output-schema {:* s/Any}}
-  [m {:keys [from to]}]
-  (hash-map to (get m from)))
-
-(deftest testing-a-model
-  (let [input-segments  [{:number 0}
-                         {:number 1}
-                         {:number 2}
-                         {:number 3}
-                         {:number 4}
-                         {:number 5}
-                         :done]
-        workflow [[:in :inc]
-                  [:inc :dupe]
-                  [:dupe :out]]
-        onyx-job
-        (o/workspace->onyx-job
-         (workspace
-          {:workflow workflow
-           :catalog [{:witan/name :inc
-                      :witan/fn :witan.models.workspace-test/inc-test}
-                     {:witan/name :dupe
-                      :witan/fn :witan.models.workspace-test/duplicate-test
-                      :witan/params {:from :number :to :foo}}]}) config)
-        onyx-job' (-> onyx-job
-                      (assoc :lifecycles lifecycles
-                             :flow-conditions [])
-                      (update :catalog conj catalog-entry-in)
-                      (update :catalog conj catalog-entry-out))]
-
-    (testing "Run local onyx job"
-      (doseq [segment input-segments]
-        (>!! input-chan segment))
-      (close! input-chan)
-      (let [env        (onyx.api/start-env env-config)
-            peer-group (onyx.api/start-peer-group peer-config)
-            n-peers    (count (set (mapcat identity workflow)))
-            v-peers    (onyx.api/start-peers n-peers peer-group)
-            _          (onyx.api/submit-job
-                        peer-config
-                        onyx-job')
-            results (take-segments! output-chan)]
-
-        (doseq [v-peer v-peers]
-          (onyx.api/shutdown-peer v-peer))
-        (onyx.api/shutdown-peer-group peer-group)
-        (onyx.api/shutdown-env env)
-
-        (is (= results [{:number 1 :foo 1}
-                        {:number 2 :foo 2}
-                        {:number 3 :foo 3}
-                        {:number 4 :foo 4}
-                        {:number 5 :foo 5}
-                        {:number 6 :foo 6}
-                        :done]))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Real Model Test
 
 (def tasks
   {:proj-historic-asfr         {:var #'witan.models.dem.ccm.fert.fertility-mvp/project-asfr-finalyrhist-fixed
@@ -212,22 +112,22 @@
                                   :params {:last-proj-year 2015}}})
 
 (def inputs
-  {:in-historic-popn                  {:chan (chan)
-                                       :src "test_data/model_inputs/bristol_hist_popn_mye.csv"}
-   :in-projd-births-by-age-of-mother  {:chan (chan)
-                                       :src "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"}
-   :in-historic-total-births          {:chan (chan)
-                                       :src "test_data/model_inputs/fert/bristol_hist_births_mye.csv"}
-   :in-historic-deaths-by-age-and-sex {:chan (chan)
-                                       :src "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"}
-   :in-historic-dom-in-migrants       {:chan (chan)
-                                       :src "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"}
-   :in-historic-dom-out-migrants      {:chan (chan)
-                                       :src "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"}
-   :in-historic-intl-in-migrants      {:chan (chan)
-                                       :src "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"}
-   :in-historic-intl-out-migrants     {:chan (chan)
-                                       :src "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"}})
+  {:in-historic-popn                  {:src "test_data/model_inputs/bristol_hist_popn_mye.csv"
+                                       :key :historic-population}
+   :in-projd-births-by-age-of-mother  {:src "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
+                                       :key :ons-proj-births-by-age-mother}
+   :in-historic-total-births          {:src "test_data/model_inputs/fert/bristol_hist_births_mye.csv"
+                                       :key :historic-births}
+   :in-historic-deaths-by-age-and-sex {:src "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"
+                                       :key :historic-deaths}
+   :in-historic-dom-in-migrants       {:src "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
+                                       :key :domestic-in-migrants}
+   :in-historic-dom-out-migrants      {:src "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
+                                       :key :domestic-out-migrants}
+   :in-historic-intl-in-migrants      {:src "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"
+                                       :key :international-in-migrants}
+   :in-historic-intl-out-migrants     {:src "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"
+                                       :key :international-out-migrants}})
 
 (defn inject-channel [event lifecycle]
   {:core.async/chan (get-in event [:onyx.core/task-map :in/chan])})
@@ -243,7 +143,7 @@
     :lifecycle/calls :onyx.plugin.core-async/reader-calls}])
 
 (defn input-to-catalog
-  [ch batch-size input]
+  [ch batch-size input {:keys [src key]}]
   {:onyx/name input
    :onyx/plugin :onyx.plugin.core-async/input
    :onyx/type :input
@@ -251,7 +151,15 @@
    :onyx/batch-size batch-size
    :onyx/max-peers 1
    :in/chan ch
+   :in/src src
+   :in/key key
    :onyx/doc "Reads segments from a core.async channel"})
+
+(def input-catalog
+  (mapv (fn [[k v]] (input-to-catalog (chan 10) ccm-batch-size k v)) inputs))
+
+(def input-lifecycles
+  (vec (mapcat input-to-lifecycle (keys inputs))))
 
 (defn workflow-fn-to-catalog
   "Take a defworkflowfn var and convert to a witan workspace catalog entry"
@@ -268,21 +176,19 @@
   ([task-name var]
    (workflow-fn-to-catalog task-name var nil)))
 
-(def ccm-batch-size 1)
-
 (def ccm-catalog
   (mapv (fn [[k {:keys [var params]}]] (workflow-fn-to-catalog k var params)) tasks))
-
-;; (mapv (fn [[k v]] (input-to-catalog (:chan v) ccm-batch-size k)) inputs)
 
 (def ccm-workflow
   [;; inputs for asfr
    [:in-historic-popn                 :calc-historic-asfr]
-   [:in-projd-births-by-age-of-mother :calc-historic-asfr]
    [:in-historic-total-births         :calc-historic-asfr]
+   [:in-projd-births-by-age-of-mother :calc-historic-asfr]
+
 
    ;; inputs for asmr
    [:in-historic-popn                  :calc-historic-asmr]
+   [:in-historic-total-births          :calc-historic-asmr]
    [:in-historic-deaths-by-age-and-sex :calc-historic-asmr]
 
    ;; inputs for mig
@@ -315,41 +221,41 @@
    [:remove-deaths        :apply-migration]
    [:apply-migration      :join-popn-latest-yr]
    [:join-popn-latest-yr  [:finish-looping? :out :select-starting-popn]]
-   [:join-popn-latest-yr  :out]
    ;; --- end loop
    ])
 
 (deftest testing-a-model
-  (let [state {}
-        onyx-job (o/workspace->onyx-job
+  (let [onyx-job (o/workspace->onyx-job
                   (workspace
                    {:workflow ccm-workflow
                     :catalog ccm-catalog}) config)
         onyx-job' (-> onyx-job
                       (assoc :lifecycles lifecycles)
-                      (update :catalog conj catalog-entry-in)
-                      (update :catalog conj catalog-entry-out))]
-    (clojure.pprint/pprint onyx-job')
+                      (update :lifecycles concat input-lifecycles)
+                      (update :catalog conj catalog-entry-out)
+                      (update :catalog concat input-catalog))]
+    #_(clojure.pprint/pprint (:catalog onyx-job'))
 
-    #_(testing "Run local onyx job"
-        (doseq [segment input-segments]
-          (>!! input-chan segment))
-        (close! input-chan)
-        (let [env        (onyx.api/start-env env-config)
-              peer-group (onyx.api/start-peer-group peer-config)
-              n-peers    (count (set (mapcat identity workflow)))
-              v-peers    (onyx.api/start-peers n-peers peer-group)
-              _          (onyx.api/submit-job
-                          peer-config
-                          onyx-job')
-              results (take-segments! output-chan)]
+    (testing "Run the model"
+      (doseq [{:keys [in/chan in/src in/key]} input-catalog]
+        (>!! chan (load-dataset key src))
+        (>!! chan :done)
+        (close! chan))
 
-          (doseq [v-peer v-peers]
-            (onyx.api/shutdown-peer v-peer))
-          (onyx.api/shutdown-peer-group peer-group)
-          (onyx.api/shutdown-env env)
+      (let [env        (onyx.api/start-env env-config)
+            peer-group (onyx.api/start-peer-group peer-config)
+            n-peers    (count (set (mapcat identity ccm-workflow)))
+            v-peers    (onyx.api/start-peers n-peers peer-group)
+            _          (onyx.api/submit-job peer-config onyx-job')
+            results (take-segments! output-chan)]
 
-          (is (= results [{:number 1 :foo 1}
+        (doseq [v-peer v-peers]
+          (onyx.api/shutdown-peer v-peer))
+        (onyx.api/shutdown-peer-group peer-group)
+        (onyx.api/shutdown-env env)
+
+        (clojure.pprint/pprint (keys results))
+        #_(is (= results [{:number 1 :foo 1}
                           {:number 2 :foo 2}
                           {:number 3 :foo 3}
                           {:number 4 :foo 4}
