@@ -7,7 +7,7 @@
 
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
-;;Historical migration data
+;; Historical migration data
 (def migration-data (ld/load-datasets {:domestic-in-migrants
                                        "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
                                        :domestic-out-migrants
@@ -17,8 +17,8 @@
                                        :international-out-migrants
                                        "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"}))
 
-;;Following 4 datasets are averages of historical migration data calculated in the R model
-;;using the equivalent of the jumpoffyr-method-average function
+;; Following 4 datasets are averages of historical migration data calculated in the R model
+;; using the equivalent of the jumpoffyr-method-average function
 (def dom-in-averages (ld/load-dataset :dom-in-averages
                                       "test_data/r_outputs_for_testing/mig/bristol_proj_domestic_inmigrants_valuesavgfixed.csv"))
 
@@ -30,6 +30,10 @@
 
 (def inter-out-averages (ld/load-dataset :inter-out-averages
                                          "test_data/r_outputs_for_testing/mig/bristol_proj_international_outmigrants_valuesavgfixed.csv"))
+
+;; Output of the trends for domestic in-migrants calculated in R
+(def trends-domin (ld/load-dataset :dom-in-trends
+                                   "test_data/r_outputs_for_testing/mig/bristol_trends_domestic_inmigrants.csv"))
 
 (deftest jumpoffyr-method-average-test
   (testing "The function return the averages on the right year period"
@@ -61,3 +65,13 @@
       (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :intin)
                                (i/sel joined-averages :rows % :cols :international-in) 0.0000000001)
                   (range (first (:shape joined-averages))))))))
+
+(deftest jumpoffyr-method-trend-test
+  (testing "Check the function replicates the one in the R code."
+    (let [r-results (:dom-in-trends trends-domin)
+          clj-results (jumpoffyr-method-trend (:domestic-in-migrants migration-data)
+                                              :estimate :domestic-in-clj 2003 2014)
+          joined-trends (wds/join r-results clj-results [:gss-code :sex :age])]
+      (is (every? #(fp-equals? (i/sel joined-trends :rows % :cols :domestic-in)
+                               (i/sel joined-trends :rows % :cols :domestic-in-clj) 0.0000001)
+                  (range (first (:shape joined-trends))))))))

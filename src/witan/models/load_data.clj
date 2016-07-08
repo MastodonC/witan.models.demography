@@ -170,6 +170,11 @@
   {:column-names (apply-col-names-schema BirthsAgeSexMotherSchema csv-data)
    :columns (vec (apply-row-schema BirthsAgeSexMotherSchema csv-data))})
 
+(defmethod apply-record-coercion :dom-in-trends
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema ProjDomInSchema csv-data)
+   :columns (vec (apply-row-schema ProjDomInSchema csv-data))})
+
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))
