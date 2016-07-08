@@ -1,95 +1,102 @@
 (ns witan.models.workspace-test
-  (:require  [clojure.test :refer :all]
-             [schema.core :as s]
-             [clojure.core.async :refer [chan >!! <!! close!]]
-             [onyx.plugin.core-async :refer [take-segments!]]
-             [onyx.api]
-             [witan.workspace.onyx :as o]
-             [witan.workspace-api :refer [defworkflowfn]]
-             [witan.workspace-api.onyx :refer [default-fn-wrapper
-                                               default-pred-wrapper]]
-             [witan.models.load-data :refer [load-dataset]]
-             ;;
-             [witan.models.dem.ccm.fert.fertility-mvp]
-             [witan.models.dem.ccm.mort.mortality-mvp]
-             [witan.models.dem.ccm.mig.net-migration]
-             [witan.models.dem.ccm.core.projection-loop]))
+  (:require [clojure.test :refer :all]
+            [schema.test :as st]
+            [schema.core :as s]
+            [clojure.core.async :refer [pipe <!! put! close!]]
+            [clojure.core.async.lab :refer [spool]]
+            [witan.workspace.onyx :as o]
+            [witan.models.functions :as fc]
+            [onyx
+             [job :refer [add-task]]
+             [test-helper :refer [with-test-env]]]
+            [onyx.plugin
+             [redis]
+             [core-async :refer [get-core-async-channels]]]
+            [onyx.tasks
+             [core-async :as core-async]
+             [redis :as redis]]
+            [witan.models.config :refer [config]]
+            [witan.models.load-data :refer [load-dataset]]
+            ;;
+            [witan.models.dem.ccm.fert.fertility-mvp]
+            [witan.models.dem.ccm.mort.mortality-mvp]
+            [witan.models.dem.ccm.mig.net-migration]
+            [witan.models.dem.ccm.core.projection-loop]))
 
-(defn workspace
-  [{:keys [workflow contracts catalog] :as raw}]
-  (->
-   raw
-   (assoc :workflow (or workflow []))
-   (assoc :contracts (or contracts []))
-   (assoc :catalog (or catalog []))))
+(defn add-source-and-sink
+  [job]
+  (-> job
+      (add-task (core-async/input :in (:batch-settings config)))
+      (add-task (core-async/output :out (:batch-settings config)))))
 
-(def config
-  {:redis-config {:redis/uri "redis"}
-   :batch-settings {:onyx/batch-size 1
-                    :onyx/batch-timeout 1000}
-   :fn-wrapper :witan.workspace-api.onyx/default-fn-wrapper
-   :pred-wrapper :witan.workspace-api.onyx/default-pred-wrapper})
+(defn run-job
+  ([job data]
+   (run-job job data 7))
+  ([job data n]
+   (let [{:keys [env-config
+                 peer-config]} config
+         {:keys [out in]} (get-core-async-channels job)]
+     (with-test-env [test-env [n env-config peer-config]]
+       (pipe (spool [data :done]) in)
+       (onyx.test-helper/validate-enough-peers! test-env job)
+       (let [job-id (:job-id (onyx.api/submit-job peer-config job))
+             result (<!! out)]
+         (onyx.api/await-job-completion peer-config job-id)
+         result)))))
+
+;; Execute before task
+#_(defn log-before-batch
+    [event lifecycle]
+    (println "Executing before batch" (:lifecycle/task lifecycle))
+    {})
+
+#_(def log-calls
+    {:lifecycle/before-batch log-before-batch})
+
+#_(deftest loop+merge-workspace-executed-on-onyx
+    (let [state {:test "blah" :number 2}
+          onyx-job (add-source-and-sink
+                    (o/workspace->onyx-job
+                     {:workflow [[:in   :inc]
+                                 [:in   :mul2]
+                                 [:inc  :dupe]
+                                 [:dupe [:enough? :mulX :inc]]
+                                 [:mul2 :dupe2]
+                                 [:dupe2 :merge]
+                                 [:mulX :merge]
+                                 [:merge :out]]
+                      :catalog [{:witan/name :inc
+                                 :witan/fn :witan.models.functions/my-inc}
+                                {:witan/name :mul2
+                                 :witan/fn :witan.models.functions/mul2}
+                                {:witan/name :dupe
+                                 :witan/fn :witan.models.functions/dupe
+                                 :witan/params {:from :number
+                                                :to :foo}}
+                                {:witan/name :dupe2
+                                 :witan/fn :witan.models.functions/dupe
+                                 :witan/params {:from :number
+                                                :to :foo2}}
+                                {:witan/name :mulX
+                                 :witan/fn :witan.models.functions/mulX
+                                 :witan/params {:x 4}}
+                                {:witan/name :merge
+                                 :witan/fn :clojure.core/identity}
+                                {:witan/name :enough?
+                                 :witan/fn :witan.models.functions/gte-ten}]}
+                     config))
+          onyx-job' onyx-job
+          #_(update onyx-job :lifecycles concat [{:lifecycle/task :inc
+                                                  :lifecycle/calls :witan.workspace.acceptance.onyx-test/log-calls}
+                                                 {:lifecycle/task :dupe
+                                                  :lifecycle/calls :witan.workspace.acceptance.onyx-test/log-calls}
+                                                 {:lifecycle/task :mulX
+                                                  :lifecycle/calls :witan.workspace.acceptance.onyx-test/log-calls}])
+          result (run-job onyx-job' state 13)
+          prediction {:test "blah", :number 40, :foo2 4, :foo 10}]
+      (is (= result prediction))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def id (java.util.UUID/randomUUID))
-
-(def ccm-batch-size 1)
-
-(def env-config
-  {:zookeeper/address "127.0.0.1:2188"
-   :zookeeper/server? true
-   :zookeeper.server/port 2188
-   :onyx/tenancy-id id})
-
-(def peer-config
-  {:zookeeper/address "127.0.0.1:2188"
-   :onyx/tenancy-id id
-   :onyx.peer/job-scheduler :onyx.job-scheduler/balanced
-   :onyx.messaging/impl :aeron
-   :onyx.messaging/peer-port 40200
-   :onyx.messaging/bind-addr "localhost"})
-
-(def capacity 1000)
-
-(def output-chan (chan capacity))
-
-(defn inject-out-ch [event lifecycle]
-  {:core.async/chan output-chan})
-
-(def out-calls
-  {:lifecycle/before-task-start inject-out-ch})
-
-;; Executing before batch
-(defn log-before-batch
-  [event lifecycle]
-  (println "Executing before batch" (:lifecycle/task lifecycle))
-  {})
-
-;; Executing after batch
-(defn log-after-batch
-  [event lifecycle]
-  (println "Executing after batch" (:lifecycle/task lifecycle))
-  {})
-
-(def log-calls
-  {:lifecycle/before-batch log-before-batch
-   :lifecycle/after-batch log-after-batch})
-
-(def lifecycles
-  [{:lifecycle/task :out
-    :lifecycle/calls :witan.models.workspace-test/out-calls}
-   {:lifecycle/task :out
-    :lifecycle/calls :onyx.plugin.core-async/writer-calls}])
-
-(def catalog-entry-out
-  {:onyx/name :out
-   :onyx/plugin :onyx.plugin.core-async/output
-   :onyx/type :output
-   :onyx/medium :core.async
-   :onyx/batch-size ccm-batch-size
-   :onyx/max-peers 1
-   :onyx/doc "Writes segments to a core.async channel"})
 
 (def tasks
   {:proj-historic-asfr         {:var #'witan.models.dem.ccm.fert.fertility-mvp/project-asfr-finalyrhist-fixed
@@ -102,7 +109,6 @@
    :proj-domestic-in-migrants  {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-in-migrants
                                 :params {:start-yr-avg-dom-mig 2003
                                          :end-yr-avg-dom-mig 2014}}
-   ;;:incr-year                  {:var nil}
    :calc-historic-asmr         {:var #'witan.models.dem.ccm.mort.mortality-mvp/calc-historic-asmr}
    :proj-domestic-out-migrants {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-out-migrants
                                 :params {:start-yr-avg-dom-mig 2003
@@ -124,75 +130,100 @@
    :proj-intl-out-migrants     {:var #'witan.models.dem.ccm.mig.net-migration/project-international-out-migrants
                                 :params {:start-yr-avg-inter-mig 2003
                                          :end-yr-avg-inter-mig 2014}}
-   :finish-looping?              {:var #'witan.models.dem.ccm.core.projection-loop/finish-looping?
-                                  :params {:last-proj-year 2015}}})
+   :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finish-looping?
+                                :params {:last-proj-year 2015}}})
 
 (def inputs
   {:in-historic-popn                  {:src "test_data/model_inputs/bristol_hist_popn_mye.csv"
                                        :key :historic-population}
-   :in-projd-births-by-age-of-mother  {:src "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
-                                       :key :ons-proj-births-by-age-mother}
    :in-historic-total-births          {:src "test_data/model_inputs/fert/bristol_hist_births_mye.csv"
                                        :key :historic-births}
-   :in-historic-deaths-by-age-and-sex {:src "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"
-                                       :key :historic-deaths}
-   :in-historic-dom-in-migrants       {:src "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
-                                       :key :domestic-in-migrants}
-   :in-historic-dom-out-migrants      {:src "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
-                                       :key :domestic-out-migrants}
-   :in-historic-intl-in-migrants      {:src "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"
-                                       :key :international-in-migrants}
-   :in-historic-intl-out-migrants     {:src "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"
-                                       :key :international-out-migrants}})
+   :in-projd-births-by-age-of-mother  {:src "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
+                                       :key :ons-proj-births-by-age-mother}
+   ;; :in-historic-deaths-by-age-and-sex {:src "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"
+   ;;                                     :key :historic-deaths}
+   ;; :in-historic-dom-in-migrants       {:src "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
+   ;;                                     :key :domestic-in-migrants}
+   ;; :in-historic-dom-out-migrants      {:src "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
+   ;;                                     :key :domestic-out-migrants}
+   ;; :in-historic-intl-in-migrants      {:src "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"
+   ;;                                     :key :international-in-migrants}
+   ;; :in-historic-intl-out-migrants     {:src "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"
+   ;;                                     :key :international-out-migrants}
+   })
 
-(defmacro make-input-calls [& forms]
-  `(do ~@(for [name forms]
-           (let [namestr (subs (str name) 1)
-                 sy-chan   (symbol (str namestr "-chan"))
-                 sy-inject (symbol (str namestr "-inject-channel"))
-                 sy-inputs (symbol (str namestr "-input-calls"))]
-             `(do (def ~sy-chan   (chan 100))
-                  (defn ~sy-inject [e# l#] (println "I AM STARTING") {:core.async/chan ~sy-chan})
-                  (def ~sy-inputs {:lifecycle/before-task-start ~sy-inject
-                                   :lifecycle/before-batch log-before-batch
-                                   :lifecycle/after-batch log-after-batch}))))))
+(def ccm-workflow
+  [;; inputs for asfr
+   [:in-historic-popn                 :calc-historic-asfr]
+   [:in-historic-total-births         :calc-historic-asfr]
+   [:in-projd-births-by-age-of-mother :calc-historic-asfr]
 
-(make-input-calls
- :in-historic-popn
- :in-projd-births-by-age-of-mother
- :in-historic-total-births
- :in-historic-deaths-by-age-and-sex
- :in-historic-dom-in-migrants
- :in-historic-dom-out-migrants
- :in-historic-intl-in-migrants
- :in-historic-intl-out-migrants)
+   [:calc-historic-asfr               :out]
 
-(defmacro input-to-lifecycle
-  [input]
-  `[{:lifecycle/task ~input
-     :lifecycle/calls (keyword (str "witan.models.workspace-test/" (subs (str ~input) 1) "-input-calls"))}
-    {:lifecycle/task ~input
-     :lifecycle/calls :onyx.plugin.core-async/reader-calls}])
+   ;; ;; inputs for asmr
+   ;; [:in-historic-popn                  :calc-historic-asmr]
+   ;; [:in-historic-total-births          :calc-historic-asmr]
+   ;; [:in-historic-deaths-by-age-and-sex :calc-historic-asmr]
 
-(defn input-to-catalog
-  [batch-size input]
-  {:onyx/name input
-   :onyx/plugin :onyx.plugin.core-async/input
-   :onyx/type :input
-   :onyx/medium :core.async
-   :onyx/batch-size batch-size
-   :onyx/max-peers 1
-   :onyx/doc "Reads segments from a core.async channel"})
+   ;; ;; inputs for mig
+   ;; [:in-historic-dom-in-migrants   :proj-domestic-in-migrants]
+   ;; [:in-historic-dom-out-migrants  :proj-domestic-out-migrants]
+   ;; [:in-historic-intl-in-migrants  :proj-intl-in-migrants]
+   ;; [:in-historic-intl-out-migrants :proj-intl-out-migrants]
 
-(def input-catalog
-  (mapv (fn [[k _]] (input-to-catalog ccm-batch-size k)) inputs))
+   ;; ;; asfr/asmr projections
+   ;; [:calc-historic-asfr :proj-historic-asfr]
+   ;; [:calc-historic-asmr :proj-historic-asmr]
 
-(def input-lifecycles
-  (vec (mapcat #(input-to-lifecycle %) (keys inputs))))
+   ;; ;; pre-loop merge
+   ;; [:proj-historic-asfr         :select-starting-popn]
+   ;; [:proj-historic-asmr         :select-starting-popn]
+   ;; [:proj-domestic-in-migrants  :select-starting-popn]
+   ;; [:proj-domestic-out-migrants :select-starting-popn]
+   ;; [:proj-intl-in-migrants      :select-starting-popn]
+   ;; [:proj-intl-out-migrants     :select-starting-popn]
+   ;; ;; - inputs for popn
+   ;; [:in-historic-popn           :select-starting-popn]
 
-(defn get-channel-from-kw
-  [kw]
-  (var-get (ns-resolve 'witan.models.workspace-test (symbol (str (name kw) "-chan")))))
+   ;; ;; --- start popn loop
+   ;; [:select-starting-popn :project-births]
+   ;; [:select-starting-popn :project-deaths]
+   ;; [:project-births       :age-on]
+   ;; [:age-on               :add-births]
+   ;; [:add-births           :remove-deaths]
+   ;; [:project-deaths       :remove-deaths]
+   ;; [:remove-deaths        :apply-migration]
+   ;; [:apply-migration      :join-popn-latest-yr]
+   ;; [:join-popn-latest-yr  [:finish-looping? :out :select-starting-popn]]
+   ;; --- end loop
+   ])
+
+(defn run-job*
+  ([job inputs n]
+   (let [{:keys [env-config
+                 peer-config]} config
+         {:keys [out]} (get-core-async-channels job)]
+     ;;
+     (doseq [[k {:keys [src key]}] inputs]
+       (let [ch (get (get-core-async-channels job) k)
+             data (load-dataset key src)]
+         (if data
+           (do
+             (println "Loading data for" k ">" src "into" key)
+             (spool [data :done] ch))
+           (throw (Exception. (str "Failed to load data: " src))))))
+
+     (with-test-env [test-env [n env-config peer-config]]
+       (onyx.test-helper/validate-enough-peers! test-env job)
+       (let [job-id (:job-id (onyx.api/submit-job peer-config job))
+             result (<!! out)]
+         (onyx.api/await-job-completion peer-config job-id)
+         result)))))
+
+(defn add-inputs-and-outputs
+  [input-keys job]
+  (-> (reduce (fn [job' next-input] (add-task job' (core-async/input next-input (:batch-settings config)))) job input-keys)
+      (add-task (core-async/output :out (:batch-settings config)))))
 
 (defn workflow-fn-to-catalog
   "Take a defworkflowfn var and convert to a witan workspace catalog entry"
@@ -212,90 +243,15 @@
 (def ccm-catalog
   (mapv (fn [[k {:keys [var params]}]] (workflow-fn-to-catalog k var params)) tasks))
 
-(def ccm-workflow
-  [;; inputs for asfr
-   [:in-historic-popn                 :calc-historic-asfr]
-   [:in-historic-total-births         :calc-historic-asfr]
-   [:in-projd-births-by-age-of-mother :calc-historic-asfr]
-
-
-   ;; inputs for asmr
-   [:in-historic-popn                  :calc-historic-asmr]
-   [:in-historic-total-births          :calc-historic-asmr]
-   [:in-historic-deaths-by-age-and-sex :calc-historic-asmr]
-
-   ;; inputs for mig
-   [:in-historic-dom-in-migrants   :proj-domestic-in-migrants]
-   [:in-historic-dom-out-migrants  :proj-domestic-out-migrants]
-   [:in-historic-intl-in-migrants  :proj-intl-in-migrants]
-   [:in-historic-intl-out-migrants :proj-intl-out-migrants]
-
-   ;; asfr/asmr projections
-   [:calc-historic-asfr :proj-historic-asfr]
-   [:calc-historic-asmr :proj-historic-asmr]
-
-   ;; pre-loop merge
-   [:proj-historic-asfr         :select-starting-popn]
-   [:proj-historic-asmr         :select-starting-popn]
-   [:proj-domestic-in-migrants  :select-starting-popn]
-   [:proj-domestic-out-migrants :select-starting-popn]
-   [:proj-intl-in-migrants      :select-starting-popn]
-   [:proj-intl-out-migrants     :select-starting-popn]
-   ;; - inputs for popn
-   [:in-historic-popn           :select-starting-popn]
-
-   ;; --- start popn loop
-   [:select-starting-popn :project-births]
-   [:select-starting-popn :project-deaths]
-   [:project-births       :age-on]
-   [:age-on               :add-births]
-   [:add-births           :remove-deaths]
-   [:project-deaths       :remove-deaths]
-   [:remove-deaths        :apply-migration]
-   [:apply-migration      :join-popn-latest-yr]
-   [:join-popn-latest-yr  [:finish-looping? :out :select-starting-popn]]
-   ;; --- end loop
-   ])
-
-(deftest testing-a-model
-  (let [onyx-job (o/workspace->onyx-job
-                  (workspace
+(deftest workspace-test
+  (let [onyx-job (add-inputs-and-outputs
+                  (keys inputs)
+                  (o/workspace->onyx-job
                    {:workflow ccm-workflow
-                    :catalog ccm-catalog}) config)
-        onyx-job' (-> onyx-job
-                      (assoc :lifecycles lifecycles)
-                      (update :lifecycles (comp vec concat) input-lifecycles)
-                      (update :catalog conj catalog-entry-out)
-                      (update :catalog (comp vec concat) input-catalog))]
-    (clojure.pprint/pprint onyx-job')
-
-    (testing "Run the model"
-      (doseq [[k {:keys [src key]}] inputs]
-        (let [ch (get-channel-from-kw k)]
-          (println k ">" src "into" key)
-          (>!! ch (load-dataset key src))
-          (>!! ch :done)
-          (close! ch)))
-
-      (let [env        (onyx.api/start-env env-config)
-            peer-group (onyx.api/start-peer-group peer-config)
-            n-peers    (count (set (mapcat identity ccm-workflow)))
-            v-peers    (onyx.api/start-peers n-peers peer-group)
-            _          (onyx.api/submit-job peer-config onyx-job')
-            _ (println "Job has been submit")
-            results    (take-segments! output-chan)
-            _ (println "Results are in")]
-
-        (doseq [v-peer v-peers]
-          (onyx.api/shutdown-peer v-peer))
-        (onyx.api/shutdown-peer-group peer-group)
-        (onyx.api/shutdown-env env)
-
-        (clojure.pprint/pprint (keys results))
-        #_(is (= results [{:number 1 :foo 1}
-                          {:number 2 :foo 2}
-                          {:number 3 :foo 3}
-                          {:number 4 :foo 4}
-                          {:number 5 :foo 5}
-                          {:number 6 :foo 6}
-                          :done]))))))
+                    :catalog ccm-catalog}
+                   config))]
+    (run-job* onyx-job inputs (->> onyx-job
+                                   :workflow
+                                   (mapcat identity)
+                                   (set)
+                                   (count)))))
