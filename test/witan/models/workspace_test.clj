@@ -60,6 +60,22 @@
 (def out-calls
   {:lifecycle/before-task-start inject-out-ch})
 
+;; Executing before batch
+(defn log-before-batch
+  [event lifecycle]
+  (println "Executing before batch" (:lifecycle/task lifecycle))
+  {})
+
+;; Executing after batch
+(defn log-after-batch
+  [event lifecycle]
+  (println "Executing after batch" (:lifecycle/task lifecycle))
+  {})
+
+(def log-calls
+  {:lifecycle/before-batch log-before-batch
+   :lifecycle/after-batch log-after-batch})
+
 (def lifecycles
   [{:lifecycle/task :out
     :lifecycle/calls :witan.models.workspace-test/out-calls}
@@ -129,37 +145,54 @@
    :in-historic-intl-out-migrants     {:src "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"
                                        :key :international-out-migrants}})
 
-(defn inject-channel [event lifecycle]
-  {:core.async/chan (get-in event [:onyx.core/task-map :in/chan])})
+(defmacro make-input-calls [& forms]
+  `(do ~@(for [name forms]
+           (let [namestr (subs (str name) 1)
+                 sy-chan   (symbol (str namestr "-chan"))
+                 sy-inject (symbol (str namestr "-inject-channel"))
+                 sy-inputs (symbol (str namestr "-input-calls"))]
+             `(do (def ~sy-chan   (chan 100))
+                  (defn ~sy-inject [e# l#] (println "I AM STARTING") {:core.async/chan ~sy-chan})
+                  (def ~sy-inputs {:lifecycle/before-task-start ~sy-inject
+                                   :lifecycle/before-batch log-before-batch
+                                   :lifecycle/after-batch log-after-batch}))))))
 
-(def input-calls
-  {:lifecycle/before-task-start inject-channel})
+(make-input-calls
+ :in-historic-popn
+ :in-projd-births-by-age-of-mother
+ :in-historic-total-births
+ :in-historic-deaths-by-age-and-sex
+ :in-historic-dom-in-migrants
+ :in-historic-dom-out-migrants
+ :in-historic-intl-in-migrants
+ :in-historic-intl-out-migrants)
 
-(defn input-to-lifecycle
+(defmacro input-to-lifecycle
   [input]
-  [{:lifecycle/task input
-    :lifecycle/calls :witan.models.workspace-test/input-calls}
-   {:lifecycle/task input
-    :lifecycle/calls :onyx.plugin.core-async/reader-calls}])
+  `[{:lifecycle/task ~input
+     :lifecycle/calls (keyword (str "witan.models.workspace-test/" (subs (str ~input) 1) "-input-calls"))}
+    {:lifecycle/task ~input
+     :lifecycle/calls :onyx.plugin.core-async/reader-calls}])
 
 (defn input-to-catalog
-  [ch batch-size input {:keys [src key]}]
+  [batch-size input]
   {:onyx/name input
    :onyx/plugin :onyx.plugin.core-async/input
    :onyx/type :input
    :onyx/medium :core.async
    :onyx/batch-size batch-size
    :onyx/max-peers 1
-   :in/chan ch
-   :in/src src
-   :in/key key
    :onyx/doc "Reads segments from a core.async channel"})
 
 (def input-catalog
-  (mapv (fn [[k v]] (input-to-catalog (chan 10) ccm-batch-size k v)) inputs))
+  (mapv (fn [[k _]] (input-to-catalog ccm-batch-size k)) inputs))
 
 (def input-lifecycles
-  (vec (mapcat input-to-lifecycle (keys inputs))))
+  (vec (mapcat #(input-to-lifecycle %) (keys inputs))))
+
+(defn get-channel-from-kw
+  [kw]
+  (var-get (ns-resolve 'witan.models.workspace-test (symbol (str (name kw) "-chan")))))
 
 (defn workflow-fn-to-catalog
   "Take a defworkflowfn var and convert to a witan workspace catalog entry"
@@ -231,23 +264,27 @@
                     :catalog ccm-catalog}) config)
         onyx-job' (-> onyx-job
                       (assoc :lifecycles lifecycles)
-                      (update :lifecycles concat input-lifecycles)
+                      (update :lifecycles (comp vec concat) input-lifecycles)
                       (update :catalog conj catalog-entry-out)
-                      (update :catalog concat input-catalog))]
-    #_(clojure.pprint/pprint (:catalog onyx-job'))
+                      (update :catalog (comp vec concat) input-catalog))]
+    (clojure.pprint/pprint onyx-job')
 
     (testing "Run the model"
-      (doseq [{:keys [in/chan in/src in/key]} input-catalog]
-        (>!! chan (load-dataset key src))
-        (>!! chan :done)
-        (close! chan))
+      (doseq [[k {:keys [src key]}] inputs]
+        (let [ch (get-channel-from-kw k)]
+          (println k ">" src "into" key)
+          (>!! ch (load-dataset key src))
+          (>!! ch :done)
+          (close! ch)))
 
       (let [env        (onyx.api/start-env env-config)
             peer-group (onyx.api/start-peer-group peer-config)
             n-peers    (count (set (mapcat identity ccm-workflow)))
             v-peers    (onyx.api/start-peers n-peers peer-group)
             _          (onyx.api/submit-job peer-config onyx-job')
-            results (take-segments! output-chan)]
+            _ (println "Job has been submit")
+            results    (take-segments! output-chan)
+            _ (println "Results are in")]
 
         (doseq [v-peer v-peers]
           (onyx.api/shutdown-peer v-peer))
