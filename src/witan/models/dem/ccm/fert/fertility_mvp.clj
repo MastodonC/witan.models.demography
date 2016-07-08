@@ -83,7 +83,6 @@
    :witan/output-schema {:historic-asfr HistASFRSchema}}
   [{:keys [base-asfr ons-proj-births-by-age-mother historic-population historic-births]}
    {:keys [fert-last-yr]}]
-  (println ">>>>>>>>>>>>> WE ARE INSIDE calculate-historic-asfr")
   (let [birth-data-yr (reduce max (ds/column
                                    ons-proj-births-by-age-mother :year))
         popn-at-risk-birth-data-yr (-> historic-population

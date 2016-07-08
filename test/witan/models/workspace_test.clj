@@ -140,16 +140,16 @@
                                        :key :historic-births}
    :in-projd-births-by-age-of-mother  {:src "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
                                        :key :ons-proj-births-by-age-mother}
-   ;; :in-historic-deaths-by-age-and-sex {:src "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"
-   ;;                                     :key :historic-deaths}
-   ;; :in-historic-dom-in-migrants       {:src "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
-   ;;                                     :key :domestic-in-migrants}
-   ;; :in-historic-dom-out-migrants      {:src "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
-   ;;                                     :key :domestic-out-migrants}
-   ;; :in-historic-intl-in-migrants      {:src "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"
-   ;;                                     :key :international-in-migrants}
-   ;; :in-historic-intl-out-migrants     {:src "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"
-   ;;                                     :key :international-out-migrants}
+   :in-historic-deaths-by-age-and-sex {:src "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"
+                                       :key :historic-deaths}
+   :in-historic-dom-in-migrants       {:src "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
+                                       :key :domestic-in-migrants}
+   :in-historic-dom-out-migrants      {:src "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
+                                       :key :domestic-out-migrants}
+   :in-historic-intl-in-migrants      {:src "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"
+                                       :key :international-in-migrants}
+   :in-historic-intl-out-migrants     {:src "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"
+                                       :key :international-out-migrants}
    })
 
 (def ccm-workflow
@@ -158,43 +158,41 @@
    [:in-historic-total-births         :calc-historic-asfr]
    [:in-projd-births-by-age-of-mother :calc-historic-asfr]
 
-   [:calc-historic-asfr               :out]
+   ;; inputs for asmr
+   [:in-historic-popn                  :calc-historic-asmr]
+   [:in-historic-total-births          :calc-historic-asmr]
+   [:in-historic-deaths-by-age-and-sex :calc-historic-asmr]
 
-   ;; ;; inputs for asmr
-   ;; [:in-historic-popn                  :calc-historic-asmr]
-   ;; [:in-historic-total-births          :calc-historic-asmr]
-   ;; [:in-historic-deaths-by-age-and-sex :calc-historic-asmr]
+   ;; inputs for mig
+   [:in-historic-dom-in-migrants   :proj-domestic-in-migrants]
+   [:in-historic-dom-out-migrants  :proj-domestic-out-migrants]
+   [:in-historic-intl-in-migrants  :proj-intl-in-migrants]
+   [:in-historic-intl-out-migrants :proj-intl-out-migrants]
 
-   ;; ;; inputs for mig
-   ;; [:in-historic-dom-in-migrants   :proj-domestic-in-migrants]
-   ;; [:in-historic-dom-out-migrants  :proj-domestic-out-migrants]
-   ;; [:in-historic-intl-in-migrants  :proj-intl-in-migrants]
-   ;; [:in-historic-intl-out-migrants :proj-intl-out-migrants]
+   ;; asfr/asmr projections
+   [:calc-historic-asfr :proj-historic-asfr]
+   [:calc-historic-asmr :proj-historic-asmr]
 
-   ;; ;; asfr/asmr projections
-   ;; [:calc-historic-asfr :proj-historic-asfr]
-   ;; [:calc-historic-asmr :proj-historic-asmr]
+   ;; pre-loop merge
+   [:proj-historic-asfr         :select-starting-popn]
+   [:proj-historic-asmr         :select-starting-popn]
+   [:proj-domestic-in-migrants  :select-starting-popn]
+   [:proj-domestic-out-migrants :select-starting-popn]
+   [:proj-intl-in-migrants      :select-starting-popn]
+   [:proj-intl-out-migrants     :select-starting-popn]
+   ;; - inputs for popn
+   [:in-historic-popn           :select-starting-popn]
 
-   ;; ;; pre-loop merge
-   ;; [:proj-historic-asfr         :select-starting-popn]
-   ;; [:proj-historic-asmr         :select-starting-popn]
-   ;; [:proj-domestic-in-migrants  :select-starting-popn]
-   ;; [:proj-domestic-out-migrants :select-starting-popn]
-   ;; [:proj-intl-in-migrants      :select-starting-popn]
-   ;; [:proj-intl-out-migrants     :select-starting-popn]
-   ;; ;; - inputs for popn
-   ;; [:in-historic-popn           :select-starting-popn]
-
-   ;; ;; --- start popn loop
-   ;; [:select-starting-popn :project-births]
-   ;; [:select-starting-popn :project-deaths]
-   ;; [:project-births       :age-on]
-   ;; [:age-on               :add-births]
-   ;; [:add-births           :remove-deaths]
-   ;; [:project-deaths       :remove-deaths]
-   ;; [:remove-deaths        :apply-migration]
-   ;; [:apply-migration      :join-popn-latest-yr]
-   ;; [:join-popn-latest-yr  [:finish-looping? :out :select-starting-popn]]
+   ;; --- start popn loop
+   [:select-starting-popn :project-births]
+   [:select-starting-popn :project-deaths]
+   [:project-births       :age-on]
+   [:age-on               :add-births]
+   [:add-births           :remove-deaths]
+   [:project-deaths       :remove-deaths]
+   [:remove-deaths        :apply-migration]
+   [:apply-migration      :join-popn-latest-yr]
+   [:join-popn-latest-yr  [:finish-looping? :out :select-starting-popn]]
    ;; --- end loop
    ])
 
@@ -208,9 +206,7 @@
        (let [ch (get (get-core-async-channels job) k)
              data (load-dataset key src)]
          (if data
-           (do
-             (println "Loading data for" k ">" src "into" key)
-             (spool [data :done] ch))
+           (spool [data :done] ch)
            (throw (Exception. (str "Failed to load data: " src))))))
 
      (with-test-env [test-env [n env-config peer-config]]
@@ -250,8 +246,8 @@
                    {:workflow ccm-workflow
                     :catalog ccm-catalog}
                    config))]
-    (run-job* onyx-job inputs (->> onyx-job
-                                   :workflow
-                                   (mapcat identity)
-                                   (set)
-                                   (count)))))
+    (println (keys (run-job* onyx-job inputs (->> onyx-job
+                                                  :workflow
+                                                  (mapcat identity)
+                                                  (set)
+                                                  (count)))))))
