@@ -2,22 +2,21 @@
   (:require [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.workspace-api :refer [defworkflowfn]]
+            [witan.workspace-api :refer [defworkflowfn defworkflowpred]]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
             [witan.models.dem.ccm.fert.fertility-mvp :as fert]
             [witan.models.dem.ccm.mort.mortality-mvp :as mort]
             [witan.models.dem.ccm.mig.net-migration :as mig]))
 
-(defworkflowfn keep-looping?
+(defworkflowpred finish-looping?
   {:witan/name :ccm-core/ccm-loop-pred
    :witan/version "1.0"
    :witan/input-schema {:historic-population HistPopulationSchema :loop-year s/Int}
    :witan/param-schema {:last-proj-year s/Int}
-   :witan/output-schema {:loop-predicate s/Bool}
    :witan/exported? true}
   [{:keys [loop-year]} {:keys [last-proj-year]}]
-  {:loop-predicate (< loop-year last-proj-year)})
+  (> loop-year last-proj-year))
 
 (defworkflowfn prepare-inputs
   "Step happening before the projection loop.
@@ -39,11 +38,12 @@
    Returns a dataset of the starting population for the next year's projection."
   {:witan/name :ccm-core/get-starting-popn
    :witan/version "1.0"
+   ;;:witan/param-schema (s/maybe {:initial-yr s/Int})
    :witan/input-schema {:latest-yr-popn HistPopulationSchema
                         :loop-year s/Int}
    :witan/output-schema {:latest-yr-popn HistPopulationSchema :loop-year s/Int
                          :population-at-risk HistPopulationSchema}}
-  [{:keys [latest-yr-popn loop-year]} _]
+  [{:keys [latest-yr-popn loop-year]} {:keys [initial-yr]}]
   (let [update-yr (ds/emap-column latest-yr-popn :year inc)]
     {:latest-yr-popn update-yr :loop-year (inc loop-year)
      :population-at-risk update-yr}))
@@ -145,6 +145,6 @@
                         apply-migration
                         join-popn-latest-yr)]
         (println (format "Projecting for year %d..." (:loop-year inputs')))
-        (if (:loop-predicate (keep-looping? inputs' params))
-          (recur inputs')
-          (:historic-population inputs'))))))
+        (if (finish-looping? inputs' params)
+          (:historic-population inputs')
+          (recur inputs'))))))

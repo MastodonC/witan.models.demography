@@ -17,16 +17,18 @@
   ([filename]
    (load-csv filename nil))
   ([filename eol]
-   (let [file (io/resource filename)]
-     (when (.exists (io/as-file file))
-       (let [normalised-data (-> (slurp file)
-                                 (str/replace "\r\n" "\n")
-                                 (str/replace "\r" "\n"))
-             parsed-csv (csv/parse-csv normalised-data :end-of-line eol)
-             parsed-data (rest parsed-csv)
-             headers (map str/lower-case (first parsed-csv))]
-         {:column-names (custom-keyword headers)
-          :columns (vec parsed-data)})))))
+   (try
+     (let [file (io/resource filename)]
+       (when (.exists (io/as-file file))
+         (let [normalised-data (-> (slurp file)
+                                   (str/replace "\r\n" "\n")
+                                   (str/replace "\r" "\n"))
+               parsed-csv (csv/parse-csv normalised-data :end-of-line eol)
+               parsed-data (rest parsed-csv)
+               headers (map str/lower-case (first parsed-csv))]
+           {:column-names (custom-keyword headers)
+            :columns (vec parsed-data)})))
+     (catch Exception e (str "Failed to load CSV: " filename e)))))
 
 (defn record-coercion
   "Coerce numbers by matching them to the

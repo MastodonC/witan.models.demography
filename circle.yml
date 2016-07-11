@@ -1,5 +1,6 @@
-## Setting memory limits for the JVM
-
 machine:
+  services:
+    - redis
   environment:
+    ## Setting memory limits for the JVM
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
