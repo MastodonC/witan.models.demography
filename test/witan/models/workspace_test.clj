@@ -17,6 +17,7 @@
              [redis :as redis]]
             [witan.models.config :refer [config]]
             [witan.models.load-data :refer [load-dataset]]
+            [witan.workspace-api :refer [set-logging!]]
             ;;
             [witan.models.dem.ccm.fert.fertility-mvp]
             [witan.models.dem.ccm.mort.mortality-mvp]
@@ -163,36 +164,43 @@
    [:in-historic-total-births          :calc-historic-asmr]
    [:in-historic-deaths-by-age-and-sex :calc-historic-asmr]
 
-   ;; inputs for mig
-   [:in-historic-dom-in-migrants   :proj-domestic-in-migrants]
-   [:in-historic-dom-out-migrants  :proj-domestic-out-migrants]
-   [:in-historic-intl-in-migrants  :proj-intl-in-migrants]
-   [:in-historic-intl-out-migrants :proj-intl-out-migrants]
-
    ;; asfr/asmr projections
    [:calc-historic-asfr :proj-historic-asfr]
    [:calc-historic-asmr :proj-historic-asmr]
 
+   ;; inputs for mig
+   ;; [:in-historic-dom-in-migrants   :proj-domestic-in-migrants]
+   ;; [:in-historic-dom-out-migrants  :proj-domestic-out-migrants]
+   ;; [:in-historic-intl-in-migrants  :proj-intl-in-migrants]
+   ;; [:in-historic-intl-out-migrants :proj-intl-out-migrants]
+
+   [:proj-historic-asfr :out]
+   [:proj-historic-asmr :out]
+   ;; [:proj-domestic-in-migrants  :out]
+   ;; [:proj-domestic-out-migrants :out]
+   ;; [:proj-intl-in-migrants      :out]
+   ;; [:proj-intl-out-migrants     :out]
+
    ;; pre-loop merge
-   [:proj-historic-asfr         :select-starting-popn]
-   [:proj-historic-asmr         :select-starting-popn]
-   [:proj-domestic-in-migrants  :select-starting-popn]
-   [:proj-domestic-out-migrants :select-starting-popn]
-   [:proj-intl-in-migrants      :select-starting-popn]
-   [:proj-intl-out-migrants     :select-starting-popn]
-   ;; - inputs for popn
-   [:in-historic-popn           :select-starting-popn]
+   ;; [:proj-historic-asfr         :select-starting-popn]
+   ;; [:proj-historic-asmr         :select-starting-popn]
+   ;; [:proj-domestic-in-migrants  :select-starting-popn]
+   ;; [:proj-domestic-out-migrants :select-starting-popn]
+   ;; [:proj-intl-in-migrants      :select-starting-popn]
+   ;; [:proj-intl-out-migrants     :select-starting-popn]
+   ;; ;; - inputs for popn
+   ;; [:in-historic-popn           :select-starting-popn]
 
    ;; --- start popn loop
-   [:select-starting-popn :project-births]
-   [:select-starting-popn :project-deaths]
-   [:project-births       :age-on]
-   [:age-on               :add-births]
-   [:add-births           :remove-deaths]
-   [:project-deaths       :remove-deaths]
-   [:remove-deaths        :apply-migration]
-   [:apply-migration      :join-popn-latest-yr]
-   [:join-popn-latest-yr  [:finish-looping? :out :select-starting-popn]]
+   ;; [:select-starting-popn :project-births]
+   ;; [:select-starting-popn :project-deaths]
+   ;; [:project-births       :age-on]
+   ;; [:age-on               :add-births]
+   ;; [:add-births           :remove-deaths]
+   ;; [:project-deaths       :remove-deaths]
+   ;; [:remove-deaths        :apply-migration]
+   ;; [:apply-migration      :join-popn-latest-yr]
+   ;; [:join-popn-latest-yr  [:finish-looping? :out :select-starting-popn]]
    ;; --- end loop
    ])
 
@@ -204,11 +212,13 @@
      ;;
      (doseq [[k {:keys [src key]}] inputs]
        (let [ch (get (get-core-async-channels job) k)
-             data (load-dataset key src)]
+             _ (print "Loading data" k "into" key "from" src "...")
+             data (load-dataset key src)
+             _ (print "OK!\n")]
          (if data
            (spool [data :done] ch)
            (throw (Exception. (str "Failed to load data: " src))))))
-
+     (println "Starting test env with" n "virtual peers...")
      (with-test-env [test-env [n env-config peer-config]]
        (onyx.test-helper/validate-enough-peers! test-env job)
        (let [job-id (:job-id (onyx.api/submit-job peer-config job))
@@ -245,9 +255,10 @@
                   (o/workspace->onyx-job
                    {:workflow ccm-workflow
                     :catalog ccm-catalog}
-                   config))]
-    (println (keys (run-job* onyx-job inputs (->> onyx-job
-                                                  :workflow
-                                                  (mapcat identity)
-                                                  (set)
-                                                  (count)))))))
+                   config))
+        onyx-job' (update onyx-job :catalog (fn [catalog] (map #(if (= (:onyx/type %) :input)
+                                                                  (assoc % :onyx/max-pending 1)
+                                                                  %) catalog)))]
+    #_(println onyx-job "\n\n")
+    (set-logging! true)
+    (println (keys (run-job* onyx-job' inputs 26)))))

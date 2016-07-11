@@ -145,6 +145,6 @@
                         apply-migration
                         join-popn-latest-yr)]
         (println (format "Projecting for year %d..." (:loop-year inputs')))
-        (if (:loop-predicate (finish-looping? inputs' params))
+        (if (finish-looping? inputs' params)
           (:historic-population inputs')
           (recur inputs'))))))
