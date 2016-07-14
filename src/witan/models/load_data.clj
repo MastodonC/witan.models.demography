@@ -1,7 +1,7 @@
 (ns witan.models.load-data
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure-csv.core :as csv]
+            [clojure.data.csv :as data-csv]
             [schema.coerce :as coerce]
             [clojure.core.matrix.dataset :as ds]
             [witan.models.dem.ccm.schemas :refer :all]))
@@ -19,10 +19,7 @@
   ([filename eol]
    (let [file (io/resource filename)]
      (when (.exists (io/as-file file))
-       (let [normalised-data (-> (slurp file)
-                                 (str/replace "\r\n" "\n")
-                                 (str/replace "\r" "\n"))
-             parsed-csv (csv/parse-csv normalised-data :end-of-line eol)
+       (let [parsed-csv (data-csv/read-csv (io/reader file) :end-of-line eol)
              parsed-data (rest parsed-csv)
              headers (map str/lower-case (first parsed-csv))]
          {:column-names (custom-keyword headers)

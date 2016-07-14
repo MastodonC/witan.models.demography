@@ -1,6 +1,5 @@
 (ns witan.models.run-models
   (:require [clojure.string :as str]
-            [clojure-csv.core :as csv]
             [clojure.walk :as walk]
             [clojure.java.io :as jio]
             [clojure.core.matrix.dataset :as ds]
@@ -19,16 +18,13 @@
    Takes in a filepath for a CSV file and a gss code.
    Returns a dataset for the local authority of interest."
   [dataset-path gss-code]
-  (let [normalised-data (-> (slurp dataset-path)
-                            (str/replace "\r\n" "\n")
-                            (str/replace "\r" "\n"))
-        parsed-csv (csv/parse-csv normalised-data :end-of-line nil)
+  (let [parsed-csv (data-csv/read-csv (jio/reader dataset-path) :end-of-line nil)
         parsed-data (rest parsed-csv)
         headers (customise-headers (map clojure.string/lower-case
                                         (first parsed-csv)))
         filtered-data (->> parsed-data
-                         (map #(clojure.walk/keywordize-keys (zipmap headers %1)))
-                         (filterv #(= (:gss-code %) gss-code)))
+                           (map #(clojure.walk/keywordize-keys (zipmap headers %1)))
+                           (filterv #(= (:gss-code %) gss-code)))
         seq-filtered-data (map #(-> %
                                     vals
                                     vec) filtered-data)]
@@ -70,10 +66,7 @@
   ([filename]
    (get-sorted-colnames filename nil))
   ([filename eol]
-   (let [normalised-data (-> (slurp filename)
-                             (str/replace "\r\n" "\n")
-                             (str/replace "\r" "\n"))
-         parsed-csv (csv/parse-csv normalised-data :end-of-line nil)
+   (let [parsed-csv (data-csv/read-csv (jio/reader filename) :end-of-line nil)
          parsed-data (rest parsed-csv)
          headers (mapv keyword (first parsed-csv))]
      (zipmap headers
