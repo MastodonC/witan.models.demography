@@ -280,3 +280,22 @@
       (is (every? #(fp-equals? (i/sel joined-proj-2040 :rows % :cols :popn)
                                (i/sel joined-proj-2040 :rows % :cols :popn-core) 0.0001)
                   (range (first (:shape joined-proj-2040))))))))
+
+
+(deftest get-district-test
+  (testing "fn recovers correct district name"
+    (is (= (get-district "E06000023") "Bristol, City of"))))
+
+(def input-data-set (ds/dataset [{:year 2014 :gss-code "E06000023"}
+                                 {:year 2015 :gss-code "E06000023"}]))
+
+(def output-data-set (ds/dataset [{:year 2014 :gss-code "E06000023" :district-out "Bristol, City of"}
+                                  {:year 2015 :gss-code "E06000023" :district-out "Bristol, City of"}]))
+
+(deftest add-district-to-dataset-per-user-input-test
+  (testing "district column added to dataset and populated"
+    (let [district-added (add-district-to-dataset-per-user-input input-data-set "E06000023")
+          joined-data (wds/join district-added output-data-set [:gss-code :year])]
+      (is (every? #(= (i/sel joined-data :rows % :cols :district)
+                      (i/sel joined-data :rows % :cols :district-out))
+                  (range (first (:shape joined-data))))))))

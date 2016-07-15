@@ -6,7 +6,8 @@
             [incanter.core :as i]
             [clojure.data.csv :as data-csv]
             [witan.models.load-data :as ld]
-            [witan.models.dem.ccm.core.projection-loop :as core]))
+            [witan.models.dem.ccm.core.projection-loop :as core]
+            [witan.datasets :as wds]))
 
 (defn customise-headers [coll]
   (mapv #(-> %
@@ -102,6 +103,22 @@
       (data-csv/write-csv out-file
                           (convert-row-maps-to-vector-of-vectors ordered-data)))))
 
+(def local-authorities (read-string (slurp "resources/default_datasets/local_authorities.edn")))
+
+(defn get-district
+  [gss-code]
+  (get-in local-authorities
+          [:gss-code-to-district
+           (keyword gss-code)]))
+
+(defn add-district-to-dataset-per-user-input
+  [data gss-code]
+  (let [data-code (distinct (i/$ :gss-code data))]
+    (when (and (= 1 (count data-code))
+               (= gss-code (first data-code)))
+      (ds/add-column data :district
+                     (repeat (get-district gss-code))))))
+
 (defn run-ccm
   "This function will evolve as we build the jar.
    Takes in a map of datasets, a gss code and a map of parameters.
@@ -109,3 +126,12 @@
   [inputs gss-code params]
   (core/looping-test (get-datasets inputs gss-code)
                      params))
+
+(defn output-ccm
+  "runs the ccm, adds district information for easier human
+   reading and outputs to a csv"
+  [inputs gss-code params filepath]
+  (println (format "Preparing projection for %s... " (get-district gss-code)))
+  (-> (run-ccm inputs gss-code params)
+      (add-district-to-dataset-per-user-input gss-code)
+      (write-data-to-csv filepath [:gss-code :district :sex :age :year :popn])))
