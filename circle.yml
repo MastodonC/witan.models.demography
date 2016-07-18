@@ -3,9 +3,3 @@
 machine:
   environment:
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
-
-test:
-  override:
-  - lein test test/witan/models/load_data_test.clj
-  - lein test test/witan/models/dem/ccm/*.clj
-  - lein test test/witan/models/dem/ccm/*/*.clj
