@@ -8,18 +8,19 @@
 
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
-(def migration-data (ld/load-datasets {:domestic-in-migrants
-                                       "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
-                                       :domestic-out-migrants
-                                       "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
-                                       :international-in-migrants
-                                       "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"
-                                       :international-out-migrants
-                                       "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"}))
+(def migration-data (ld/load-datasets
+                     {:domestic-in-migrants
+                      "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
+                      :domestic-out-migrants
+                      "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
+                      :international-in-migrants
+                      "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
+                      :international-out-migrants
+                      "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"}))
 
 (def net-migration-r (:net-migration (ld/load-dataset
                                       :net-migration
-                                      "test_data/r_outputs_for_testing/mig/bristol_migration_module_r_output_2015.csv")))
+                                      "./datasets/test_datasets/r_outputs_for_testing/mig/bristol_migration_module_r_output_2015.csv")))
 
 (def params {:start-yr-avg-dom-mig 2003
              :end-yr-avg-dom-mig 2014

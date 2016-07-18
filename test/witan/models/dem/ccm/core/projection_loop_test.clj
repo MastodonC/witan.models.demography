@@ -12,21 +12,21 @@
 ;; Load testing data
 (def data-inputs (ld/load-datasets
                   {:ons-proj-births-by-age-mother
-                   "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
+                   "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
                    :historic-births
-                   "test_data/model_inputs/fert/bristol_hist_births_mye.csv"
+                   "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
                    :historic-population
-                   "test_data/model_inputs/bristol_hist_popn_mye.csv"
+                   "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"
                    :historic-deaths
-                   "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"
+                   "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"
                    :domestic-in-migrants
-                   "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
+                   "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
                    :domestic-out-migrants
-                   "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
+                   "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
                    :international-in-migrants
-                   "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"
+                   "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
                    :international-out-migrants
-                   "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"}))
+                   "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"}))
 
 (def params {;; Core module
              :first-proj-year 2014
@@ -76,11 +76,11 @@
 
 (def output-2015 (ld/load-datasets
                   {:end-population
-                   "test_data/r_outputs_for_testing/core/bristol_end_population_2015.csv"}))
+                   "./datasets/test_datasets/r_outputs_for_testing/core/bristol_end_population_2015.csv"}))
 
 (def output-2040 (ld/load-datasets
                   {:end-population
-                   "test_data/r_outputs_for_testing/core/bristol_end_population_2040.csv"}))
+                   "./datasets/test_datasets/r_outputs_for_testing/core/bristol_end_population_2040.csv"}))
 
 ;; Useful fns:
 (defn- same-coll? [coll1 coll2]

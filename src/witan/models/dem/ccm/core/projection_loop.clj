@@ -7,7 +7,11 @@
             [witan.models.dem.ccm.schemas :refer :all]
             [witan.models.dem.ccm.fert.fertility-mvp :as fert]
             [witan.models.dem.ccm.mort.mortality-mvp :as mort]
-            [witan.models.dem.ccm.mig.net-migration :as mig]))
+            [witan.models.dem.ccm.mig.net-migration :as mig]
+            [taoensso.timbre :as timbre
+             :refer (log  trace  debug  info  warn  error  fatal  report
+                          logf tracef debugf infof warnf errorf fatalf reportf
+                          spy get-env log-env)]))
 
 (defworkflowfn keep-looping?
   {:witan/name :ccm-core/ccm-loop-pred

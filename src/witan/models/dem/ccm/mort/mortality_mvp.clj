@@ -45,7 +45,8 @@
    :witan/input-schema {:historic-deaths DeathsSchema
                         :historic-births BirthsSchema
                         :historic-population HistPopulationSchema}
-   :witan/output-schema {:historic-asmr HistASMRSchema}}
+   :witan/output-schema {:historic-asmr HistASMRSchema}
+   :witan/exported? false}
   [{:keys [historic-deaths historic-births historic-population]} _]
   (->> (create-popn-at-risk-death historic-population historic-deaths historic-births)
        (calc-death-rates historic-deaths)
@@ -61,7 +62,8 @@
    :witan/version "1.0"
    :witan/input-schema {:historic-asmr HistASMRSchema}
    :witan/param-schema {:start-yr-avg-mort s/Int :end-yr-avg-mort s/Int}
-   :witan/output-schema {:initial-projected-mortality-rates ProjFixedASMRSchema}}
+   :witan/output-schema {:initial-projected-mortality-rates ProjFixedASMRSchema}
+   :witan/exported? false}
   [{:keys [historic-asmr]} {:keys [start-yr-avg-mort end-yr-avg-mort]}]
   {:initial-projected-mortality-rates (cf/jumpoffyr-method-average historic-asmr
                                                                    :death-rate
@@ -77,7 +79,8 @@
    :witan/version "1.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjFixedASMRSchema
                         :population-at-risk HistPopulationSchema}
-   :witan/output-schema {:deaths DeathsOutputSchema}}
+   :witan/output-schema {:deaths DeathsOutputSchema}
+   :witan/exported? true}
   [{:keys [initial-projected-mortality-rates population-at-risk]} _]
   {:deaths
    (cf/project-component-fixed-rates population-at-risk
@@ -95,7 +98,8 @@
                         :historic-population HistPopulationSchema}
    :witan/param-schema {:start-yr-avg-mort s/Int :end-yr-avg-mort s/Int}
    :witan/output-schema {:historic-asmr HistASMRSchema
-                         :initial-projected-mortality-rates ProjFixedASMRSchema}}
+                         :initial-projected-mortality-rates ProjFixedASMRSchema}
+   :witan/exported? true}
   [input-data params]
   (-> input-data
       calc-historic-asmr
