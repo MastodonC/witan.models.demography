@@ -11,8 +11,8 @@
 ;; Calculate averages for fixed values/rates or trends:
 (defn jumpoffyr-method-average
   "Takes in a dataset with historical data, a column name to be averaged,
-  a name for the average column, and years to start and end averaging for. 
-  Returns a dataset where the column to be averaged contains the averages 
+  a name for the average column, and years to start and end averaging for.
+  Returns a dataset where the column to be averaged contains the averages
   for all the years of interest and is named to avg-name."
   [historical-data col-to-avg avg-name start-yr-avg end-yr-avg]
   (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
@@ -26,7 +26,7 @@
         (wds/rollup :mean avg-name [:gss-code :sex :age]))))
 
 (defn jumpoffyr-method-trend
-  "Takes in a dataset with historical data, a column name for a trend to be 
+  "Takes in a dataset with historical data, a column name for a trend to be
   calculated for, a name for the trend col and years to start and end to
   calculate the trend for. Returns a dataset with a new col for the calculated trend"
   [historical-data trend-col trend-out start-yr-avg end-yr-avg]
@@ -39,17 +39,19 @@
                                                        :$lte end-yr}}))
                           (i/$group-by [:sex :gss-code :age]))
         lm (map (fn [[k v]]
-                  (-> (st/linear-model (i/$ trend-col v) (i/$ :year v))
-                      :coefs)) grouped-data)
-        newest-data (mapv (fn [[k v] i] (assoc k
-                                              :intercept (first i) 
-                                              :regres-coef (second i))) grouped-data lm)]
+                  (:coefs (st/linear-model (i/$ trend-col v) (i/$ :year v))))
+                grouped-data)
+        newest-data (mapv (fn [[k v] i]
+                            (assoc k
+                                   :intercept (first i)
+                                   :regres-coef (second i)))
+                          grouped-data lm)]
     (-> newest-data
         ds/dataset
         (wds/add-derived-column trend-out
                                 [:regres-coef :intercept]
                                 (fn [y i] (let [t (+ i (* y (inc end-yr)))]
-                                            (if (< t 0)
+                                            (if (neg? t)
                                               0
                                               t))))
         (ds/select-columns [:gss-code :sex :age trend-out]))))

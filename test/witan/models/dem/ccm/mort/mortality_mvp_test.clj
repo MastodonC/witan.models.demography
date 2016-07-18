@@ -15,13 +15,13 @@
 ;;historic-popn = MYE-Est in R code
 (def hist-asmr-inputs
   (ld/load-datasets {:historic-deaths
-       "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"
-       :historic-births
-       "test_data/model_inputs/fert/bristol_hist_births_mye.csv"
-       :historic-population
-       "test_data/model_inputs/bristol_hist_popn_mye.csv"
-       :population-at-risk ;;this actually comes from the proj loop but for test use this csv
-       "test_data/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"}))
+                     "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"
+                     :historic-births
+                     "test_data/model_inputs/fert/bristol_hist_births_mye.csv"
+                     :historic-population
+                     "test_data/model_inputs/bristol_hist_popn_mye.csv"
+                     :population-at-risk ;;this actually comes from the proj loop but for test use this csv
+                     "test_data/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"}))
 
 ;;Output from R calc-historic-asmr function for comparison
 (def historic-asmr-r (:historic-asmr (ld/load-dataset
