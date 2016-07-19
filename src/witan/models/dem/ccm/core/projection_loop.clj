@@ -34,7 +34,7 @@
    the latest year and the population for that year.
    Both those elements will be updated within the
    projection loop."
-  {:witan/name :ccm-core/get-starting-popn
+  {:witan/name :ccm-core/prepare-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:historic-population HistPopulationSchema}
    :witan/output-schema {:loop-year s/Int :latest-yr-popn HistPopulationSchema}}
@@ -46,7 +46,7 @@
 (defworkflowfn select-starting-popn
   "Takes in a dataset of popn estimates.
    Returns a dataset of the starting population for the next year's projection."
-  {:witan/name :ccm-core/get-starting-popn
+  {:witan/name :ccm-core/select-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn HistPopulationSchema
                         :loop-year s/Int}
