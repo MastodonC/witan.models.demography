@@ -104,7 +104,27 @@
    :out {:var #'witan.models.acceptance.workspace-test/out}
    })
 
-(def ccm-workflow
+(defn get-meta
+  [v]
+  (let [meta-key (if (:pred? v) :witan/workflowpred :witan/workflowfn)]
+    (-> v :var meta meta-key)))
+
+(defn make-contracts
+  [task-coll]
+  (distinct (mapv (fn [[k v]] (get-meta v)) task-coll)))
+
+(defn make-catalog
+  [task-coll]
+  (mapv (fn [[k v]]
+          (hash-map :witan/name k
+                    :witan/version "1.0"
+                    :witan/params (:params v)
+                    :witan/fn (:witan/name (get-meta v)))) task-coll))
+
+(defworkflowmodel ccm-workflow
+  "The CCM model"
+  {:witan/name :test.model/ccm-model
+   :witan/version "1.0"}
   [;; inputs for asfr
    [:in-historic-popn                 :calc-historic-asfr]
    [:in-historic-total-births         :calc-historic-asfr]
@@ -153,29 +173,12 @@
    ;; --- end loop
    ])
 
-(defn get-meta
-  [v]
-  (let [meta-key (if (:pred? v) :witan/workflowpred :witan/workflowfn)]
-    (-> v :var meta meta-key)))
-
-(defn make-contracts
-  [task-coll]
-  (distinct (mapv (fn [[k v]] (get-meta v)) task-coll)))
-
-(defn make-catalog
-  [task-coll]
-  (mapv (fn [[k v]]
-          (hash-map :witan/name k
-                    :witan/version "1.0"
-                    :witan/params (:params v)
-                    :witan/fn (:witan/name (get-meta v)))) task-coll))
-
 (deftest workspace-test
-  (let [workspace {:workflow ccm-workflow
-                   :catalog (make-catalog tasks)
-                   :contracts (make-contracts tasks)}
-        workspace' (s/with-fn-validation (wex/build! workspace))
-        result (wex/run!! workspace' {})
+  (let [workspace     {:workflow  ccm-workflow
+                       :catalog   (make-catalog tasks)
+                       :contracts (make-contracts tasks)}
+        workspace'    (s/with-fn-validation (wex/build! workspace))
+        result        (wex/run!! workspace' {})
         expected-keys (sort [:births
                              :international-in-migrants
                              :projected-international-in-migrants
