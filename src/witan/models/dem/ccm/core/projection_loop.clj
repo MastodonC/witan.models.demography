@@ -2,7 +2,7 @@
   (:require [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.workspace-api :refer [defworkflowfn]]
+            [witan.workspace-api :refer [defworkflowfn defworkflowpred]]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
             [witan.models.dem.ccm.fert.fertility-mvp :as fert]
@@ -19,13 +19,22 @@
   [{:keys [loop-year]} {:keys [last-proj-year]}]
   {:loop-predicate (< loop-year last-proj-year)})
 
+(defworkflowpred finished-looping?
+  {:witan/name :ccm-core/ccm-loop-pred
+   :witan/version "1.0"
+   :witan/input-schema {:historic-population HistPopulationSchema :loop-year s/Int}
+   :witan/param-schema {:last-proj-year s/Int}
+   :witan/exported? true}
+  [{:keys [loop-year]} {:keys [last-proj-year]}]
+  (> loop-year last-proj-year))
+
 (defworkflowfn prepare-inputs
   "Step happening before the projection loop.
    Takes in the historic population and outputs
    the latest year and the population for that year.
    Both those elements will be updated within the
    projection loop."
-  {:witan/name :ccm-core/get-starting-popn
+  {:witan/name :ccm-core/prepare-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:historic-population HistPopulationSchema}
    :witan/output-schema {:loop-year s/Int :latest-yr-popn HistPopulationSchema}}
@@ -37,7 +46,7 @@
 (defworkflowfn select-starting-popn
   "Takes in a dataset of popn estimates.
    Returns a dataset of the starting population for the next year's projection."
-  {:witan/name :ccm-core/get-starting-popn
+  {:witan/name :ccm-core/select-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:latest-yr-popn HistPopulationSchema
                         :loop-year s/Int}
