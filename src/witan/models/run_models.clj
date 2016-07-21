@@ -7,7 +7,13 @@
             [clojure.data.csv :as data-csv]
             [witan.models.load-data :as ld]
             [witan.models.dem.ccm.core.projection-loop :as core]
-            [witan.datasets :as wds]))
+            [witan.datasets :as wds]
+            [clojure.tools.cli :refer [parse-opts]]
+            [taoensso.timbre :as timbre
+             :refer (log  trace  debug  info  warn  error  fatal  report
+                          logf tracef debugf infof warnf errorf fatalf reportf
+                          spy get-env log-env)])
+  (:gen-class :main true))
 
 (defn customise-headers [coll]
   (mapv #(-> %
@@ -103,7 +109,7 @@
       (data-csv/write-csv out-file
                           (convert-row-maps-to-vector-of-vectors ordered-data)))))
 
-(def local-authorities (read-string (slurp "resources/default_datasets/local_authorities.edn")))
+(def local-authorities (read-string (slurp "./datasets/default_datasets/local_authorities.edn")))
 
 (defn get-district
   [gss-code]
@@ -127,11 +133,49 @@
   (core/looping-test (get-datasets inputs gss-code)
                      params))
 
-(defn output-ccm
+(def cli-options
+  [["-i" "--input-config FILEPATH" "Filepath for the config file with inputs info"
+    :validate [#(.exists (jio/file %)) "Must be an existing file path"]
+    :default "./default_config.edn"]
+   ["-o" "--output-projections FILEPATH" "Filepath for the output projections"
+    :validate [#(.exists (jio/as-file (.getPath (jio/file %))))
+               "Must contain an existing path of directories"]
+    :default "./ccm_projections.csv"]
+   ["-c" "--gss-code for a English local authority" "Gss code for the local authority of interest"]])
+
+(defn get-inputs
+  "Gets content out of an edn file
+  with locations of data inputs."
+  [input]
+  (cond (string? input) (when (.exists (jio/as-file input))
+                          (try (read-string (slurp input))
+                               (catch Exception e (println (format "Caught Error: %s"
+                                                                   (.getMessage e))))))
+        (map? input) input))
+
+(defn -main
   "runs the ccm, adds district information for easier human
    reading and outputs to a csv"
-  [inputs gss-code params filepath]
-  (println (format "Preparing projection for %s... " (get-district gss-code)))
-  (-> (run-ccm inputs gss-code params)
-      (add-district-to-dataset-per-user-input gss-code)
-      (write-data-to-csv filepath [:gss-code :district :sex :age :year :popn])))
+  [& args]
+  (let [{:keys [errors options]} (parse-opts args cli-options)
+        {:keys [input-config output-projections gss-code]} options
+        {:keys [input-datasets user-parameters]} (get-inputs input-config)
+        params (try (assoc user-parameters
+                           :proportion-male-newborns
+                           (double (/ (:number-male-newborns user-parameters)
+                                      (:number-all-newborns user-parameters))))
+                    (catch Exception e (println (format "Caught Error: %s"
+                                                        (.getMessage e)))))]
+    (println (format "%d option validation errors\n%s" (count errors)
+                     (clojure.string/join "\n" errors)))
+    (println (format "\nInput used: %s\nOutput used: %s\n"
+                     (:input-config (:options (parse-opts args cli-options)))
+                     (:output-projections (:options (parse-opts args cli-options)))))
+    (println (format "Preparing projection for %s... " (get-district gss-code)))
+    (-> (run-ccm input-datasets gss-code params)
+        (add-district-to-dataset-per-user-input gss-code)
+        (write-data-to-csv output-projections [:gss-code :district :sex :age :year :popn]))))
+
+(comment
+  "example gss code input when running on the repl"
+  (-main "-cE06000023"))

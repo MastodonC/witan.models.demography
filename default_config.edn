@@ -1,0 +1,42 @@
+{:input-datasets
+ {;; General population dataset
+  :historic-population
+  "./datasets/default_datasets/core/historic-population.csv"
+  ;; Fertility datasets
+  :ons-proj-births-by-age-mother
+  "./datasets/default_datasets/fertility/proj-births-by-age-mother.csv"
+  :historic-births
+  "./datasets/default_datasets/fertility/historic_births.csv"
+  ;; Mortality dataset
+  :historic-deaths
+  "./datasets/default_datasets/mortality/historic_deaths.csv"
+  ;; Migration dataset
+  :domestic-in-migrants
+  "./datasets/default_datasets/migration/domestic_in_migrants.csv"
+  :domestic-out-migrants
+  "./datasets/default_datasets/migration/domestic_out_migrants.csv"
+  :international-in-migrants
+  "./datasets/default_datasets/migration/international_in_migrants.csv"
+  :international-out-migrants
+  "./datasets/default_datasets/migration/international_out_migrants.csv"}
+
+ :user-parameters
+ {;; Core module
+  :first-proj-year 2014
+  :last-proj-year 2015
+  ;; Fertility module
+  :fert-last-yr 2014
+  :start-yr-avg-fert 2014
+  :end-yr-avg-fert 2014 ;; Expected = to :fert-last-yr
+  :number-male-newborns 105
+  :number-all-newborns 205
+  ;; :proportion-male-newborns (double (/ 105 205)) <- issue when parsing the file
+  ;; Mortality module
+  :start-yr-avg-mort 2010 ;; Expected > or = to earliest year of mortality data
+  :end-yr-avg-mort 2014 ;; Expected < or = to latest year of mortality data
+  ;; Migration module
+  :start-yr-avg-dom-mig 2003 ;; Expected > or = to earliest year of domestic migration data
+  :end-yr-avg-dom-mig 2014 ;; Expected < or = to latest year of domestic migration data
+  :start-yr-avg-inter-mig 2003 ;; Expected > or = to earliest year of international migration data
+  :end-yr-avg-inter-mig 2014 ;; Expected < or = to latest year of domestic international data
+  }}

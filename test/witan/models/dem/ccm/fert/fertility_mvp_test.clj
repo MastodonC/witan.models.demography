@@ -12,14 +12,15 @@
 ;; Test inputs ;;
 ;;;;;;;;;;;;;;;;;
 
-(def fertility-inputs (ld/load-datasets {:ons-proj-births-by-age-mother
-                                         "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
-                                         :historic-births
-                                         "test_data/model_inputs/fert/bristol_hist_births_mye.csv"
-                                         :historic-population
-                                         "test_data/model_inputs/bristol_hist_popn_mye.csv"
-                                         :population-at-risk ;;this actually comes from the proj loop but for test use this csv
-                                         "test_data/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"}))
+(def fertility-inputs (ld/load-datasets
+                       {:ons-proj-births-by-age-mother
+                        "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
+                        :historic-births
+                        "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
+                        :historic-population
+                        "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"
+                        :population-at-risk ;;this actually comes from the proj loop but for test use this csv
+                        "./datasets/test_datasets/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"}))
 
 (def params {:fert-last-yr 2014
              :start-yr-avg-fert 2014
@@ -32,13 +33,13 @@
 
 (def fertility-outputs-r (ld/load-datasets
                           {:projected-asfr-finalyrfixed
-                           "test_data/r_outputs_for_testing/fert/bristol_initial_proj_asfr_finalyrfixed_2015.csv"
+                           "./datasets/test_datasets/r_outputs_for_testing/fert/bristol_initial_proj_asfr_finalyrfixed_2015.csv"
                            :births
-                           "test_data/r_outputs_for_testing/fert/bristol_fertility_module_r_output_2015.csv"
+                           "./datasets/test_datasets/r_outputs_for_testing/fert/bristol_fertility_module_r_output_2015.csv"
                            :historic-asfr
-                           "test_data/r_outputs_for_testing/fert/bristol_historic_asfr.csv"
+                           "./datasets/test_datasets/r_outputs_for_testing/fert/bristol_historic_asfr.csv"
                            :births-by-age-sex-mother
-                           "test_data/r_outputs_for_testing/fert/bristol_proj_births_age_sex_mother_2015.csv"}))
+                           "./datasets/test_datasets/r_outputs_for_testing/fert/bristol_proj_births_age_sex_mother_2015.csv"}))
 
 (deftest calculate-historic-asfr-test
   (testing "Historic ASFR calculation"

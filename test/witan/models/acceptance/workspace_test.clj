@@ -76,28 +76,28 @@
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Inputs
    :in-historic-popn                  {:var #'witan.models.acceptance.workspace-test/resource-csv-loader
-                                       :params {:src "test_data/model_inputs/bristol_hist_popn_mye.csv"
+                                       :params {:src "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"
                                                 :key :historic-population}}
    :in-historic-total-births          {:var #'witan.models.acceptance.workspace-test/resource-csv-loader
-                                       :params {:src "test_data/model_inputs/fert/bristol_hist_births_mye.csv"
+                                       :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
                                                 :key :historic-births}}
    :in-projd-births-by-age-of-mother  {:var #'witan.models.acceptance.workspace-test/resource-csv-loader
-                                       :params {:src "test_data/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
+                                       :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
                                                 :key :ons-proj-births-by-age-mother}}
    :in-historic-deaths-by-age-and-sex {:var #'witan.models.acceptance.workspace-test/resource-csv-loader
-                                       :params {:src "test_data/model_inputs/mort/bristol_hist_deaths_mye.csv"
+                                       :params {:src "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"
                                                 :key :historic-deaths}}
    :in-historic-dom-in-migrants       {:var #'witan.models.acceptance.workspace-test/resource-csv-loader
-                                       :params {:src "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
+                                       :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
                                                 :key :domestic-in-migrants}}
    :in-historic-dom-out-migrants      {:var #'witan.models.acceptance.workspace-test/resource-csv-loader
-                                       :params {:src "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
+                                       :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
                                                 :key :domestic-out-migrants}}
    :in-historic-intl-in-migrants      {:var #'witan.models.acceptance.workspace-test/resource-csv-loader
-                                       :params {:src "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"
+                                       :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
                                                 :key :international-in-migrants}}
    :in-historic-intl-out-migrants     {:var #'witan.models.acceptance.workspace-test/resource-csv-loader
-                                       :params {:src "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"
+                                       :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"
                                                 :key :international-out-migrants}}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Outputs

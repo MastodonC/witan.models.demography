@@ -17,7 +17,7 @@
   ([filename]
    (load-csv filename nil))
   ([filename eol]
-   (let [file (io/resource filename)]
+   (let [file (io/file filename)]
      (when (.exists (io/as-file file))
        (let [parsed-csv (data-csv/read-csv (io/reader file) :end-of-line eol)
              parsed-data (rest parsed-csv)

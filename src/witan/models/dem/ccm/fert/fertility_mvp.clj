@@ -80,7 +80,8 @@
                         :historic-population HistPopulationSchema
                         :historic-births BirthsSchema}
    :witan/param-schema {:fert-last-yr s/Int}
-   :witan/output-schema {:historic-asfr HistASFRSchema}}
+   :witan/output-schema {:historic-asfr HistASFRSchema}
+   :witan/exported? false}
   [{:keys [base-asfr ons-proj-births-by-age-mother historic-population historic-births]}
    {:keys [fert-last-yr]}]
   (let [birth-data-yr (reduce max (ds/column
@@ -110,7 +111,8 @@
    :witan/input-schema {:historic-asfr HistASFRSchema}
    :witan/param-schema {:fert-last-yr s/Int :start-yr-avg-fert s/Int
                         :end-yr-avg-fert s/Int}
-   :witan/output-schema {:initial-projected-fertility-rates ProjFixedASFRSchema}}
+   :witan/output-schema {:initial-projected-fertility-rates ProjFixedASFRSchema}
+   :witan/exported? false}
   [{:keys [historic-asfr]} {:keys [fert-last-yr start-yr-avg-fert end-yr-avg-fert]}]
   {:initial-projected-fertility-rates
    (cf/jumpoffyr-method-average historic-asfr
@@ -127,7 +129,8 @@
    :witan/version "1.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjFixedASFRSchema
                         :population-at-risk HistPopulationSchema}
-   :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}}
+   :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
+   :witan/exported? false}
   [{:keys [initial-projected-fertility-rates population-at-risk]} _]
   (let [projected-births (cf/project-component-fixed-rates
                           population-at-risk
@@ -160,7 +163,8 @@
    :witan/version "1.0"
    :witan/input-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
    :witan/param-schema {:proportion-male-newborns double}
-   :witan/output-schema {:births BirthsBySexSchema}}
+   :witan/output-schema {:births BirthsBySexSchema}
+   :witan/exported? false}
   [{:keys [births-by-age-sex-mother]} {:keys [proportion-male-newborns]}]
   (let [births-by-sex (-> births-by-age-sex-mother
                           (wds/rollup :sum :births [:gss-code])
@@ -185,7 +189,8 @@
    :witan/param-schema {:fert-last-yr s/Int :start-yr-avg-fert s/Int
                         :end-yr-avg-fert s/Int}
    :witan/output-schema {:historic-asfr HistASFRSchema
-                         :initial-projected-fertility-rates ProjFixedASFRSchema}}
+                         :initial-projected-fertility-rates ProjFixedASFRSchema}
+   :witan/exported? true}
   [input-data params]
   (-> input-data
       (calculate-historic-asfr params)
@@ -201,7 +206,8 @@
                         :population-at-risk HistPopulationSchema}
    :witan/param-schema {:proportion-male-newborns double}
    :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema
-                         :births BirthsBySexSchema}}
+                         :births BirthsBySexSchema}
+   :witan/exported? true}
   [input-data params]
   (-> input-data
       project-births-from-fixed-rates
