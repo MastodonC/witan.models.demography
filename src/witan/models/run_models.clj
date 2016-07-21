@@ -101,10 +101,11 @@
                               (vector? ordered-colnames)
                               (zipmap ordered-colnames
                                       (vec (range (count ordered-colnames)))))
-        ordered-data (map #(order-result-map % sorted-colnames) rows-as-maps)]
+        order-columns (map #(order-result-map % sorted-colnames) rows-as-maps)
+        sort-rows (sort-by #(vec (map % [:year :sex :age])) order-columns)]
     (with-open [out-file (jio/writer filepath)]
       (data-csv/write-csv out-file
-                          (convert-row-maps-to-vector-of-vectors ordered-data)))))
+                          (convert-row-maps-to-vector-of-vectors sort-rows)))))
 
 (def local-authorities (read-string (slurp "./datasets/default_datasets/local_authorities.edn")))
 
