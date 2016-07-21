@@ -9,31 +9,31 @@
 
 ;; Historical migration data
 (def migration-data (ld/load-datasets {:domestic-in-migrants
-                                       "test_data/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
+                                       "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
                                        :domestic-out-migrants
-                                       "test_data/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
+                                       "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
                                        :international-in-migrants
-                                       "test_data/model_inputs/mig/bristol_hist_international_inmigrants.csv"
+                                       "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
                                        :international-out-migrants
-                                       "test_data/model_inputs/mig/bristol_hist_international_outmigrants.csv"}))
+                                       "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"}))
 
 ;; Following 4 datasets are averages of historical migration data calculated in the R model
 ;; using the equivalent of the jumpoffyr-method-average function
 (def dom-in-averages (ld/load-dataset :dom-in-averages
-                                      "test_data/r_outputs_for_testing/mig/bristol_proj_domestic_inmigrants_valuesavgfixed.csv"))
+                                      "./datasets/test_datasets/r_outputs_for_testing/mig/bristol_proj_domestic_inmigrants_valuesavgfixed.csv"))
 
 (def dom-out-averages (ld/load-dataset :dom-out-averages
-                                       "test_data/r_outputs_for_testing/mig/bristol_proj_domestic_outmigrants_valuesavgfixed.csv"))
+                                       "./datasets/test_datasets/r_outputs_for_testing/mig/bristol_proj_domestic_outmigrants_valuesavgfixed.csv"))
 
 (def inter-in-averages (ld/load-dataset :inter-in-averages
-                                        "test_data/r_outputs_for_testing/mig/bristol_proj_international_inmigrants_valuesavgfixed.csv"))
+                                        "./datasets/test_datasets/r_outputs_for_testing/mig/bristol_proj_international_inmigrants_valuesavgfixed.csv"))
 
 (def inter-out-averages (ld/load-dataset :inter-out-averages
-                                         "test_data/r_outputs_for_testing/mig/bristol_proj_international_outmigrants_valuesavgfixed.csv"))
+                                         "./datasets/test_datasets/r_outputs_for_testing/mig/bristol_proj_international_outmigrants_valuesavgfixed.csv"))
 
 ;; Output of the trends for domestic in-migrants calculated in R
 (def trends-domin (ld/load-dataset :dom-in-trends
-                                   "test_data/r_outputs_for_testing/mig/bristol_trends_domestic_inmigrants.csv"))
+                                   "./datasets/test_datasets/r_outputs_for_testing/mig/bristol_trends_domestic_inmigrants.csv"))
 
 (deftest jumpoffyr-method-average-test
   (testing "The function return the averages on the right year period"
