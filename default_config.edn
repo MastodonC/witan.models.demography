@@ -24,6 +24,7 @@
  {;; Core module
   :first-proj-year 2014
   :last-proj-year 2015
+
   ;; Fertility module
   :fert-last-yr 2014
   :start-yr-avg-fert 2014
@@ -31,12 +32,14 @@
   :number-male-newborns 105
   :number-all-newborns 205
   ;; :proportion-male-newborns (double (/ 105 205)) <- issue when parsing the file
+
   ;; Mortality module
-  :start-yr-avg-mort 2010 ;; Expected > or = to earliest year of mortality data
-  :end-yr-avg-mort 2014 ;; Expected < or = to latest year of mortality data
+  :start-yr-avg-mort 2010 ;; Expected > or = to earliest year of mortality data (2002)
+  :end-yr-avg-mort 2014 ;; Expected < or = to latest year of mortality data (2014)
+
   ;; Migration module
-  :start-yr-avg-dom-mig 2003 ;; Expected > or = to earliest year of domestic migration data
-  :end-yr-avg-dom-mig 2014 ;; Expected < or = to latest year of domestic migration data
-  :start-yr-avg-inter-mig 2003 ;; Expected > or = to earliest year of international migration data
-  :end-yr-avg-inter-mig 2014 ;; Expected < or = to latest year of domestic international data
+  :start-yr-avg-dom-mig 2003 ;; Expected > or = to earliest year of domestic migration data (2002)
+  :end-yr-avg-dom-mig 2014 ;; Expected < or = to latest year of domestic migration data (2014)
+  :start-yr-avg-inter-mig 2003 ;; Expected > or = to earliest year of international migration data (2002)
+  :end-yr-avg-inter-mig 2014 ;; Expected < or = to latest year of domestic international data (2014)
   }}
