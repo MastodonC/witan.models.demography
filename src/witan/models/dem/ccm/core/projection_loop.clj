@@ -8,10 +8,7 @@
             [witan.models.dem.ccm.fert.fertility-mvp :as fert]
             [witan.models.dem.ccm.mort.mortality-mvp :as mort]
             [witan.models.dem.ccm.mig.net-migration :as mig]
-            [taoensso.timbre :as timbre
-             :refer (log  trace  debug  info  warn  error  fatal  report
-                          logf tracef debugf infof warnf errorf fatalf reportf
-                          spy get-env log-env)]))
+            [taoensso.timbre :as timbre]))
 
 (defworkflowfn keep-looping?
   {:witan/name :ccm-core/ccm-loop-pred
@@ -157,7 +154,7 @@
                         remove-deaths
                         apply-migration
                         join-popn-latest-yr)]
-        (println (format "Projecting for year %d..." (:loop-year inputs')))
+        (timbre/info (format "\nProjecting for year %d..." (:loop-year inputs')))
         (if (:loop-predicate (keep-looping? inputs' params))
           (recur inputs')
           (:historic-population inputs'))))))

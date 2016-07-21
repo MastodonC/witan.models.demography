@@ -9,10 +9,7 @@
             [witan.models.dem.ccm.core.projection-loop :as core]
             [witan.datasets :as wds]
             [clojure.tools.cli :refer [parse-opts]]
-            [taoensso.timbre :as timbre
-             :refer (log  trace  debug  info  warn  error  fatal  report
-                          logf tracef debugf infof warnf errorf fatalf reportf
-                          spy get-env log-env)])
+            [taoensso.timbre :as timbre])
   (:gen-class :main true))
 
 (defn customise-headers [coll]
@@ -149,8 +146,8 @@
   [input]
   (cond (string? input) (when (.exists (jio/as-file input))
                           (try (read-string (slurp input))
-                               (catch Exception e (println (format "Caught Error: %s"
-                                                                   (.getMessage e))))))
+                               (catch Exception e (timbre/info (format "Caught Error: %s"
+                                                                       (.getMessage e))))))
         (map? input) input))
 
 (defn -main
@@ -164,14 +161,14 @@
                            :proportion-male-newborns
                            (double (/ (:number-male-newborns user-parameters)
                                       (:number-all-newborns user-parameters))))
-                    (catch Exception e (println (format "Caught Error: %s"
-                                                        (.getMessage e)))))]
-    (println (format "%d option validation errors\n%s" (count errors)
-                     (clojure.string/join "\n" errors)))
-    (println (format "\nInput used: %s\nOutput used: %s\n"
-                     (:input-config (:options (parse-opts args cli-options)))
-                     (:output-projections (:options (parse-opts args cli-options)))))
-    (println (format "Preparing projection for %s... " (get-district gss-code)))
+                    (catch Exception e (timbre/info (format "Caught Error: %s"
+                                                            (.getMessage e)))))]
+    (timbre/info (format "\n%d option validation errors\n%s" (count errors)
+                         (clojure.string/join "\n" errors)))
+    (timbre/info (format "\nInput used: %s\nOutput used: %s\n"
+                         (:input-config (:options (parse-opts args cli-options)))
+                         (:output-projections (:options (parse-opts args cli-options)))))
+    (timbre/info (format "\nPreparing projection for %s... " (get-district gss-code)))
     (-> (run-ccm input-datasets gss-code params)
         (add-district-to-dataset-per-user-input gss-code)
         (write-data-to-csv output-projections [:gss-code :district :sex :age :year :popn]))))
