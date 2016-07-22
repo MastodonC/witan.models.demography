@@ -136,7 +136,7 @@
     :validate [#(.exists (jio/file %)) "Must be an existing file path"]
     :default "./default_config.edn"]
    ["-o" "--output-projections FILEPATH" "Filepath for the output projections"
-    :validate [#(.exists (jio/as-file (.getPath (jio/file %))))
+    :validate [#(.exists (jio/as-file (.getParent (jio/file %))))
                "Must contain an existing path of directories"]
     :default "./ccm_projections.csv"]
    ["-c" "--gss-code for a English local authority" "Gss code for the local authority of interest"]])
