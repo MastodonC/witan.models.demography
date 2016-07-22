@@ -12,8 +12,12 @@
                  [org.clojure/tools.cli "0.3.5"]
                  [com.taoensso/timbre "4.7.0"]]
   :target-path "target/%s"
-  :profiles {:dev {:dependencies [[witan.workspace-executor "0.2.1"
+  :profiles {:dev {:source-paths ["src" "src-cli"]
+                   :dependencies [[witan.workspace-executor "0.2.1"
                                    :exclusions [witan.workspace-api]]]}
-             :uberjar {:main witan.models.run-models
-                       :aot :all}}
+             :uberjar {:aot :all}
+             :cli {:main witan.models.run-models
+                   :source-paths ["src" "src-cli"]
+                   :dependencies [[witan.workspace-executor "0.2.1"
+                                   :exclusions [witan.workspace-api]]]}}
   :exclusions [prismatic/schema org.clojure/clojure])
