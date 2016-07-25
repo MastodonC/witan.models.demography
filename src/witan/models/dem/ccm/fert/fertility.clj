@@ -76,7 +76,7 @@
    population, the base age-specific fertility rate and the base year.
    Returns a dataset containing the historic age specific fertility rates."
   {:witan/name :ccm-fert/calc-hist-asfr
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:ons-proj-births-by-age-mother BirthsAgeSexMotherSchema
                         :historic-population PopulationSchema
                         :historic-births BirthsSchema}
@@ -108,7 +108,7 @@
    age specific fertility rates, calculated using the jumpoff year average
    method (see docs)."
   {:witan/name :ccm-fert/project-asfr-finalyrhist-fixed
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:historic-asfr HistASFRSchema}
    :witan/output-schema {:initial-projected-fertility-rates ProjFixedASFRSchema}
    :witan/exported? true}
@@ -123,7 +123,7 @@
   loop and another dataset with fixed fertility rates for the population. Returns a
   dataset with a column of births, which are the product of popn at risk & the rates"
   {:witan/name :ccm-fert/project-births-fixed-rates
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjFixedASFRSchema
                         :population-at-risk PopulationAtRiskSchema}
    :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
@@ -157,7 +157,7 @@
    age specific fertility rates, calculated using the jumpoff year average
    method (see docs)."
   {:witan/name :ccm-fert/combine-into-births-by-sex
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
    :witan/param-schema {:proportion-male-newborns double}
    :witan/output-schema {:births BirthsBySexSchema}

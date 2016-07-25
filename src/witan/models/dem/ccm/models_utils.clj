@@ -1,12 +1,13 @@
 (ns witan.models.dem.ccm.models-utils
-  (:require [witan.workspace-api :refer [defworkflowfn]]
+  (:require [witan.workspace-api :refer [defworkflowfn
+                                         defworkflowoutput
+                                         defworkflowinput]]
             [witan.models.load-data :as ld]
             [schema.core :as s]))
 
 (defn get-meta
   [v]
-  (let [meta-key (if (:pred? v) :witan/workflowpred :witan/workflowfn)]
-    (-> v :var meta meta-key)))
+  (-> v :var meta :witan/metadata))
 
 (defn make-contracts
   [task-coll]
@@ -15,30 +16,37 @@
 (defn make-catalog
   [task-coll]
   (mapv (fn [[k v]]
-          (hash-map :witan/name k
-                    :witan/version "1.0"
-                    :witan/params (:params v)
-                    :witan/fn (:witan/name (get-meta v)))) task-coll))
+          (let [m (hash-map :witan/name k
+                            :witan/version "1.0.0"
+                            :witan/type (:witan/type (get-meta v))
+                            :witan/fn (:witan/name (get-meta v)))]
+            (if (:params v)
+              (assoc m :witan/params (:params v))
+              m))) task-coll))
 
-(defworkflowfn resource-csv-loader
+(defworkflowinput resource-csv-loader
   "Loads CSV files from resources"
   {:witan/name :workspace-test/resource-csv-loader
-   :witan/version "1.0"
-   :witan/input-schema {:* s/Any}
+   :witan/version "1.0.0"
    :witan/output-schema {:* s/Any}
    :witan/param-schema {:src s/Str
-                        :key s/Keyword}
-   :witan/exported? false}
+                        :key s/Keyword}}
   [_ {:keys [src key]}]
   (ld/load-dataset key src))
 
-(defworkflowfn out
-  "Print a message to indicate we were called"
-  {:witan/name :workspace-test/out
-   :witan/version "1.0"
+(defworkflowfn fn-out
+  {:witan/name :workspace-test/fn-out
+   :witan/version "1.0.0"
    :witan/input-schema {:* s/Any}
-   :witan/output-schema {:finished? (s/pred true?)}
-   :witan/exported? true}
+   :witan/output-schema {:finished? (s/eq true)}}
+  [data _]
+  ;; This is where data is persisted to a file, S3 etc.
+  {:finished? true})
+
+(defworkflowoutput out
+  {:witan/name :workspace-test/out
+   :witan/version "1.0.0"
+   :witan/input-schema {:* s/Any}}
   [data _]
   ;; This is where data is persisted to a file, S3 etc.
   {:finished? true})
