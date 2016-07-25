@@ -172,6 +172,16 @@
   {:column-names (apply-col-names-schema ProjDomInSchema csv-data)
    :columns (vec (apply-row-schema ProjDomInSchema csv-data))})
 
+(defmethod apply-record-coercion :future-mortality-trend-assumption
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema NationalTrendsSchema csv-data)
+   :columns (vec (apply-row-schema NationalTrendsSchema csv-data))})
+
+(defmethod apply-record-coercion :projected-asmr
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema ProjASMRSchema csv-data)
+   :columns (vec (apply-row-schema ProjASMRSchema csv-data))})
+
 (defn create-dataset-after-coercion
   [{:keys [column-names columns]}]
   (ds/dataset column-names columns))

@@ -151,7 +151,7 @@
    :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility/combine-into-births-by-sex
                                 :params {:proportion-male-newborns
                                          (:proportion-male-newborns params)}}
-   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr
+   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-average-fixed
                                 :params {:start-yr-avg-mort (:start-yr-avg-mort params)
                                          :end-yr-avg-mort (:end-yr-avg-mort params)}}
    :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}

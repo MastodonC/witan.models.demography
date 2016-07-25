@@ -108,6 +108,13 @@
 (def ProjFixedASMRSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:death-rate double]]))
 
+(def ProjASMRSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int] [:death-rate double]]))
+
+(def NationalTrendsSchema
+  (make-ordered-ds-schema [[:sex s/Str] [:age s/Int] [:year s/Int] [:principal double]
+                           [:low double] [:high double]]))
+
 ;; For the fertility component
 (def HistASFRSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
