@@ -22,18 +22,14 @@
    Takes in a filepath for a CSV file and a gss code.
    Returns a dataset for the local authority of interest."
   [dataset-path gss-code]
-  (let [parsed-csv (data-csv/read-csv (jio/reader dataset-path) :end-of-line nil)
+  (let [parsed-csv (data-csv/read-csv (slurp dataset-path))
         parsed-data (rest parsed-csv)
         headers (customise-headers (map clojure.string/lower-case
                                         (first parsed-csv)))
-        filtered-data (->> parsed-data
-                           (map #(clojure.walk/keywordize-keys (zipmap headers %1)))
-                           (filterv #(= (:gss-code %) gss-code)))
-        seq-filtered-data (map #(-> %
-                                    vals
-                                    vec) filtered-data)]
+        index (.indexOf headers :gss-code)
+        filtered-data (filterv #(= gss-code (nth % index)) parsed-data)]
     {:column-names headers
-     :columns seq-filtered-data}))
+     :columns filtered-data}))
 
 (defn get-dataset
   "Input is a keyword and a filepath to csv file
