@@ -9,9 +9,15 @@
             [witan.models.dem.ccm.core.projection-loop :as core]
             [witan.datasets :as wds]
             [clojure.tools.cli :refer [parse-opts]]
-            [taoensso.timbre :as timbre])
+            [taoensso.timbre :as timbre]
+            [schema.core :as s]
+            [witan.models.dem.ccm.models-utils :refer :all]
+            [witan.models.dem.ccm.models :refer [ccm-workflow]]
+            [witan.workspace-executor.core :as wex]
+            [witan.workspace-api :refer [defworkflowfn]])
   (:gen-class :main true))
 
+;; Handle inputs
 (defn customise-headers [coll]
   (mapv #(-> %
              (clojure.string/replace #"[. /']" "-")
@@ -40,13 +46,18 @@
        ld/create-dataset-after-coercion
        (hash-map keyname)))
 
-(defn get-datasets
-  "Input should be a map with keys for each dataset and filepaths to csv
-   files as the values. Output is a map of core.matrix datasets."
-  [file-map gss-code]
-  (->> file-map
-       (mapv (fn [[k path]] (get-dataset k path gss-code)))
-       (reduce merge)))
+(defworkflowfn resource-csv-loader-filtered
+  "Loads CSV files from resources"
+  {:witan/name :workspace-test/resource-csv-loader-filtered
+   :witan/version "1.0"
+   :witan/input-schema {:* s/Any}
+   :witan/output-schema {:* s/Any}
+   :witan/param-schema {:gss-code s/Str
+                        :src s/Str
+                        :key s/Keyword}
+   :witan/exported? true}
+  [_ {:keys [src key gss-code]}]
+  (get-dataset key src gss-code))
 
 ;; Functions from witan.models.econscratch to write datasets
 ;; to CSV and specify the order of the columns:
@@ -119,13 +130,99 @@
       (ds/add-column data :district
                      (repeat (get-district gss-code))))))
 
-(defn run-ccm
-  "This function will evolve as we build the jar.
-   Takes in a map of datasets, a gss code and a map of parameters.
-   Returns a dataset with historical data and projections."
+;; Building the workspace:
+(defn tasks [inputs params gss-code]
+  { ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Functions
+   :project-asfr         {:var #'witan.models.dem.ccm.fert.fertility-mvp/project-asfr-finalyrhist-fixed
+                                :params {:fert-last-yr (:fert-last-yr params)
+                                         :start-yr-avg-fert (:start-yr-avg-fert params)
+                                         :end-yr-avg-fert (:end-yr-avg-fert params)}}
+   :join-popn-latest-yr        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-yr}
+   :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
+   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality-mvp/project-deaths-from-fixed-rates}
+   :proj-dom-in-migrants  {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-in-migrants
+                                :params {:start-yr-avg-dom-mig (:start-yr-avg-dom-mig params)
+                                         :end-yr-avg-dom-mig (:end-yr-avg-dom-mig params)}}
+   :calc-hist-asmr         {:var #'witan.models.dem.ccm.mort.mortality-mvp/calc-historic-asmr}
+   :proj-dom-out-migrants {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-out-migrants
+                                :params {:start-yr-avg-dom-mig (:start-yr-avg-dom-mig params)
+                                         :end-yr-avg-dom-mig (:end-yr-avg-dom-mig params)}}
+   :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
+   :age-on                     {:var #'witan.models.dem.ccm.core.projection-loop/age-on}
+   :project-births             {:var #'witan.models.dem.ccm.fert.fertility-mvp/project-births-from-fixed-rates}
+   :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility-mvp/combine-into-births-by-sex
+                                :params {:proportion-male-newborns
+                                         (:proportion-male-newborns params)}}
+   :project-asmr         {:var #'witan.models.dem.ccm.mort.mortality-mvp/project-asmr
+                                :params {:start-yr-avg-mort (:start-yr-avg-mort params)
+                                         :end-yr-avg-mort (:end-yr-avg-mort params)}}
+   :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
+   :prepare-starting-popn      {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs}
+   :calc-hist-asfr         {:var #'witan.models.dem.ccm.fert.fertility-mvp/calculate-historic-asfr
+                                :params {:fert-last-yr (:fert-last-yr params)}}
+   :apply-migration            {:var #'witan.models.dem.ccm.core.projection-loop/apply-migration}
+   :proj-intl-in-migrants      {:var #'witan.models.dem.ccm.mig.net-migration/project-international-in-migrants
+                                :params {:start-yr-avg-inter-mig (:start-yr-avg-inter-mig params)
+                                         :end-yr-avg-inter-mig (:end-yr-avg-inter-mig params)}}
+   :proj-intl-out-migrants     {:var #'witan.models.dem.ccm.mig.net-migration/project-international-out-migrants
+                                :params {:start-yr-avg-inter-mig (:start-yr-avg-inter-mig params)
+                                         :end-yr-avg-inter-mig (:end-yr-avg-inter-mig params)}}
+
+   :combine-into-net-flows {:var #'witan.models.dem.ccm.mig.net-migration/combine-into-net-flows}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Predicates
+   :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?
+                                :params {:last-proj-year (:last-proj-year params)}
+                                :pred? true}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Inputs
+   :in-hist-popn                  {:var #'witan.models.run-models/resource-csv-loader-filtered
+                                       :params {:gss-code gss-code
+                                                :src (:historic-population inputs)
+                                        :key :historic-population}}
+   :in-hist-total-births          {:var #'witan.models.run-models/resource-csv-loader-filtered
+                                       :params {:gss-code gss-code
+                                                :src (:historic-births inputs)
+                                                :key :historic-births}}
+   :in-proj-births-by-age-of-mother  {:var #'witan.models.run-models/resource-csv-loader-filtered
+                                       :params {:gss-code gss-code
+                                                :src (:ons-proj-births-by-age-mother inputs)
+                                                :key :ons-proj-births-by-age-mother}}
+   :in-hist-deaths-by-age-and-sex {:var #'witan.models.run-models/resource-csv-loader-filtered
+                                       :params {:gss-code gss-code
+                                                :src (:historic-deaths inputs)
+                                                :key :historic-deaths}}
+   :in-hist-dom-in-migrants       {:var #'witan.models.run-models/resource-csv-loader-filtered
+                                       :params {:gss-code gss-code
+                                                :src (:domestic-in-migrants inputs)
+                                                :key :domestic-in-migrants}}
+   :in-hist-dom-out-migrants      {:var #'witan.models.run-models/resource-csv-loader-filtered
+                                       :params {:gss-code gss-code
+                                                :src (:domestic-out-migrants inputs)
+                                                :key :domestic-out-migrants}}
+   :in-hist-intl-in-migrants      {:var #'witan.models.run-models/resource-csv-loader-filtered
+                                       :params {:gss-code gss-code
+                                                :src (:international-in-migrants inputs)
+                                                :key :international-in-migrants}}
+   :in-hist-intl-out-migrants     {:var #'witan.models.run-models/resource-csv-loader-filtered
+                                       :params {:gss-code gss-code
+                                                :src (:international-out-migrants inputs)
+                                                :key :international-out-migrants}}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Outputs
+   :out {:var #'witan.models.dem.ccm.models-utils/out}
+   })
+
+(defn run-workspace
   [inputs gss-code params]
-  (core/looping-test (get-datasets inputs gss-code)
-                     params))
+  (let [tasks (tasks inputs params gss-code)
+        workspace     {:workflow  ccm-workflow
+                       :catalog   (make-catalog tasks)
+                       :contracts (make-contracts tasks)}
+        workspace'    (s/with-fn-validation (wex/build! workspace))
+        result        (wex/run!! workspace' {})]
+    (:historic-population (first result))))
 
 (def cli-options
   [["-i" "--input-config FILEPATH" "Filepath for the config file with inputs info"
@@ -166,7 +263,7 @@
                          (:input-config (:options (parse-opts args cli-options)))
                          (:output-projections (:options (parse-opts args cli-options)))))
     (timbre/info (format "\nPreparing projection for %s... " (get-district gss-code)))
-    (-> (run-ccm input-datasets gss-code params)
+    (-> (run-workspace input-datasets gss-code params)
         (add-district-to-dataset-per-user-input gss-code)
         (write-data-to-csv output-projections [:gss-code :district :sex :age :year :popn]))))
 

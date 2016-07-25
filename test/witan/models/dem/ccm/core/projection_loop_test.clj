@@ -68,11 +68,28 @@
                   :start-yr-avg-inter-mig 2003
                   :end-yr-avg-inter-mig 2014})
 
-(def prepared-inputs (-> data-inputs
-                         prepare-inputs
-                         (fert/fertility-pre-projection params)
-                         (mort/mortality-pre-projection params)
-                         (mig/migration-pre-projection params)))
+(def prepared-inputs (prepare-inputs data-inputs))
+
+(defn fertility-module [inputs params]
+  (-> inputs
+      (fert/calculate-historic-asfr params)
+      (fert/project-asfr-finalyrhist-fixed params)
+      fert/project-births-from-fixed-rates
+      (fert/combine-into-births-by-sex params)))
+
+(defn mortality-module [inputs params]
+  (-> inputs
+      mort/calc-historic-asmr
+      (mort/project-asmr params)
+      mort/project-deaths-from-fixed-rates))
+
+(defn migration-module [inputs params]
+  (-> inputs
+      (mig/project-domestic-in-migrants params)
+      (mig/project-domestic-out-migrants params)
+      (mig/project-international-in-migrants params)
+      (mig/project-international-out-migrants params)
+      mig/combine-into-net-flows))
 
 (def output-2015 (ld/load-datasets
                   {:end-population
@@ -127,9 +144,10 @@
 
 (deftest add-births-test
   (testing "Newborns are correctly added to projection year popn."
-    (let [births-added (-> prepared-inputs
+    (let [
+          births-added (-> prepared-inputs
                            select-starting-popn
-                           (fert/births-projection params)
+                           (fertility-module params)
                            age-on
                            add-births)
           popn-with-births (:latest-yr-popn births-added)
@@ -143,8 +161,8 @@
   (testing "The deaths are removed from the popn."
     (let [aged-on-popn (-> prepared-inputs
                            select-starting-popn
-                           (fert/births-projection params)
-                           mort/project-deaths-from-fixed-rates
+                           (fertility-module params)
+                           (mortality-module params)
                            age-on)
           popn-with-births (add-births aged-on-popn)
           popn-wo-deaths (remove-deaths popn-with-births)]
@@ -156,8 +174,9 @@
   (testing "The migrants are added to the popn."
     (let [popn-with-births (-> prepared-inputs
                                select-starting-popn
-                               (fert/births-projection params)
-                               mort/project-deaths-from-fixed-rates
+                               (fertility-module params)
+                               (mortality-module params)
+                               (migration-module params)
                                age-on
                                add-births)
           popn-wo-deaths (remove-deaths popn-with-births)
@@ -165,31 +184,3 @@
       (is (= (apply + (concat  (get-popn (:latest-yr-popn popn-wo-deaths) :popn 2015 0 "F")
                                (get-popn (:net-migration popn-wo-deaths) :net-mig 0 "F")))
              (nth (get-popn (:latest-yr-popn popn-with-mig) :popn 2015 0 "F") 0))))))
-
-(deftest looping-test-test
-  (testing "The output of the loop matches the R code."
-    (let [proj-clj (looping-test data-inputs params-2040)
-          proj-clj-2015 (ds/rename-columns
-                         (i/query-dataset proj-clj
-                                          {:year
-                                           {:$eq 2015}})
-                         {:popn :popn-clj})
-          proj-clj-2040 (ds/rename-columns
-                         (i/query-dataset proj-clj
-                                          {:year
-                                           {:$eq 2040}})
-                         {:popn :popn-clj})
-          proj-r-2015 (ds/rename-columns
-                       (:end-population output-2015) {:popn :popn-r})
-          proj-r-2040 (ds/rename-columns
-                       (:end-population output-2040) {:popn :popn-r})
-          r-clj-2015 (wds/join proj-r-2015 proj-clj-2015 [:gss-code :sex :age :year])
-          r-clj-2040 (wds/join proj-r-2040 proj-clj-2040 [:gss-code :sex :age :year])]
-      ;; Compare all values in the :popn column between the R and Clj results for 2015:
-      (is (every? #(fp-equals? (i/sel r-clj-2015 :rows % :cols :popn-r)
-                               (i/sel r-clj-2015 :rows % :cols :popn-clj) 0.0001)
-                  (range (first (:shape r-clj-2015)))))
-      ;; Compare all values in the :popn column between the R and Clj results for 2040:
-      (is (every? #(fp-equals? (i/sel r-clj-2040 :rows % :cols :popn-r)
-                               (i/sel r-clj-2040 :rows % :cols :popn-clj) 0.0001)
-                  (range (first (:shape r-clj-2040))))))))

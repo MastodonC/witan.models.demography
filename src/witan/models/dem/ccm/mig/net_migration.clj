@@ -11,7 +11,8 @@
    :witan/version "1.0"
    :witan/input-schema {:domestic-in-migrants ComponentMYESchema}
    :witan/param-schema {:start-yr-avg-dom-mig s/Int :end-yr-avg-dom-mig s/Int}
-   :witan/output-schema {:projected-domestic-in-migrants ProjDomInSchema}}
+   :witan/output-schema {:projected-domestic-in-migrants ProjDomInSchema}
+   :witan/exported? true}
   [{:keys [domestic-in-migrants]} {:keys [start-yr-avg-dom-mig end-yr-avg-dom-mig]}]
   {:projected-domestic-in-migrants
    (cf/jumpoffyr-method-average domestic-in-migrants :estimate
@@ -22,7 +23,8 @@
    :witan/version "1.0"
    :witan/input-schema {:domestic-out-migrants ComponentMYESchema}
    :witan/param-schema {:start-yr-avg-dom-mig s/Int :end-yr-avg-dom-mig s/Int}
-   :witan/output-schema {:projected-domestic-out-migrants ProjDomOutSchema}}
+   :witan/output-schema {:projected-domestic-out-migrants ProjDomOutSchema}
+   :witan/exported? true}
   [{:keys [domestic-out-migrants]} {:keys [start-yr-avg-dom-mig end-yr-avg-dom-mig]}]
   {:projected-domestic-out-migrants
    (cf/jumpoffyr-method-average domestic-out-migrants :estimate
@@ -33,7 +35,8 @@
    :witan/version "1.0"
    :witan/input-schema {:international-in-migrants ComponentMYESchema}
    :witan/param-schema {:start-yr-avg-inter-mig s/Int :end-yr-avg-inter-mig s/Int}
-   :witan/output-schema {:projected-international-in-migrants ProjInterInSchema}}
+   :witan/output-schema {:projected-international-in-migrants ProjInterInSchema}
+   :witan/exported? true}
   [{:keys [international-in-migrants]} {:keys [start-yr-avg-inter-mig end-yr-avg-inter-mig]}]
   {:projected-international-in-migrants
    (cf/jumpoffyr-method-average international-in-migrants :estimate
@@ -44,7 +47,8 @@
    :witan/version "1.0"
    :witan/input-schema {:international-out-migrants ComponentMYESchema}
    :witan/param-schema {:start-yr-avg-inter-mig s/Int :end-yr-avg-inter-mig s/Int}
-   :witan/output-schema {:projected-international-out-migrants ProjInterOutSchema}}
+   :witan/output-schema {:projected-international-out-migrants ProjInterOutSchema}
+   :witan/exported? true}
   [{:keys [international-out-migrants]} {:keys [start-yr-avg-inter-mig end-yr-avg-inter-mig]}]
   {:projected-international-out-migrants
    (cf/jumpoffyr-method-average international-out-migrants :estimate
@@ -57,7 +61,8 @@
                         :projected-domestic-out-migrants ProjDomOutSchema
                         :projected-international-in-migrants ProjInterInSchema
                         :projected-international-out-migrants ProjInterOutSchema}
-   :witan/output-schema {:net-migration NetMigrationSchema}}
+   :witan/output-schema {:net-migration NetMigrationSchema}
+   :witan/exported? true}
   [{:keys [projected-domestic-in-migrants projected-domestic-out-migrants
            projected-international-in-migrants projected-international-out-migrants]} _]
   (let [net-migrants (-> (reduce #(wds/join %1 %2 [:gss-code :sex :age])
@@ -71,24 +76,3 @@
                           (fn [di do ii io] (+ (- di do) (- ii io))))
                          (ds/select-columns [:gss-code :sex :age :net-mig]))]
     {:net-migration net-migrants}))
-
-(defworkflowfn migration-pre-projection
-  {:witan/name :ccm-mig/proj-dom-in-mig
-   :witan/version "1.0"
-   :witan/input-schema {:domestic-out-migrants ComponentMYESchema
-                        :domestic-in-migrants ComponentMYESchema
-                        :international-out-migrants ComponentMYESchema
-                        :international-in-migrants ComponentMYESchema}
-   :witan/param-schema  {:start-yr-avg-dom-mig s/Int :end-yr-avg-dom-mig s/Int
-                         :start-yr-avg-inter-mig s/Int :end-yr-avg-inter-mig s/Int}
-   :witan/output-schema {:projected-domestic-out-migrants ProjDomOutSchema
-                         :projected-domestic-in-migrants ProjDomInSchema
-                         :projected-international-out-migrants ProjInterOutSchema
-                         :projected-international-in-migrants ProjInterInSchema
-                         :net-migration NetMigrationSchema}}
-  [input-data params]
-  (combine-into-net-flows (merge-> input-data
-                                   (project-domestic-in-migrants params)
-                                   (project-domestic-out-migrants params)
-                                   (project-international-in-migrants params)
-                                   (project-international-out-migrants params))))

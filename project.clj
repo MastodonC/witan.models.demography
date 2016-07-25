@@ -13,7 +13,7 @@
                  [com.taoensso/timbre "4.7.0"]]
   :target-path "target/%s"
   :profiles {:dev {:source-paths ["src" "src-cli"]
-                   :dependencies [[witan.workspace-executor "0.2.1"
+                   :dependencies [[witan.workspace-executor "0.2.2"
                                    :exclusions [witan.workspace-api]]]}
              :uberjar {:aot :all}
              :cli {:main witan.models.run-models

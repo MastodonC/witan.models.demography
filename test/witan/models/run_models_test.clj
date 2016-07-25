@@ -4,6 +4,7 @@
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
             [witan.datasets :as wds]
+            [witan.models.load-data :as ld]
             [witan.models.dem.ccm.core.projection-loop :as core]
             [witan.models.dem.ccm.core.projection-loop-test :as core-test]
             [witan.models.dem.ccm.fert.fertility-mvp :as fert]
@@ -48,30 +49,21 @@
       (is (true?
            (every? #(= % "E06000023") gss-dataset))))))
 
-(deftest run-ccm-test
+(def r-output-2015 (ld/load-datasets
+                    {:end-population
+                     "./datasets/test_datasets/r_outputs_for_testing/core/bristol_end_population_2015.csv"}))
+
+(deftest run-workspace-test
   (testing "The historical and projection data is returned"
-    (let [proj-core-2015 (ds/rename-columns (i/query-dataset
-                                             (core/looping-test core-test/data-inputs params-2015)
-                                             {:year {:$eq 2015}})
-                                            {:popn :popn-core})
-          proj-bristol-2015 (i/query-dataset (run-ccm datasets gss-bristol params-2015)
-                                             {:year {:$eq 2015}})
-          proj-core-2040 (ds/rename-columns (i/query-dataset
-                                             (core/looping-test core-test/data-inputs params-2040)
-                                             {:year {:$eq 2040}})
-                                            {:popn :popn-core})
-          proj-bristol-2040 (i/query-dataset (run-ccm datasets gss-bristol params-2040)
-                                             {:year {:$eq 2040}})
-          joined-proj-2015 (wds/join proj-bristol-2015 proj-core-2015 [:gss-code :sex :age :year])
-          joined-proj-2040 (wds/join proj-bristol-2040 proj-core-2040 [:gss-code :sex :age :year])]
-      ;; Compare projection values for 2015:
-      (is (every? #(fp-equals? (i/sel joined-proj-2015 :rows % :cols :popn)
-                               (i/sel joined-proj-2015 :rows % :cols :popn-core) 0.0001)
-                  (range (first (:shape joined-proj-2015)))))
-      ;; Compare projection values for 2040:
-      (is (every? #(fp-equals? (i/sel joined-proj-2040 :rows % :cols :popn)
-                               (i/sel joined-proj-2040 :rows % :cols :popn-core) 0.0001)
-                  (range (first (:shape joined-proj-2040))))))))
+    (let [proj-bristol-2015 (run-workspace datasets gss-bristol params-2015)
+          r-proj-bristol-2015 (ds/rename-columns (:end-population r-output-2015)
+                                                 {:popn :popn-r})
+          joined-ds (wds/join proj-bristol-2015 r-proj-bristol-2015 [:gss-code :sex :age :year])]
+      (is proj-bristol-2015)
+      (= (:shape proj-bristol-2015) (:shape r-proj-bristol-2015))
+      (is (every? #(fp-equals? (i/sel joined-ds :rows % :cols :popn)
+                               (i/sel joined-ds :rows % :cols :popn-r) 0.0000000001)
+                  (range (first (:shape joined-ds))))))))
 
 (deftest get-district-test
   (testing "fn recovers correct district name"
