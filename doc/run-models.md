@@ -9,9 +9,9 @@ A minimal version of the population projection is now available for English unit
 
 ## Running a population projection
 
-An executable.jar file, which contains all the code and data needed to produce a projection, can be downloaded from http://example.com/FIXME.
+An executable.jar file, which includes all the code and data needed to produce a projection, can be downloaded from http://example.com/FIXME.
 
-The .jar file contains the following:
+The .jar file includes the following:
 
 ![minimal CCM](images/jar-setup.png)
 
@@ -19,7 +19,7 @@ To run the .jar file and produce a projection, follow the instructions in the [R
 
 ## User-defined parameters for the model
 
-Some parameters in the model need to be specified by the user. The .jar file contains default values for the parameters, which can be changed as needed. The parameters, with defaults in parentheses, are:
+Some parameters in the model can be specified by the user. The .jar file will access the default values for the parameters when running the projection. The parameters, with defaults in parentheses, are:
 
 * First year of projection (2015)
 * Last year of projection (2040)
@@ -27,7 +27,7 @@ Some parameters in the model need to be specified by the user. The .jar file con
 * Start & end years of year range to average over when projecting deaths (2010-2014)
 * Start & end years of year range to average over when projecting domestic migration (2010-2014)
 * Start & end years of year range to average over when projecting international migration (2010-2014)
-* Proportion of male newborns, represented as a number of male newborns and a number of all newborns. **IMPORTANT**: This proportion is set to 105/205 for the UK, and should only be changed for other countries. 
+* Proportion of male newborns, represented as a number of male newborns (105) and a number of all newborns (205). **IMPORTANT**: This proportion is set to 105/205 for the UK, and should only be changed for other countries. 
 
 ## User-defined parameters for the geography
 
@@ -105,3 +105,11 @@ Some datasets have been reformatted from their original structure. The column na
 | GSS Code  | Sex | Age | Var | Year | Estimate |
 | --------- | --- | --- | ---- | ------ | ----- |
 | E06000023 |  F  | 0  | international-out | 2002 | 4 |
+
+## Projection output
+
+The output of the projection is a csv file containing the projected population, appended onto the historic population data.
+
+| gss-code  | district | sex | age | year | popn |
+| --------- | --- | --- | ---- | ------ | ----- |
+| E06000023 |  Bristol, City of  | F  | 0 | 2001 | 2330.0 |

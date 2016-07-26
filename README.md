@@ -52,7 +52,7 @@ A GSS code must always be specified to tell the model which geographic area the 
 
 ## Options
 
-The projections can be customised by adjusting the options below. Read more about how the .jar file works and what input data is expected in the [docs](https://github.com/MastodonC/witan.models.demography/tree/master/doc/run-model.md).
+The projections can be customised by adjusting the options below. Read more about how the .jar file works and what input data is expected in the [docs](https://github.com/MastodonC/witan.models.demography/tree/master/doc/run-models.md).
 
 * [`-c` or `--gss-code`](#gss-code)
 * [`-i` or `--input-config`](#input-config)
@@ -92,7 +92,7 @@ The geographical area for the projection must be specified. This is done with th
 
 ### input-config
 
-The configuration file contains file paths to the model input datasets and model parameters that can be adjusted by the user. The parameters in this file are described [here](doc/run-model.md).
+The configuration file contains file paths to the model input datasets and model parameters that can be adjusted by the user. The parameters in this file are described [here](doc/run-models.md).
 
 The [default config file](https://github.com/MastodonC/witan.models.demography/blob/master/default_config.edn) should be used as a template and edited at its current location or copied (and modified) anywhere else on your machine.
 
