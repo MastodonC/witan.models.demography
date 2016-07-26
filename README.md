@@ -52,7 +52,7 @@ A GSS code must always be specified to tell the model which geographic area the 
 
 ## Options
 
-The projections can be customised by adjusting the options below. Read more about how the .jar file works and what input data is expected in the [docs](https://github.com/MastodonC/witan.models.demography/tree/master/doc/run-models.md).
+The projections can be customised by adjusting the options below. Read more about how the .jar file works and what input data is expected in the [docs](doc/run-models.md).
 
 * [`-c` or `--gss-code`](#gss-code)
 * [`-i` or `--input-config`](#input-config)
