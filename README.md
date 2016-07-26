@@ -32,7 +32,7 @@ You need to have [Leiningen](http://leiningen.org/) installed to run the project
 ```
 	$ lein clean
 
-	$ lein uberjar
+	$ lein with-profile cli uberjar
 ```
 
 Copy the filepath to the standalone file, starting at the `target` directory, to use later. For example:
@@ -51,7 +51,7 @@ For example:
 ```
     $ java -jar target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023" -i "default_config.edn" -o "ccm_projections.csv" 
 ```
-A GSS code must always be specified to tell the model which geographic area the proejctions are for. See the GSS codes that are accepted [here](#gss-code).
+A GSS code must always be specified to tell the model which geographic area the projections are for. See the GSS codes that are accepted [here](#gss-code).
 
 ## Options
 
@@ -66,6 +66,8 @@ The last two options have default values if not specified:
 
 * default input configuration filepath: "default_config.edn"
 * default output projection filepath: "ccm_projections.csv"
+
+These default settings mean the "default_config.edn" file is located inside this repository and the output will be created as "ccm_projections.csv" inside this repository as well.
 
 The previous command can thus been run as follows:
 
@@ -89,18 +91,17 @@ The geographical area for the projection must be specified. This is done with th
   * an English non-metropolitan district (starts with "E07")   
   * an English metropolitan borough (starts with "E08")   
   * a London borough (starts with "E09")   
-  * Northern Ireland, Scotland, or Wales (country codes "N92000002", "S92000003", or "W92000004"; smaller geographis not yet available)
+  * Northern Ireland, Scotland, or Wales (country codes "N92000002", "S92000003", or "W92000004"; smaller geographies not yet available)
 
 ### input-config
 
-Configuration file with model parameters that can be adjusted by the user. The parameters in this file are described [here](doc/run-model.md).
+The configuration file contains file paths to the model input datasets and model parameters that can be adjusted by the user. The parameters in this file are described [here](doc/run-model.md).
 
-See example: [`default_config.edn`](https://github.com/MastodonC/witan.models.demography/blob/master/default_config.edn)
-
+The [default config file](https://github.com/MastodonC/witan.models.demography/blob/master/default_config.edn) should be used as a template and edited at its current location or copied (and modified) anywhere else on your machine.
 
 ### output-projections
 
-Path to the file where the final projection should be saved. The projections are output as .csv files.
+This is the path to the file where the final projection should be saved. The projections are returned in one csv file. This file contains the historical population data used in the projection, with the projected population appended. The output path can be anywhere on your machine as long as the directories on the path exist. 
 
 
 ## License

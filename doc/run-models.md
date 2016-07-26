@@ -27,7 +27,7 @@ Some parameters in the model need to be specified by the user. The .jar file con
 * Start & end years of year range to average over when projecting deaths (2010-2014)
 * Start & end years of year range to average over when projecting domestic migration (2010-2014)
 * Start & end years of year range to average over when projecting international migration (2010-2014)
-* Proportion of male newbors (0.5122)
+* Proportion of male newborns, represented as a number of male newborns and a number of all newborns. **IMPORTANT**: This proportion is set to 105/205 for the UK, and should only be changed for other countries. 
 
 ## User-defined parameters for the geography
 
