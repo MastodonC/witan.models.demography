@@ -35,10 +35,7 @@ You need to have [Leiningen](http://leiningen.org/) installed to run the project
 	$ lein with-profile cli uberjar
 ```
 
-Copy the filepath to the standalone file, starting at the `target` directory, to use later. For example:
-```
-    target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar
-```
+Copy the filepath to the standalone file to use later.
 
 ## Usage
 Population projections can be produced by running the executable .jar file from the command line:  
@@ -49,7 +46,7 @@ Population projections can be produced by running the executable .jar file from 
 
 For example:
 ```
-    $ java -jar target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023" -i "default_config.edn" -o "ccm_projections.csv" 
+    $ java -jar witan.models.demography/target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023" -i "default_config.edn" -o "ccm_projections.csv" 
 ```
 A GSS code must always be specified to tell the model which geographic area the projections are for. See the GSS codes that are accepted [here](#gss-code).
 
@@ -72,7 +69,7 @@ These default settings mean the "default_config.edn" file is located inside this
 The previous command can thus been run as follows:
 
 ```
-	$ java -jar target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023"
+	$ java -jar witan.models.demography/target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023"
 ```
 
 Example:
@@ -80,7 +77,7 @@ Example:
 To save the projections output to a different directory, with a different filename:
 
 ```
-	$ java -jar target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023" -o /home/user/Documents/ccm_projections/Bristol_projections.csv" 
+	$ java -jar witan.models.demography/target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023" -o /home/user/Documents/ccm_projections/Bristol_projections.csv" 
 ```
 
 ### gss-code
