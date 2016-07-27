@@ -46,7 +46,7 @@
                         :historic-births BirthsSchema
                         :historic-population HistPopulationSchema}
    :witan/output-schema {:historic-asmr HistASMRSchema}
-   :witan/exported? false}
+   :witan/exported? true}
   [{:keys [historic-deaths historic-births historic-population]} _]
   (->> (create-popn-at-risk-death historic-population historic-deaths historic-births)
        (calc-death-rates historic-deaths)
@@ -63,7 +63,7 @@
    :witan/input-schema {:historic-asmr HistASMRSchema}
    :witan/param-schema {:start-yr-avg-mort s/Int :end-yr-avg-mort s/Int}
    :witan/output-schema {:initial-projected-mortality-rates ProjFixedASMRSchema}
-   :witan/exported? false}
+   :witan/exported? true}
   [{:keys [historic-asmr]} {:keys [start-yr-avg-mort end-yr-avg-mort]}]
   {:initial-projected-mortality-rates (cf/jumpoffyr-method-average historic-asmr
                                                                    :death-rate
@@ -86,21 +86,3 @@
    (cf/project-component-fixed-rates population-at-risk
                                      initial-projected-mortality-rates
                                      :death-rate :deaths)})
-
-(defworkflowfn mortality-pre-projection
-  "Handles the steps of the mortality module happening outside of the loop.
-   Takes in the historic input data and params maps and returns the
-   projected ASMR."
-  {:witan/name :ccm-mort/mort-pre-proj
-   :witan/version "1.0"
-   :witan/input-schema {:historic-deaths DeathsSchema
-                        :historic-births BirthsSchema
-                        :historic-population HistPopulationSchema}
-   :witan/param-schema {:start-yr-avg-mort s/Int :end-yr-avg-mort s/Int}
-   :witan/output-schema {:historic-asmr HistASMRSchema
-                         :initial-projected-mortality-rates ProjFixedASMRSchema}
-   :witan/exported? true}
-  [input-data params]
-  (-> input-data
-      calc-historic-asmr
-      (project-asmr params)))
