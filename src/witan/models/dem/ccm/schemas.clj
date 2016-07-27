@@ -23,10 +23,21 @@
 
 ;;Define schemas
 ;;Historic data used in core loop & component modules
-(def ComponentMYESchema
+(def DomesticInmigrants
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:var s/Str] [:year s/Int] [:estimate double]]))
+                           [:year s/Int] [:domin double]]))
 
+(def DomesticOutmigrants
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:domout double]]))
+
+(def InternationalInmigrants
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:intin double]]))
+
+(def InternationalOutmigrants
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:intout double]]))
 (def DeathsSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:deaths double]]))
