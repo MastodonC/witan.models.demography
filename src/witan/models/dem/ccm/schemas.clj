@@ -80,11 +80,16 @@
 (def InterOutAverageSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intout double]]))
 
-;; For the mortality component
+;; For the core module
 (def HistPopulationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:popn double]]))
 
+(def PopulationAtRiskSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:popn-at-risk double]]))
+
+;; For the mortality component
 (def HistASMRSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:death-rate double]]))
@@ -93,7 +98,6 @@
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:death-rate double]]))
 
 ;; For the fertility component
-
 (def HistASFRSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:fert-rate double]]))

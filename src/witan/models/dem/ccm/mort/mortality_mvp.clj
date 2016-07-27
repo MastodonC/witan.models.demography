@@ -19,9 +19,10 @@
                            (ds/emap-column :year inc)
                            (i/query-dataset {:year {:$lte max-yr-deaths}})
                            (ds/emap-column :age (fn [v] (if (< v 90) (inc v) v)))
-                           (wds/rollup :sum :popn [:gss-code :sex :age :year]))]
+                           (wds/rollup :sum :popn [:gss-code :sex :age :year])
+                           (ds/rename-columns {:popn :popn-at-risk}))]
     (-> births-ds
-        (ds/rename-columns {:births :popn})
+        (ds/rename-columns {:births :popn-at-risk})
         (ds/join-rows popn-not-age-0))))
 
 (defn calc-death-rates
@@ -32,7 +33,7 @@
   [deaths-ds popn-at-risk]
   (-> deaths-ds
       (wds/join popn-at-risk [:gss-code :sex :age :year])
-      (wds/add-derived-column :death-rate [:deaths :popn]
+      (wds/add-derived-column :death-rate [:deaths :popn-at-risk]
                               (fn [d p] (wds/safe-divide [d p])))
       (ds/select-columns [:gss-code :sex :age :year :death-rate])))
 
@@ -78,7 +79,7 @@
   {:witan/name :ccm-mort/project-deaths-fixed-rates
    :witan/version "1.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjFixedASMRSchema
-                        :population-at-risk HistPopulationSchema}
+                        :population-at-risk PopulationAtRiskSchema}
    :witan/output-schema {:deaths DeathsOutputSchema}
    :witan/exported? true}
   [{:keys [initial-projected-mortality-rates population-at-risk]} _]

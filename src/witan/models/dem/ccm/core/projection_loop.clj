@@ -53,12 +53,12 @@
    :witan/input-schema {:latest-yr-popn HistPopulationSchema
                         :loop-year s/Int}
    :witan/output-schema {:latest-yr-popn HistPopulationSchema :loop-year s/Int
-                         :population-at-risk HistPopulationSchema}
+                         :population-at-risk PopulationAtRiskSchema}
    :witan/exported? true}
   [{:keys [latest-yr-popn loop-year]} _]
   (let [update-yr (ds/emap-column latest-yr-popn :year inc)]
     {:latest-yr-popn update-yr :loop-year (inc loop-year)
-     :population-at-risk update-yr}))
+     :population-at-risk (ds/rename-columns update-yr {:popn :popn-at-risk})}))
 
 (defworkflowfn age-on
   "Takes in a dataset with the starting-population.
