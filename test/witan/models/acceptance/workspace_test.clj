@@ -25,12 +25,12 @@
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
    :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality-mvp/project-deaths-from-fixed-rates}
    :proj-dom-in-migrants  {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-in-migrants
-                                :params {:start-yr-avg-dom-mig 2003
-                                         :end-yr-avg-dom-mig 2014}}
+                                :params {:start-yr-avg-domin-mig 2003
+                                         :end-yr-avg-domin-mig 2014}}
    :calc-hist-asmr         {:var #'witan.models.dem.ccm.mort.mortality-mvp/calc-historic-asmr}
    :proj-dom-out-migrants {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-out-migrants
-                                :params {:start-yr-avg-dom-mig 2003
-                                         :end-yr-avg-dom-mig 2014}}
+                                :params {:start-yr-avg-domout-mig 2003
+                                         :end-yr-avg-domout-mig 2014}}
    :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
    :age-on                     {:var #'witan.models.dem.ccm.core.projection-loop/age-on}
    :project-births             {:var #'witan.models.dem.ccm.fert.fertility-mvp/project-births-from-fixed-rates}
@@ -45,11 +45,11 @@
                                 :params {:fert-last-yr 2014}}
    :apply-migration            {:var #'witan.models.dem.ccm.core.projection-loop/apply-migration}
    :proj-intl-in-migrants      {:var #'witan.models.dem.ccm.mig.net-migration/project-international-in-migrants
-                                :params {:start-yr-avg-inter-mig 2003
-                                         :end-yr-avg-inter-mig 2014}}
+                                :params {:start-yr-avg-intin-mig 2003
+                                         :end-yr-avg-intin-mig 2014}}
    :proj-intl-out-migrants     {:var #'witan.models.dem.ccm.mig.net-migration/project-international-out-migrants
-                                :params {:start-yr-avg-inter-mig 2003
-                                         :end-yr-avg-inter-mig 2014}}
+                                :params {:start-yr-avg-intout-mig 2003
+                                         :end-yr-avg-intout-mig 2014}}
 
    :combine-into-net-flows {:var #'witan.models.dem.ccm.mig.net-migration/combine-into-net-flows}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

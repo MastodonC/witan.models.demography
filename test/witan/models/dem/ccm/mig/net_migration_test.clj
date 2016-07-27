@@ -22,10 +22,14 @@
                                       :net-migration
                                       "./datasets/test_datasets/r_outputs_for_testing/mig/bristol_migration_module_r_output_2015.csv")))
 
-(def params {:start-yr-avg-dom-mig 2003
-             :end-yr-avg-dom-mig 2014
-             :start-yr-avg-inter-mig 2003
-             :end-yr-avg-inter-mig 2014})
+(def params {:start-yr-avg-domin-mig 2003
+             :end-yr-avg-domin-mig 2014
+             :start-yr-avg-domout-mig 2003
+             :end-yr-avg-domout-mig 2014
+             :start-yr-avg-intin-mig 2003
+             :end-yr-avg-intin-mig 2014
+             :start-yr-avg-intout-mig 2003
+             :end-yr-avg-intout-mig 2014})
 
 (deftest combine-into-net-flows-test
   (testing "The net migration flows are calculated correctly."
