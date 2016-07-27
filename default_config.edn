@@ -26,9 +26,7 @@
   :last-proj-year 2015
 
   ;; Fertility module
-  :fert-last-yr 2014
-  :start-yr-avg-fert 2014
-  :end-yr-avg-fert 2014 ;; Expected = to :fert-last-yr
+  :fert-base-yr 2014
   ;; proportion of male newborns in the UK -> 105/205
   :number-male-newborns 105 ;; <- keep that value for a population projection for the UK
   :number-all-newborns 205 ;; <- keep that value for a population projection for the UK

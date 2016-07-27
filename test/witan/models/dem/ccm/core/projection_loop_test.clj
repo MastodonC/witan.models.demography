@@ -32,9 +32,7 @@
              :first-proj-year 2014
              :last-proj-year 2015
              ;; Fertility module
-             :fert-last-yr 2014
-             :start-yr-avg-fert 2014
-             :end-yr-avg-fert 2014 ;; (s/validate (s/eq :fert-last-yr) :end-yr-avg-fert)
+             :fert-base-yr 2014
              :proportion-male-newborns (double (/ 105 205))
              ;; Mortality module
              ;; (s/validate (s/pred (>= % earliest-mort-yr)) :start-yr-avg-mort)
@@ -63,9 +61,7 @@
                   :first-proj-year 2014
                   :last-proj-year 2040
                   ;; Fertility module
-                  :fert-last-yr 2014
-                  :start-yr-avg-fert 2014
-                  :end-yr-avg-fert 2014
+                  :fert-base-yr 2014
                   :proportion-male-newborns (double (/ 105 205))
                   ;; Mortality module
                   :start-yr-avg-mort 2010
@@ -85,7 +81,7 @@
 (defn fertility-module [inputs params]
   (-> inputs
       (fert/calculate-historic-asfr params)
-      (fert/project-asfr-finalyrhist-fixed params)
+      fert/project-asfr-finalyrhist-fixed
       fert/project-births-from-fixed-rates
       (fert/combine-into-births-by-sex params)))
 

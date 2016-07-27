@@ -22,9 +22,7 @@
                         :population-at-risk ;;this actually comes from the proj loop but for test use this csv
                         "./datasets/test_datasets/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"}))
 
-(def params {:fert-last-yr 2014
-             :start-yr-avg-fert 2014
-             :end-yr-avg-fert 2014
+(def params {:fert-base-yr 2014
              :proportion-male-newborns (double (/ 105 205))})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -62,7 +60,7 @@
                           (ds/rename-columns {:fert-rate :fert-rate-r}))
           joined-asfr (-> fertility-inputs
                           (calculate-historic-asfr params)
-                          (project-asfr-finalyrhist-fixed params)
+                          project-asfr-finalyrhist-fixed
                           :initial-projected-fertility-rates
                           (wds/join proj-asfr-r [:gss-code :sex :age]))]
       (is (every? #(fp-equals? (i/sel joined-asfr :rows % :cols :fert-rate-r)
@@ -77,7 +75,7 @@
                             (ds/rename-columns {:births :births-r}))
           joined-births (-> fertility-inputs
                             (calculate-historic-asfr params)
-                            (project-asfr-finalyrhist-fixed params)
+                            project-asfr-finalyrhist-fixed
                             project-births-from-fixed-rates
                             :births-by-age-sex-mother
                             (wds/join proj-births-r [:gss-code :sex :age :year]))]
@@ -93,7 +91,7 @@
                               (ds/rename-columns {:births :births-r}))
           joined-births-by-sex (-> fertility-inputs
                                    (calculate-historic-asfr params)
-                                   (project-asfr-finalyrhist-fixed params)
+                                   project-asfr-finalyrhist-fixed
                                    project-births-from-fixed-rates
                                    (combine-into-births-by-sex params)
                                    :births

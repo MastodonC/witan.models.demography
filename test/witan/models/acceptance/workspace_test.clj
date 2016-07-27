@@ -15,20 +15,17 @@
 
 
 (def tasks
-  {;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  { ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Functions
-   :project-asfr         {:var #'witan.models.dem.ccm.fert.fertility-mvp/project-asfr-finalyrhist-fixed
-                                :params {:fert-last-yr 2014
-                                         :start-yr-avg-fert 2014
-                                         :end-yr-avg-fert 2014}}
+   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility-mvp/project-asfr-finalyrhist-fixed}
    :join-popn-latest-yr        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-yr}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
    :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality-mvp/project-deaths-from-fixed-rates}
-   :proj-dom-in-migrants  {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-in-migrants
+   :proj-dom-in-migrants       {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-in-migrants
                                 :params {:start-yr-avg-domin-mig 2003
                                          :end-yr-avg-domin-mig 2014}}
-   :calc-hist-asmr         {:var #'witan.models.dem.ccm.mort.mortality-mvp/calc-historic-asmr}
-   :proj-dom-out-migrants {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-out-migrants
+   :calc-hist-asmr             {:var #'witan.models.dem.ccm.mort.mortality-mvp/calc-historic-asmr}
+   :proj-dom-out-migrants      {:var #'witan.models.dem.ccm.mig.net-migration/project-domestic-out-migrants
                                 :params {:start-yr-avg-domout-mig 2003
                                          :end-yr-avg-domout-mig 2014}}
    :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
@@ -36,13 +33,13 @@
    :project-births             {:var #'witan.models.dem.ccm.fert.fertility-mvp/project-births-from-fixed-rates}
    :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility-mvp/combine-into-births-by-sex
                                 :params {:proportion-male-newborns (double (/ 105 205))}}
-   :project-asmr         {:var #'witan.models.dem.ccm.mort.mortality-mvp/project-asmr
+   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality-mvp/project-asmr
                                 :params {:start-yr-avg-mort 2010
                                          :end-yr-avg-mort 2014}}
    :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
    :prepare-starting-popn      {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs}
-   :calc-hist-asfr         {:var #'witan.models.dem.ccm.fert.fertility-mvp/calculate-historic-asfr
-                                :params {:fert-last-yr 2014}}
+   :calc-hist-asfr             {:var #'witan.models.dem.ccm.fert.fertility-mvp/calculate-historic-asfr
+                                :params {:fert-base-yr 2014}}
    :apply-migration            {:var #'witan.models.dem.ccm.core.projection-loop/apply-migration}
    :proj-intl-in-migrants      {:var #'witan.models.dem.ccm.mig.net-migration/project-international-in-migrants
                                 :params {:start-yr-avg-intin-mig 2003
@@ -52,38 +49,38 @@
                                          :end-yr-avg-intout-mig 2014}}
 
    :combine-into-net-flows {:var #'witan.models.dem.ccm.mig.net-migration/combine-into-net-flows}
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Predicates
    :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?
                                 :params {:last-proj-year 2021}
                                 :pred? true}
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Inputs
    :in-hist-popn                  {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
-                                       :params {:src "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"
-                                                :key :historic-population}}
+                                   :params {:src "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"
+                                            :key :historic-population}}
    :in-hist-total-births          {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
-                                       :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
-                                                :key :historic-births}}
+                                   :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
+                                            :key :historic-births}}
    :in-proj-births-by-age-of-mother  {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
-                                       :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
-                                                :key :ons-proj-births-by-age-mother}}
+                                      :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
+                                               :key :ons-proj-births-by-age-mother}}
    :in-hist-deaths-by-age-and-sex {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
-                                       :params {:src "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"
-                                                :key :historic-deaths}}
+                                   :params {:src "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"
+                                            :key :historic-deaths}}
    :in-hist-dom-in-migrants       {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
-                                       :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
-                                                :key :domestic-in-migrants}}
+                                   :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
+                                            :key :domestic-in-migrants}}
    :in-hist-dom-out-migrants      {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
-                                       :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
-                                                :key :domestic-out-migrants}}
+                                   :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
+                                            :key :domestic-out-migrants}}
    :in-hist-intl-in-migrants      {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
-                                       :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
-                                                :key :international-in-migrants}}
+                                   :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
+                                            :key :international-in-migrants}}
    :in-hist-intl-out-migrants     {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
-                                       :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"
-                                                :key :international-out-migrants}}
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                                   :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"
+                                            :key :international-out-migrants}}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Outputs
    :out {:var #'witan.models.dem.ccm.models-utils/out}
    })
