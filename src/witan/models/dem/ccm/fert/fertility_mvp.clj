@@ -11,8 +11,9 @@
   "Creates a population at risk for calculating historic age specific
   fertility rates. Takes in the historic population and a base year."
   [historic-population base-year]
-  (i/query-dataset historic-population
-                   {:year (dec base-year)}))
+  (-> historic-population
+      (i/query-dataset {:year (dec base-year)})
+      (ds/rename-columns {:popn :popn-at-risk})))
 
 (defn calc-asfr-birth-data-yr
   "Takes the population at risk for the birth data year and ONS
@@ -22,7 +23,7 @@
   (-> ons-proj-births-by-age-mother
       (wds/join popn-at-risk-birth-data-yr [:gss-code :sex :age])
       (wds/add-derived-column :births [:births] (fn [b] (or b 0.0)))
-      (wds/add-derived-column :fert-rate-birth-data-yr [:births :popn]
+      (wds/add-derived-column :fert-rate-birth-data-yr [:births :popn-at-risk]
                               (fn [b p] (wds/safe-divide [b p])))
       (ds/select-columns [:gss-code :sex :age :fert-rate-birth-data-yr])))
 
@@ -33,7 +34,7 @@
   [popn-at-risk-fert-last-yr asfr-birth-data-yr]
   (-> asfr-birth-data-yr
       (wds/join popn-at-risk-fert-last-yr [:gss-code :sex :age])
-      (wds/add-derived-column :births [:popn :fert-rate-birth-data-yr]
+      (wds/add-derived-column :births [:popn-at-risk :fert-rate-birth-data-yr]
                               (fn [p b] (* ^double p b)))
       (wds/add-derived-column :year [:year] inc)
       (wds/rollup :sum :births [:gss-code :year])
@@ -89,7 +90,7 @@
         popn-at-risk-birth-data-yr (-> historic-population
                                        (create-popn-at-risk-birth birth-data-yr)
                                        (ds/select-columns
-                                        [:gss-code :sex :age :popn]))
+                                        [:gss-code :sex :age :popn-at-risk]))
         asfr-birth-data-yr (calc-asfr-birth-data-yr popn-at-risk-birth-data-yr
                                                     ons-proj-births-by-age-mother)
         popn-at-risk-fert-proj-base-yr (create-popn-at-risk-birth historic-population fert-last-yr)
@@ -128,7 +129,7 @@
   {:witan/name :ccm-fert/project-births-fixed-rates
    :witan/version "1.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjFixedASFRSchema
-                        :population-at-risk HistPopulationSchema}
+                        :population-at-risk PopulationAtRiskSchema}
    :witan/output-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
    :witan/exported? true}
   [{:keys [initial-projected-fertility-rates population-at-risk]} _]

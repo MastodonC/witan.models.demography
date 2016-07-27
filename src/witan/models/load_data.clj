@@ -139,8 +139,8 @@
 
 (defmethod apply-record-coercion :population-at-risk
   [data-info csv-data]
-  {:column-names (apply-col-names-schema HistPopulationSchema csv-data)
-   :columns (vec (apply-row-schema HistPopulationSchema csv-data))})
+  {:column-names (apply-col-names-schema PopulationAtRiskSchema csv-data)
+   :columns (vec (apply-row-schema PopulationAtRiskSchema csv-data))})
 
 (defmethod apply-record-coercion :historic-asmr
   [data-info csv-data]
