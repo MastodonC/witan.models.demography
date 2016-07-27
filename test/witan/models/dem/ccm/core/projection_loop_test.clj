@@ -42,14 +42,22 @@
              ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mort))) :end-yr-avg-mort)
              :end-yr-avg-mort 2014
              ;; Migration module
-             ;; (s/validate (s/pred (>= % earliest-dom-mig-yr)) :start-yr-avg-dom-mig)
-             :start-yr-avg-dom-mig 2003
-             ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-dom-mig)
-             :end-yr-avg-dom-mig 2014
-             ;; (s/validate (s/pred (>= % earliest-inter-mig-yr)) :start-yr-avg-inter-mig)
-             :start-yr-avg-inter-mig 2003
-             ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-inter-mig)
-             :end-yr-avg-inter-mig 2014})
+             ;; (s/validate (s/pred (>= % earliest-domin-mig-yr)) :start-yr-avg-domin-mig)
+             :start-yr-avg-domin-mig 2003
+             ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-domin-mig)
+             :end-yr-avg-domin-mig 2014
+             ;; (s/validate (s/pred (>= % earliest-domout-mig-yr)) :start-yr-avg-domout-mig)
+             :start-yr-avg-domout-mig 2003
+             ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-domout-mig)
+             :end-yr-avg-domout-mig 2014
+             ;; (s/validate (s/pred (>= % earliest-intin-mig-yr)) :start-yr-avg-intin-mig)
+             :start-yr-avg-intin-mig 2003
+             ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-intin-mig)
+             :end-yr-avg-intin-mig 2014
+             ;; (s/validate (s/pred (>= % earliest-intout-mig-yr)) :start-yr-avg-intout-mig)
+             :start-yr-avg-intout-mig 2003
+             ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-intout-mig)
+             :end-yr-avg-intout-mig 2014})
 
 (def params-2040 {;; Core module
                   :first-proj-year 2014
@@ -63,10 +71,14 @@
                   :start-yr-avg-mort 2010
                   :end-yr-avg-mort 2014
                   ;; Migration module
-                  :start-yr-avg-dom-mig 2003
-                  :end-yr-avg-dom-mig 2014
-                  :start-yr-avg-inter-mig 2003
-                  :end-yr-avg-inter-mig 2014})
+                  :start-yr-avg-domin-mig 2003
+                  :end-yr-avg-domin-mig 2014
+                  :start-yr-avg-domout-mig 2003
+                  :end-yr-avg-domout-mig 2014
+                  :start-yr-avg-intin-mig 2003
+                  :end-yr-avg-intin-mig 2014
+                  :start-yr-avg-intout-mig 2003
+                  :end-yr-avg-intout-mig 2014})
 
 (def prepared-inputs (prepare-inputs data-inputs))
 

@@ -38,8 +38,12 @@
   :end-yr-avg-mort 2014 ;; Expected < or = to latest year of mortality data (2014)
 
   ;; Migration module
-  :start-yr-avg-dom-mig 2003 ;; Expected > or = to earliest year of domestic migration data (2002)
-  :end-yr-avg-dom-mig 2014 ;; Expected < or = to latest year of domestic migration data (2014)
-  :start-yr-avg-inter-mig 2003 ;; Expected > or = to earliest year of international migration data (2002)
-  :end-yr-avg-inter-mig 2014 ;; Expected < or = to latest year of domestic international data (2014)
+  :start-yr-avg-domin-mig 2003 ;; Expected > or = to earliest year of domestic in-migration data (2002)
+  :end-yr-avg-domin-mig 2014 ;; Expected < or = to latest year of domestic in-migration data (2014)
+  :start-yr-avg-domout-mig 2003 ;; Expected > or = to earliest year of domestic out-migration data (2002)
+  :end-yr-avg-domout-mig 2014 ;; Expected < or = to latest year of domestic out-migration data (2014)
+  :start-yr-avg-intin-mig 2003 ;; Expected > or = to earliest year of international in-migration data (2002)
+  :end-yr-avg-intin-mig 2014 ;; Expected < or = to latest year of domestic international in-migration data (2014)
+  :start-yr-avg-intout-mig 2003 ;; Expected > or = to earliest year of international out-migration data (2002)
+  :end-yr-avg-intout-mig 2014 ;; Expected < or = to latest year of domestic international out-migration data (2014)
   }}
