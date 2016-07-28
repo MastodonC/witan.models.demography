@@ -84,23 +84,23 @@
 
 (defmethod apply-record-coercion :domestic-in-migrants
   [data-info csv-data]
-  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
-   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
+  {:column-names (apply-col-names-schema DomesticInmigrants csv-data)
+   :columns (vec (apply-row-schema DomesticInmigrants csv-data))})
 
 (defmethod apply-record-coercion :domestic-out-migrants
   [data-info csv-data]
-  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
-   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
+  {:column-names (apply-col-names-schema DomesticOutmigrants csv-data)
+   :columns (vec (apply-row-schema DomesticOutmigrants csv-data))})
 
 (defmethod apply-record-coercion :international-in-migrants
   [data-info csv-data]
-  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
-   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
+  {:column-names (apply-col-names-schema InternationalInmigrants csv-data)
+   :columns (vec (apply-row-schema InternationalInmigrants csv-data))})
 
 (defmethod apply-record-coercion :international-out-migrants
   [data-info csv-data]
-  {:column-names (apply-col-names-schema ComponentMYESchema csv-data)
-   :columns (vec (apply-row-schema ComponentMYESchema csv-data))})
+  {:column-names (apply-col-names-schema InternationalOutmigrants csv-data)
+   :columns (vec (apply-row-schema InternationalOutmigrants csv-data))})
 
 (defmethod apply-record-coercion :dom-in-averages
   [data-info csv-data]
