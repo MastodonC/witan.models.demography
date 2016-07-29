@@ -1,5 +1,5 @@
-(ns witan.models.dem.ccm.mig.net-migration-test
-  (:require [witan.models.dem.ccm.mig.net-migration :refer :all]
+(ns witan.models.dem.ccm.mig.migration-test
+  (:require [witan.models.dem.ccm.mig.migration :refer :all]
             [witan.models.load-data :as ld]
             [clojure.test :refer :all]
             [clojure.core.matrix.dataset :as ds]

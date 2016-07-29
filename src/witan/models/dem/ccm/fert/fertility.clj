@@ -1,4 +1,4 @@
-(ns witan.models.dem.ccm.fert.fertility-mvp
+(ns witan.models.dem.ccm.fert.fertility
   (:require [witan.models.dem.ccm.components-functions :as cf]
             [witan.workspace-api :refer [defworkflowfn]]
             [clojure.core.matrix.dataset :as ds]

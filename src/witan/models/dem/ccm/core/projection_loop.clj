@@ -5,9 +5,9 @@
             [witan.workspace-api :refer [defworkflowfn defworkflowpred]]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
-            [witan.models.dem.ccm.fert.fertility-mvp :as fert]
-            [witan.models.dem.ccm.mort.mortality-mvp :as mort]
-            [witan.models.dem.ccm.mig.net-migration :as mig]
+            [witan.models.dem.ccm.fert.fertility :as fert]
+            [witan.models.dem.ccm.mort.mortality :as mort]
+            [witan.models.dem.ccm.mig.migration :as mig]
             [taoensso.timbre :as timbre]))
 
 (defworkflowfn keep-looping?

@@ -1,4 +1,4 @@
-(ns witan.models.dem.ccm.mig.net-migration
+(ns witan.models.dem.ccm.mig.migration
   (:require [witan.models.dem.ccm.components-functions :as cf]
             [witan.workspace-api :refer [defworkflowfn merge->]]
             [witan.datasets :as wds]

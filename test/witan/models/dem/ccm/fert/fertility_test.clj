@@ -1,5 +1,5 @@
-(ns witan.models.dem.ccm.fert.fertility-mvp-test
-  (:require [witan.models.dem.ccm.fert.fertility-mvp :refer :all]
+(ns witan.models.dem.ccm.fert.fertility-test
+  (:require [witan.models.dem.ccm.fert.fertility :refer :all]
             [witan.models.load-data :as ld]
             [clojure.test :refer :all]
             [incanter.core :as i]
