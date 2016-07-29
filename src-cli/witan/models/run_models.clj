@@ -220,7 +220,7 @@
                        :contracts (make-contracts tasks)}
         workspace'    (s/with-fn-validation (wex/build! workspace))
         result        (wex/run!! workspace' {})]
-    (:historic-population (first result))))
+    (:population (first result))))
 
 (def cli-options
   [["-i" "--input-config FILEPATH" "Filepath for the config file with inputs info"

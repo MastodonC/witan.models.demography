@@ -78,7 +78,7 @@
   {:witan/name :ccm-fert/calc-hist-asfr
    :witan/version "1.0"
    :witan/input-schema {:ons-proj-births-by-age-mother BirthsAgeSexMotherSchema
-                        :historic-population HistPopulationSchema
+                        :historic-population PopulationSchema
                         :historic-births BirthsSchema}
    :witan/param-schema {:fert-base-yr s/Int}
    :witan/output-schema {:historic-asfr HistASFRSchema}
