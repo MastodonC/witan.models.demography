@@ -92,7 +92,7 @@
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intout double]]))
 
 ;; For the core module
-(def HistPopulationSchema
+(def PopulationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:popn double]]))
 

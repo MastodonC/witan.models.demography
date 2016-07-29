@@ -45,7 +45,7 @@
    :witan/version "1.0"
    :witan/input-schema {:historic-deaths DeathsSchema
                         :historic-births BirthsSchema
-                        :historic-population HistPopulationSchema}
+                        :historic-population PopulationSchema}
    :witan/output-schema {:historic-asmr HistASMRSchema}
    :witan/exported? true}
   [{:keys [historic-deaths historic-births historic-population]} _]

@@ -115,6 +115,7 @@
                              :projected-international-out-migrants
                              :population-at-risk
                              :historic-population
+                             :population
                              :international-out-migrants])]
     (is result)
     (is (= expected-keys (-> result first keys vec sort)))
