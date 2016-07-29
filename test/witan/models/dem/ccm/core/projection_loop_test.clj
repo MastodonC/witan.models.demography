@@ -5,9 +5,9 @@
             [incanter.core :as i]
             [witan.models.load-data :as ld]
             [witan.datasets :as wds]
-            [witan.models.dem.ccm.fert.fertility-mvp :as fert]
-            [witan.models.dem.ccm.mort.mortality-mvp :as mort]
-            [witan.models.dem.ccm.mig.net-migration :as mig]))
+            [witan.models.dem.ccm.fert.fertility :as fert]
+            [witan.models.dem.ccm.mort.mortality :as mort]
+            [witan.models.dem.ccm.mig.migration :as mig]))
 
 ;; Load testing data
 (def data-inputs (ld/load-datasets

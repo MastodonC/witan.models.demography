@@ -1,5 +1,5 @@
-(ns witan.models.dem.ccm.mort.mortality-mvp-test
-  (:require [witan.models.dem.ccm.mort.mortality-mvp :refer :all]
+(ns witan.models.dem.ccm.mort.mortality-test
+  (:require [witan.models.dem.ccm.mort.mortality :refer :all]
             [witan.models.load-data :as ld]
             [clojure.test :refer :all]
             [incanter.core :as i]

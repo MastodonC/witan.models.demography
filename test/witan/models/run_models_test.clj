@@ -7,9 +7,9 @@
             [witan.models.load-data :as ld]
             [witan.models.dem.ccm.core.projection-loop :as core]
             [witan.models.dem.ccm.core.projection-loop-test :as core-test]
-            [witan.models.dem.ccm.fert.fertility-mvp :as fert]
-            [witan.models.dem.ccm.mort.mortality-mvp :as mort]
-            [witan.models.dem.ccm.mig.net-migration :as mig]
+            [witan.models.dem.ccm.fert.fertility :as fert]
+            [witan.models.dem.ccm.mort.mortality :as mort]
+            [witan.models.dem.ccm.mig.migration :as mig]
             [witan.models.dem.ccm.components-functions :as cf]))
 
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))

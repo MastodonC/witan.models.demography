@@ -1,4 +1,4 @@
-(ns witan.models.dem.ccm.mort.mortality-mvp
+(ns witan.models.dem.ccm.mort.mortality
   (:require [witan.models.dem.ccm.components-functions :as cf]
             [witan.workspace-api :refer [defworkflowfn]]
             [witan.datasets :as wds]
