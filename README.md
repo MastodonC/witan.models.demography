@@ -15,6 +15,27 @@ Current status:
 
 See the [docs](https://github.com/MastodonC/witan.models.demography/blob/master/doc/intro.md) for more info about the methodology.
 
+## Development
+
+The `:dev` profile has a dependency for `witan.workspace-executor` ont top of `witan.workspace-api` which means the two following tools can be used.
+
+* To visualise a model workflow, use the `view-workflow` function:
+```Clojure
+(witan.workspace-executor.core/view-workflow
+   (:workflow witan.models.dem.ccm.models/cohort-component-model))
+```
+
+* To print logs whenever a `defworkflowfn` is called (useful for debugging purpose), use the
+`set-api-logging!` function:
+```Clojure
+(witan.workspace-api/set-api-logging! println)
+```
+
+Turn it off with:
+```Clojure
+(witan.workspace-api/set-api-logging! identity)
+```
+
 ## Requirements
 
 You need to have [Leiningen](http://leiningen.org/) installed to run the projections.
@@ -38,15 +59,15 @@ You need to have [Leiningen](http://leiningen.org/) installed to run the project
 Copy the filepath to the standalone file to use later.
 
 ## Usage
-Population projections can be produced by running the executable .jar file from the command line:  
+Population projections can be produced by running the executable .jar file from the command line:
 
 ```
-    $ java -jar [path/to/jar] -c ["GSS code"] -i [optional/path/to/input/config/file] -o [optional/path/to/output/csv] 
+    $ java -jar [path/to/jar] -c ["GSS code"] -i [optional/path/to/input/config/file] -o [optional/path/to/output/csv]
 ```
 
 For example:
 ```
-    $ java -jar witan.models.demography/target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023" -i "default_config.edn" -o "ccm_projections.csv" 
+    $ java -jar witan.models.demography/target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023" -i "default_config.edn" -o "ccm_projections.csv"
 ```
 A GSS code must always be specified to tell the model which geographic area the projections are for. See the GSS codes that are accepted [here](#gss-code).
 
@@ -77,17 +98,17 @@ Example:
 To save the projections output to a different directory, with a different filename:
 
 ```
-	$ java -jar witan.models.demography/target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023" -o /home/user/Documents/ccm_projections/Bristol_projections.csv" 
+	$ java -jar witan.models.demography/target/uberjar/witan.models.demography-0.1.0-SNAPSHOT-standalone.jar -c "E06000023" -o /home/user/Documents/ccm_projections/Bristol_projections.csv"
 ```
 
 ### gss-code
 
 The geographical area for the projection must be specified. This is done with the 9-digit GSS code (Government Statistical Service code), or name, of one of the following:
 
-  * an English unitary authority (starts with "E06")   
-  * an English non-metropolitan district (starts with "E07")   
-  * an English metropolitan borough (starts with "E08")   
-  * a London borough (starts with "E09")   
+  * an English unitary authority (starts with "E06")
+  * an English non-metropolitan district (starts with "E07")
+  * an English metropolitan borough (starts with "E08")
+  * a London borough (starts with "E09")
   * Northern Ireland, Scotland, or Wales (country codes "N92000002", "S92000003", or "W92000004"; smaller geographies not yet available)
 
 ### input-config
@@ -98,7 +119,7 @@ The [default config file](https://github.com/MastodonC/witan.models.demography/b
 
 ### output-projections
 
-This is the path to the file where the final projection should be saved. The projections are returned in one csv file. This file contains the historical population data used in the projection, with the projected population appended. The output path can be anywhere on your machine as long as the directories on the path exist. 
+This is the path to the file where the final projection should be saved. The projections are returned in one csv file. This file contains the historical population data used in the projection, with the projected population appended. The output path can be anywhere on your machine as long as the directories on the path exist.
 
 
 ## License
