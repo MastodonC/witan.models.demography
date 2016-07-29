@@ -1,6 +1,8 @@
 (ns witan.models.acceptance.workspace-test
   (:require [clojure.test :refer :all]
+            [clojure.set]
             [witan.workspace-api :refer :all]
+            [witan.workspace-api.protocols :as p]
             [witan.workspace-executor.core :as wex]
             [witan.models.load-data :as ld]
             [schema.core :as s]
@@ -9,7 +11,8 @@
             [witan.models.dem.ccm.mort.mortality]
             [witan.models.dem.ccm.mig.migration]
             [witan.models.dem.ccm.core.projection-loop]
-            [witan.models.dem.ccm.models :refer [ccm-workflow]]
+            [witan.models.dem.ccm.models :refer [cohort-component-model
+                                                 model-library]]
             [witan.models.dem.ccm.models-utils :refer [make-catalog make-contracts]]))
 
 
@@ -49,12 +52,11 @@
                                          :end-yr-avg-intout-mig 2014}}
 
    :combine-into-net-flows {:var #'witan.models.dem.ccm.mig.migration/combine-into-net-flows}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Predicates
    :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?
-                                :params {:last-proj-year 2021}
-                                :pred? true}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                                :params {:last-proj-year 2021}}
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Inputs
    :in-hist-popn                  {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"
@@ -87,36 +89,18 @@
 
 
 (deftest workspace-test
-  (let [workspace     {:workflow  ccm-workflow
+  (let [workspace     {:workflow  (:workflow cohort-component-model)
                        :catalog   (make-catalog tasks)
                        :contracts (make-contracts tasks)}
         workspace'    (s/with-fn-validation (wex/build! workspace))
-        result        (wex/run!! workspace' {})
-        expected-keys (sort [:births
-                             :international-in-migrants
-                             :projected-international-in-migrants
-                             :historic-asfr
-                             :latest-yr-popn
-                             :initial-projected-fertility-rates
-                             :deaths
-                             :historic-births
-                             :historic-deaths
-                             :births-by-age-sex-mother
-                             :domestic-out-migrants
-                             :historic-asmr
-                             :projected-domestic-in-migrants
-                             :ons-proj-births-by-age-mother
-                             :net-migration
-                             :finished?
-                             :initial-projected-mortality-rates
-                             :domestic-in-migrants
-                             :loop-year
-                             :projected-domestic-out-migrants
-                             :projected-international-out-migrants
-                             :population-at-risk
-                             :historic-population
-                             :population
-                             :international-out-migrants])]
-    (is result)
-    (is (= expected-keys (-> result first keys vec sort)))
+        result        (wex/run!! workspace' {})]
+    (is (not-empty result))
     (is (:finished? (first result)))))
+
+(deftest imodellibrary-test
+  (let [ml (model-library)
+        models (p/available-models ml)
+        fns (p/available-fns ml)]
+    (is (not-empty models))
+    (is (= (first models) (-> #'cohort-component-model meta :witan/metadata)))
+    (is (not-empty fns))))

@@ -2,7 +2,8 @@
   (:require [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
             [incanter.core :as i]
-            [witan.workspace-api :refer [defworkflowfn defworkflowpred]]
+            [witan.workspace-api :refer [defworkflowfn defworkflowpred
+                                         defworkflowoutput]]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
             [witan.models.dem.ccm.fert.fertility :as fert]
@@ -10,19 +11,9 @@
             [witan.models.dem.ccm.mig.migration :as mig]
             [taoensso.timbre :as timbre]))
 
-(defworkflowfn keep-looping?
-  {:witan/name :ccm-core/ccm-loop-pred
-   :witan/version "1.0"
-   :witan/input-schema {:population PopulationSchema :loop-year s/Int}
-   :witan/param-schema {:last-proj-year s/Int}
-   :witan/output-schema {:loop-predicate s/Bool}
-   :witan/exported? false}
-  [{:keys [loop-year]} {:keys [last-proj-year]}]
-  {:loop-predicate (< loop-year last-proj-year)})
-
 (defworkflowpred finished-looping?
   {:witan/name :ccm-core/ccm-loop-pred
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:population PopulationSchema :loop-year s/Int}
    :witan/param-schema {:last-proj-year s/Int}
    :witan/exported? true}
@@ -36,7 +27,7 @@
    projection loop. Also outputs the the population that will ultimately
    contain the historic population and the population projections."
   {:witan/name :ccm-core/prepare-starting-popn
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:historic-population PopulationSchema}
    :witan/output-schema {:loop-year s/Int :latest-yr-popn PopulationSchema
                          :population PopulationSchema}
@@ -51,7 +42,7 @@
   "Takes in a dataset of popn estimates.
    Returns a dataset of the starting population for the next year's projection."
   {:witan/name :ccm-core/select-starting-popn
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema
                         :loop-year s/Int}
    :witan/output-schema {:latest-yr-popn PopulationSchema :loop-year s/Int
@@ -68,7 +59,7 @@
    Last year's 89 year olds are aged on and added to this year's
    90+ age group (represented in code as age 90)"
   {:witan/name :ccm-cor/age-on
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema}
    :witan/output-schema {:latest-yr-popn PopulationSchema}
    :witan/exported? true}
@@ -83,7 +74,7 @@
    Returns a dataset where the births output from the fertility module is
    appended to the aged-on population, adding age groups 0."
   {:witan/name :ccm-core/add-births
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :births BirthsBySexSchema
                         :loop-year s/Int}
    :witan/output-schema {:latest-yr-popn PopulationSchema}
@@ -103,7 +94,7 @@
    Returns a dataset where the deaths output from the mortality module is
    subtracted from the popn dataset."
   {:witan/name :ccm-core/remove-deaths
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :deaths DeathsOutputSchema}
    :witan/output-schema {:latest-yr-popn PopulationSchema}
    :witan/exported? true}
@@ -121,7 +112,7 @@
    dataset with the net migrants for the same year.
    Returns a dataset where the migrants are added to the popn dataset"
   {:witan/name :ccm-core/apply-migration
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :net-migration NetMigrationSchema}
    :witan/output-schema {:latest-yr-popn PopulationSchema}
    :witan/exported? true}
@@ -138,10 +129,17 @@
    projected population for the next year of projection.
    Returns a datasets that appends the second dataset to the first one."
   {:witan/name :ccm-core/join-yrs
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema
                         :population PopulationSchema}
    :witan/output-schema {:population PopulationSchema}
    :witan/exported? true}
   [{:keys [latest-yr-popn population]} _]
   {:population (ds/join-rows population latest-yr-popn)})
+
+(defworkflowoutput population-out
+  "Returns the population field"
+  {:witan/name :ccm-core-out/population
+   :witan/version "1.0.0"
+   :witan/input-schema {:population PopulationSchema}}
+  [d _] d)

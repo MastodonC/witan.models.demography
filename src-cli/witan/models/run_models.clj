@@ -12,7 +12,7 @@
             [taoensso.timbre :as timbre]
             [schema.core :as s]
             [witan.models.dem.ccm.models-utils :refer :all]
-            [witan.models.dem.ccm.models :refer [ccm-workflow]]
+            [witan.models.dem.ccm.models :refer [cohort-component-model]]
             [witan.workspace-executor.core :as wex]
             [witan.workspace-api :refer [defworkflowfn]])
   (:gen-class :main true))
@@ -49,13 +49,12 @@
 (defworkflowfn resource-csv-loader-filtered
   "Loads CSV files from resources"
   {:witan/name :workspace-test/resource-csv-loader-filtered
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:* s/Any}
    :witan/output-schema {:* s/Any}
    :witan/param-schema {:gss-code s/Str
                         :src s/Str
-                        :key s/Keyword}
-   :witan/exported? true}
+                        :key s/Keyword}}
   [_ {:keys [src key gss-code]}]
   (get-dataset key src gss-code))
 
@@ -168,12 +167,12 @@
                                          :end-yr-avg-intout-mig (:end-yr-avg-intout-mig params)}}
 
    :combine-into-net-flows {:var #'witan.models.dem.ccm.mig.migration/combine-into-net-flows}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Predicates
    :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?
                                 :params {:last-proj-year (:last-proj-year params)}
                                 :pred? true}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Inputs
    :in-hist-popn                  {:var #'witan.models.run-models/resource-csv-loader-filtered
                                    :params {:gss-code gss-code
@@ -207,15 +206,14 @@
                                    :params {:gss-code gss-code
                                             :src (:international-out-migrants inputs)
                                             :key :international-out-migrants}}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Outputs
-   :out {:var #'witan.models.dem.ccm.models-utils/out}
-   })
+   :out {:var #'witan.models.dem.ccm.core.projection-loop/population-out}})
 
 (defn run-workspace
   [inputs gss-code params]
   (let [tasks (tasks inputs params gss-code)
-        workspace     {:workflow  ccm-workflow
+        workspace     {:workflow  (:workflow cohort-component-model)
                        :catalog   (make-catalog tasks)
                        :contracts (make-contracts tasks)}
         workspace'    (s/with-fn-validation (wex/build! workspace))

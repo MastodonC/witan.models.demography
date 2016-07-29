@@ -8,7 +8,7 @@
 
 (defworkflowfn project-domestic-in-migrants
   {:witan/name :ccm-mig/proj-dom-in-mig
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:domestic-in-migrants DomesticInmigrants}
    :witan/param-schema {:start-yr-avg-domin-mig s/Int :end-yr-avg-domin-mig s/Int}
    :witan/output-schema {:projected-domestic-in-migrants ProjDomInSchema}
@@ -20,7 +20,7 @@
 
 (defworkflowfn project-domestic-out-migrants
   {:witan/name :ccm-mig/proj-dom-out-mig
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:domestic-out-migrants DomesticOutmigrants}
    :witan/param-schema {:start-yr-avg-domout-mig s/Int :end-yr-avg-domout-mig s/Int}
    :witan/output-schema {:projected-domestic-out-migrants ProjDomOutSchema}
@@ -32,7 +32,7 @@
 
 (defworkflowfn project-international-in-migrants
   {:witan/name :ccm-mig/proj-inter-in-mig
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:international-in-migrants InternationalInmigrants}
    :witan/param-schema {:start-yr-avg-intin-mig s/Int :end-yr-avg-intin-mig s/Int}
    :witan/output-schema {:projected-international-in-migrants ProjInterInSchema}
@@ -44,7 +44,7 @@
 
 (defworkflowfn project-international-out-migrants
   {:witan/name :ccm-mig/proj-inter-out-mig
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:international-out-migrants InternationalOutmigrants}
    :witan/param-schema {:start-yr-avg-intout-mig s/Int :end-yr-avg-intout-mig s/Int}
    :witan/output-schema {:projected-international-out-migrants ProjInterOutSchema}
@@ -56,7 +56,7 @@
 
 (defworkflowfn combine-into-net-flows
   {:witan/name :ccm-mig/combine-mig-flows
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:projected-domestic-in-migrants ProjDomInSchema
                         :projected-domestic-out-migrants ProjDomOutSchema
                         :projected-international-in-migrants ProjInterInSchema

@@ -42,7 +42,7 @@
   population. Returns a dataset with a column for historic mortality
   rates calculated from the inputs."
   {:witan/name :ccm-mort/calc-historic-asmr
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:historic-deaths DeathsSchema
                         :historic-births BirthsSchema
                         :historic-population PopulationSchema}
@@ -60,7 +60,7 @@
   mortality rates, projected with the jumpoff year average method (see
   docs)"
   {:witan/name :ccm-mort/project-asmr
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:historic-asmr HistASMRSchema}
    :witan/param-schema {:start-yr-avg-mort s/Int :end-yr-avg-mort s/Int}
    :witan/output-schema {:initial-projected-mortality-rates ProjFixedASMRSchema}
@@ -77,7 +77,7 @@
   loop and another dataset with fixed death rates for the population. Returns a
   dataset with a column of deaths, which are the product of popn at risk & death rates"
   {:witan/name :ccm-mort/project-deaths-fixed-rates
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjFixedASMRSchema
                         :population-at-risk PopulationAtRiskSchema}
    :witan/output-schema {:deaths DeathsOutputSchema}
