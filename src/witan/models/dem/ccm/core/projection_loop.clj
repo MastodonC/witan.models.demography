@@ -31,10 +31,10 @@
 
 (defworkflowfn prepare-inputs
   "Step happening before the projection loop.
-   Takes in the historic population and outputs
-   the latest year and the population for that year.
-   Both those elements will be updated within the
-   projection loop."
+   Takes in the historic population and outputs the latest year and
+   the population for that year which will be updated within the
+   projection loop. Also outputs the the population that will ultimately
+   contain the historic population and the population projections."
   {:witan/name :ccm-core/prepare-starting-popn
    :witan/version "1.0"
    :witan/input-schema {:historic-population PopulationSchema}
@@ -134,7 +134,7 @@
     {:latest-yr-popn popn-w-migrants}))
 
 (defworkflowfn join-popn-latest-yr
-  "Takes in a dataset of popn for previous years and a dataset of
+  "Takes in a dataset of population for previous years and a dataset of
    projected population for the next year of projection.
    Returns a datasets that appends the second dataset to the first one."
   {:witan/name :ccm-core/join-yrs
