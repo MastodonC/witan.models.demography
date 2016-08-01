@@ -73,12 +73,12 @@
                                                                    end-yr-avg-mort)})
 
 (defworkflowfn project-asmr-average-applynationaltrend
-  "Takes a dataset with projected death rates for the future, a dataset with 
+  "Takes a dataset with projected death rates for the future, a dataset with
   historic mortality rates, and parameters for: first projection year, last
-  projection year, the scenario to use in the future rates dataset (e.g. :low, 
-  :principal or :high), the start and end  years of data to average for the calculation, 
+  projection year, the scenario to use in the future rates dataset (e.g. :low,
+  :principal or :high), the start and end  years of data to average for the calculation,
   and the last year of mortality data. Returns a dataset that now includes projected
-  mortality rates, projected with the jumpoff year average method combined with an 
+  mortality rates, projected with the jumpoff year average method combined with an
   applied national trend (see docs)"
   {:witan/name :ccm-mort/project-asmr-average-applynationaltrend
    :witan/version "1.0.0"
@@ -124,9 +124,9 @@
 (defworkflowfn project-deaths
   ""
   {:witan/name :ccm-mort/project-deaths
-   :witan/version "1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjASMRSchema
-                        :population-at-risk HistPopulationSchema
+                        :population-at-risk PopulationAtRiskSchema
                         :loop-year s/Int}
    :witan/output-schema  {:deaths DeathsOutputSchema}
    :witan/exported? true}

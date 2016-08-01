@@ -25,6 +25,11 @@
                      :future-mortality-trend-assumption
                      "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"}))
 
+(def proj-death-inputs
+  (assoc (ld/load-datasets {:population-at-risk ;;this actually comes from the proj loop but for test use this csv
+                            "./datasets/test_datasets/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"})
+         :loop-year 2015))
+
 ;;Output from R calc-historic-asmr function for comparison
 (def historic-asmr-r (:historic-asmr (ld/load-dataset
                                       :historic-asmr
@@ -106,9 +111,11 @@
                 (range (first (:shape joined-proj-deaths)))))))
 
 (deftest project-deaths-test
-  (let [proj-deaths-clj (-> hist-asmr-inputs
-                            calc-historic-asmr
-                            (project-asmr-average-applynationaltrend params)
+  (let [death-rates (-> hist-asmr-inputs
+                        calc-historic-asmr
+                        (project-asmr-average-applynationaltrend params))
+        proj-deaths-clj (-> death-rates
+                            (merge proj-death-inputs)
                             project-deaths
                             :deaths)
         joined-proj-deaths (wds/join proj-deaths-national-trend-r proj-deaths-clj

@@ -111,10 +111,10 @@
   "Takes a dataset of projected rates or values for the jumpoff year, and a dataset of
    projected national rates for the following years of the projection (currently
    this is ONS data). Takes parameters for first & last projection years, the
-   scenario to be used from the future rates dataset (e.g. :low, :principal, or 
+   scenario to be used from the future rates dataset (e.g. :low, :principal, or
    :high), and the name of the column with rates or value in the jumpoff year dataset
    (e.g. :death-rate or :death). Returns a dataset with projected rates or values
-   for each age, sex, and projection year, calculated by applying the trend from 
+   for each age, sex, and projection year, calculated by applying the trend from
    the projected national rates to the data from the jumpoff year dataset."
   [jumpoffyr-projection future-assumption
    first-proj-yr last-proj-yr scenario assumption-col]
@@ -125,7 +125,7 @@
         projection-first-proj-yr (-> jumpoffyr-projection
                                      (ds/add-column :year (repeat first-proj-yr))
                                      (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
-    (order-ds (:accumulator 
+    (order-ds (:accumulator
                (reduce (fn [{:keys [accumulator last-calculated]} current-yr]
                          (let [projection-this-yr (-> proportional-differences
                                                       (i/query-dataset {:year current-yr})
@@ -149,13 +149,13 @@
   [population-at-risk fixed-rates col-fixed-rates col-result]
   (-> fixed-rates
       (wds/join population-at-risk [:gss-code :age :sex])
-      (wds/add-derived-column col-result [col-fixed-rates :popn] *)
+      (wds/add-derived-column col-result [col-fixed-rates :popn-at-risk] *)
       (ds/select-columns [:gss-code :sex :age :year col-result])))
 
 (defn project-component
   [population-at-risk rates loop-year col-rates col-result]
   (-> rates
-      (i/query-dataset rates {:year loop-year})
+      (i/query-dataset {:year loop-year})
       (wds/join population-at-risk [:gss-code :age :sex])
-      (wds/add-derived-column col-result [col-rates :popn] *)
+      (wds/add-derived-column col-result [col-rates :popn-at-risk] *)
       (ds/select-columns [:gss-code :sex :age :year col-result])))
