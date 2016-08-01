@@ -259,7 +259,8 @@
                          (:input-config (:options (parse-opts args cli-options)))
                          (:output-projections (:options (parse-opts args cli-options)))))
     (timbre/info (format "\nPreparing projection for %s... " (get-district gss-code)))
-    (-> (run-workspace input-datasets gss-code params)
+    (-> input-datasets
+        (run-workspace gss-code params)
         (add-district-to-dataset-per-user-input gss-code)
         (write-data-to-csv output-projections [:gss-code :district :sex :age :year :popn]))))
 
