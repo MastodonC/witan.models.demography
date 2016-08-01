@@ -1,5 +1,6 @@
 (ns witan.models.dem.ccm.models-utils
-  (:require [witan.workspace-api :refer [defworkflowfn
+  (:require [clojure.set]
+            [witan.workspace-api :refer [defworkflowfn
                                          defworkflowoutput
                                          defworkflowinput]]
             [witan.models.load-data :as ld]
