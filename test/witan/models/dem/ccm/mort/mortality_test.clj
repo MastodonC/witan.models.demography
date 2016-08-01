@@ -30,10 +30,15 @@
                                       :historic-asmr
                                       "./datasets/test_datasets/r_outputs_for_testing/mort/bristol_historic_asmr.csv")))
 
-(def proj-deaths-r (-> :deaths
-                       (ld/load-dataset "./datasets/test_datasets/r_outputs_for_testing/mort/bristol_mortality_module_r_output_2015.csv")
-                       :deaths
-                       (ds/rename-columns {:deaths :deaths-r})))
+(def proj-deaths-fixed-r (-> :deaths
+                             (ld/load-dataset "./datasets/test_datasets/r_outputs_for_testing/mort/bristol_mortality_module_r_output_2015.csv")
+                             :deaths
+                             (ds/rename-columns {:deaths :deaths-r})))
+
+(def proj-deaths-national-trend-r (-> :deaths
+                                      (ld/load-dataset "./datasets/test_datasets/r_outputs_for_testing/mort/bristol_mortality_module_r_output_2015.csv")
+                                      :deaths
+                                      (ds/rename-columns {:deaths :deaths-r})))
 
 (def proj-asmr-avg-applynationaltrend-r
   (-> :projected-asmr
@@ -93,7 +98,20 @@
                             (project-asmr-average-fixed params)
                             project-deaths-from-fixed-rates
                             :deaths)
-        joined-proj-deaths (wds/join proj-deaths-r proj-deaths-clj
+        joined-proj-deaths (wds/join proj-deaths-fixed-r proj-deaths-clj
+                                     [:gss-code :sex :age :year])]
+    (is (every? #(fp-equals? (i/sel joined-proj-deaths :rows % :cols :deaths-r)
+                             (i/sel joined-proj-deaths :rows % :cols :deaths)
+                             0.0000001)
+                (range (first (:shape joined-proj-deaths)))))))
+
+(deftest project-deaths-test
+  (let [proj-deaths-clj (-> hist-asmr-inputs
+                            calc-historic-asmr
+                            (project-asmr-average-applynationaltrend params)
+                            project-deaths
+                            :deaths)
+        joined-proj-deaths (wds/join proj-deaths-national-trend-r proj-deaths-clj
                                      [:gss-code :sex :age :year])]
     (is (every? #(fp-equals? (i/sel joined-proj-deaths :rows % :cols :deaths-r)
                              (i/sel joined-proj-deaths :rows % :cols :deaths)

@@ -151,3 +151,11 @@
       (wds/join population-at-risk [:gss-code :age :sex])
       (wds/add-derived-column col-result [col-fixed-rates :popn] *)
       (ds/select-columns [:gss-code :sex :age :year col-result])))
+
+(defn project-component
+  [population-at-risk rates loop-year col-rates col-result]
+  (-> rates
+      (i/query-dataset rates {:year loop-year})
+      (wds/join population-at-risk [:gss-code :age :sex])
+      (wds/add-derived-column col-result [col-rates :popn] *)
+      (ds/select-columns [:gss-code :sex :age :year col-result])))

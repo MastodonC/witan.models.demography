@@ -120,3 +120,19 @@
    (cf/project-component-fixed-rates population-at-risk
                                      initial-projected-mortality-rates
                                      :death-rate :deaths)})
+
+(defworkflowfn project-deaths
+  ""
+  {:witan/name :ccm-mort/project-deaths
+   :witan/version "1.0"
+   :witan/input-schema {:initial-projected-mortality-rates ProjASMRSchema
+                        :population-at-risk HistPopulationSchema
+                        :loop-year s/Int}
+   :witan/output-schema  {:deaths DeathsOutputSchema}
+   :witan/exported? true}
+  [{:keys [initial-projected-mortality-rates population-at-risk loop-year]} _]
+  {:deaths
+   (cf/project-component population-at-risk
+                         initial-projected-mortality-rates
+                         loop-year
+                         :death-rate :deaths)})
