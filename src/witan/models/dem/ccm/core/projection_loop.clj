@@ -4,18 +4,20 @@
             [incanter.core :as i]
             [witan.workspace-api :refer [defworkflowfn defworkflowpred
                                          defworkflowoutput]]
+            [witan.workspace-api.utils :as utils]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
             [witan.models.dem.ccm.fert.fertility :as fert]
             [witan.models.dem.ccm.mort.mortality :as mort]
             [witan.models.dem.ccm.mig.migration :as mig]
+            [witan.models.dem.ccm.models-utils :as m-utils]
             [taoensso.timbre :as timbre]))
 
 (defworkflowpred finished-looping?
   {:witan/name :ccm-core/ccm-loop-pred
    :witan/version "1.0.0"
-   :witan/input-schema {:population PopulationSchema :loop-year s/Int}
-   :witan/param-schema {:last-proj-year s/Int}
+   :witan/input-schema {:population PopulationSchema :loop-year (s/constrained s/Int m-utils/year?)}
+   :witan/param-schema {:last-proj-year (s/constrained s/Int m-utils/year?)}
    :witan/exported? true}
   [{:keys [loop-year]} {:keys [last-proj-year]}]
   (> loop-year last-proj-year))
@@ -34,6 +36,7 @@
    :witan/exported? true}
   [{:keys [historic-population]} _]
   (let [last-yr (reduce max (ds/column historic-population :year))
+        _ (utils/property-holds? last-yr m-utils/year? (str last-yr " is not a year"))
         last-yr-popn (i/query-dataset historic-population {:year last-yr})]
     {:loop-year last-yr :latest-yr-popn last-yr-popn
      :population historic-population}))
@@ -45,7 +48,7 @@
    :witan/version "1.0.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema
                         :loop-year s/Int}
-   :witan/output-schema {:latest-yr-popn PopulationSchema :loop-year s/Int
+   :witan/output-schema {:latest-yr-popn PopulationSchema :loop-year (s/constrained s/Int m-utils/year?)
                          :population-at-risk PopulationAtRiskSchema}
    :witan/exported? true}
   [{:keys [latest-yr-popn loop-year]} _]
@@ -76,7 +79,7 @@
   {:witan/name :ccm-core/add-births
    :witan/version "1.0.0"
    :witan/input-schema {:latest-yr-popn PopulationSchema :births BirthsBySexSchema
-                        :loop-year s/Int}
+                        :loop-year (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:latest-yr-popn PopulationSchema}
    :witan/exported? true}
   [{:keys [latest-yr-popn births loop-year]} _]

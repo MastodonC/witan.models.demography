@@ -3,6 +3,8 @@
             [witan.workspace-api :refer [defworkflowfn]]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
+            [witan.workspace-api.utils :as utils]
+            [witan.models.dem.ccm.models-utils :as m-utils]
             [clojure.core.matrix.dataset :as ds]
             [schema.core :as s]
             [incanter.core :as i]))
@@ -15,6 +17,7 @@
   or equal to the latest year of deaths data.."
   [popn-ds deaths-ds births-ds]
   (let [max-yr-deaths (reduce max (ds/column deaths-ds :year))
+        _ (utils/property-holds? max-yr-deaths m-utils/year? (str max-yr-deaths " is not a year"))
         popn-not-age-0 (-> popn-ds
                            (ds/emap-column :year inc)
                            (i/query-dataset {:year {:$lte max-yr-deaths}})
@@ -84,10 +87,10 @@
    :witan/version "1.0.0"
    :witan/input-schema {:historic-asmr HistASMRSchema
                         :future-mortality-trend-assumption NationalTrendsSchema}
-   :witan/param-schema {:start-yr-avg-mort s/Int :end-yr-avg-mort s/Int
-                        :first-proj-yr s/Int :last-proj-yr s/Int
+   :witan/param-schema {:start-yr-avg-mort (s/constrained s/Int m-utils/year?) :end-yr-avg-mort (s/constrained s/Int m-utils/year?)
+                        :first-proj-yr (s/constrained s/Int m-utils/year?) :last-proj-yr (s/constrained s/Int m-utils/year?)
                         :mort-scenario (s/enum :low :principal :high)
-                        :mort-last-yr s/Int}
+                        :mort-last-yr (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
    :witan/exported? false}
   [{:keys [historic-asmr future-mortality-trend-assumption]}
@@ -127,7 +130,7 @@
    :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjASMRSchema
                         :population-at-risk PopulationAtRiskSchema
-                        :loop-year s/Int}
+                        :loop-year (s/constrained s/Int m-utils/year?)}
    :witan/output-schema  {:deaths DeathsOutputSchema}
    :witan/exported? true}
   [{:keys [initial-projected-mortality-rates population-at-risk loop-year]} _]

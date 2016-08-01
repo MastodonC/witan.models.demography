@@ -4,7 +4,9 @@
             [witan.datasets :as wds]
             [schema.core :as s]
             [incanter.stats :as st]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [witan.workspace-api.utils :as utils]
+            [witan.models.dem.ccm.models-utils :as m-utils]))
 
 ;; Calculate rates/values for alternative ways to project components of change:
 
@@ -16,12 +18,20 @@
   for all the years of interest and is named to avg-name."
   [historical-data col-to-avg avg-name start-yr-avg end-yr-avg]
   (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
-        hist-latest-yr (reduce max (ds/column historical-data :year))
-        start-yr (s/validate (s/pred #(>= % hist-earliest-yr)) start-yr-avg)
-        end-yr (s/validate (s/pred #(<= % hist-latest-yr)) end-yr-avg)]
+        hist-latest-yr (reduce max (ds/column historical-data :year))]
+    (-> start-yr-avg
+        (utils/property-holds?  #(>= % hist-earliest-yr)
+                                "Start year must be more than or equal to earliest year in dataset")
+        (utils/property-holds?  m-utils/year?
+                                (str start-yr-avg " is not a year")))
+    (-> end-yr-avg
+        (utils/property-holds?  #(>= % hist-latest-yr)
+                                "End year must be less than or equal to the latest year in the dataset")
+        (utils/property-holds?  m-utils/year?
+                                (str end-yr-avg " is not a year")))
     (-> (i/query-dataset historical-data
-                         {:year {:$gte start-yr
-                                 :$lte end-yr}})
+                         {:year {:$gte start-yr-avg
+                                 :$lte end-yr-avg}})
         (ds/rename-columns {col-to-avg avg-name})
         (wds/rollup :mean avg-name [:gss-code :sex :age]))))
 
@@ -32,25 +42,33 @@
   [historical-data trend-col trend-out start-yr-avg end-yr-avg]
   (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
         hist-latest-yr (reduce max (ds/column historical-data :year))
-        start-yr (s/validate (s/pred #(>= % hist-earliest-yr)) start-yr-avg)
-        end-yr (s/validate (s/pred #(<= % hist-latest-yr)) end-yr-avg)
+        _ (-> start-yr-avg
+              (utils/property-holds?  #(>= % hist-earliest-yr)
+                                      "Start year must be more than or equal to earliest year in dataset")
+              (utils/property-holds?  m-utils/year?
+                                      (str start-yr-avg " is not a year")))
+        _ (-> end-yr-avg
+              (utils/property-holds?  #(>= % hist-latest-yr)
+                                      "End year must be less than or equal to the latest year in the dataset")
+              (utils/property-holds?  m-utils/year?
+                                      (str end-yr-avg " is not a year")))
         grouped-data (->> historical-data
-                          (#(i/query-dataset % {:year {:$gte start-yr
-                                                       :$lte end-yr}}))
+                          (#(i/query-dataset % {:year {:$gte start-yr-avg
+                                                       :$lte end-yr-avg}}))
                           (i/$group-by [:sex :gss-code :age]))
         lm (map (fn [[k v]]
                   (:coefs (st/linear-model (i/$ trend-col v) (i/$ :year v))))
                 grouped-data)
-        newest-data (mapv (fn [[k v] i]
+        assoc-coefs (mapv (fn [[k v] i]
                             (assoc k
                                    :intercept (first i)
                                    :regres-coef (second i)))
                           grouped-data lm)]
-    (-> newest-data
+    (-> assoc-coefs
         ds/dataset
         (wds/add-derived-column trend-out
                                 [:regres-coef :intercept]
-                                (fn [y i] (let [t (+ i (* y (inc end-yr)))]
+                                (fn [y i] (let [t (+ i (* y (inc end-yr-avg)))]
                                             (if (neg? t)
                                               0
                                               t))))
@@ -68,6 +86,7 @@
 
 (defn order-ds
   [dataset col-key]
+  (utils/property-holds? dataset ds/dataset? "Not a dataset")
   (cond (keyword? col-key) (->> dataset
                                 ds/row-maps
                                 vec

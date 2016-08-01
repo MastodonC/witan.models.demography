@@ -3,6 +3,8 @@
             [witan.workspace-api :refer [defworkflowfn merge->]]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
+            [witan.workspace-api.utils :as utils]
+            [witan.models.dem.ccm.models-utils :as m-utils]
             [clojure.core.matrix.dataset :as ds]
             [schema.core :as s]))
 
@@ -10,7 +12,7 @@
   {:witan/name :ccm-mig/proj-dom-in-mig
    :witan/version "1.0.0"
    :witan/input-schema {:domestic-in-migrants DomesticInmigrants}
-   :witan/param-schema {:start-yr-avg-domin-mig s/Int :end-yr-avg-domin-mig s/Int}
+   :witan/param-schema {:start-yr-avg-domin-mig (s/constrained s/Int m-utils/year?) :end-yr-avg-domin-mig (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:projected-domestic-in-migrants ProjDomInSchema}
    :witan/exported? true}
   [{:keys [domestic-in-migrants]} {:keys [start-yr-avg-domin-mig end-yr-avg-domin-mig]}]
@@ -22,7 +24,7 @@
   {:witan/name :ccm-mig/proj-dom-out-mig
    :witan/version "1.0.0"
    :witan/input-schema {:domestic-out-migrants DomesticOutmigrants}
-   :witan/param-schema {:start-yr-avg-domout-mig s/Int :end-yr-avg-domout-mig s/Int}
+   :witan/param-schema {:start-yr-avg-domout-mig (s/constrained s/Int m-utils/year?) :end-yr-avg-domout-mig (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:projected-domestic-out-migrants ProjDomOutSchema}
    :witan/exported? true}
   [{:keys [domestic-out-migrants]} {:keys [start-yr-avg-domout-mig end-yr-avg-domout-mig]}]
@@ -34,7 +36,7 @@
   {:witan/name :ccm-mig/proj-inter-in-mig
    :witan/version "1.0.0"
    :witan/input-schema {:international-in-migrants InternationalInmigrants}
-   :witan/param-schema {:start-yr-avg-intin-mig s/Int :end-yr-avg-intin-mig s/Int}
+   :witan/param-schema {:start-yr-avg-intin-mig (s/constrained s/Int m-utils/year?) :end-yr-avg-intin-mig (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:projected-international-in-migrants ProjInterInSchema}
    :witan/exported? true}
   [{:keys [international-in-migrants]} {:keys [start-yr-avg-intin-mig end-yr-avg-intin-mig]}]
@@ -46,7 +48,7 @@
   {:witan/name :ccm-mig/proj-inter-out-mig
    :witan/version "1.0.0"
    :witan/input-schema {:international-out-migrants InternationalOutmigrants}
-   :witan/param-schema {:start-yr-avg-intout-mig s/Int :end-yr-avg-intout-mig s/Int}
+   :witan/param-schema {:start-yr-avg-intout-mig (s/constrained s/Int m-utils/year?) :end-yr-avg-intout-mig (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:projected-international-out-migrants ProjInterOutSchema}
    :witan/exported? true}
   [{:keys [international-out-migrants]} {:keys [start-yr-avg-intout-mig end-yr-avg-intout-mig]}]
