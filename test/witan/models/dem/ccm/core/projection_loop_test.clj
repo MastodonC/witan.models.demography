@@ -88,7 +88,7 @@
 (defn mortality-module [inputs params]
   (-> inputs
       mort/calc-historic-asmr
-      (mort/project-asmr params)
+      (mort/project-asmr-average-fixed params)
       mort/project-deaths-from-fixed-rates))
 
 (defn migration-module [inputs params]

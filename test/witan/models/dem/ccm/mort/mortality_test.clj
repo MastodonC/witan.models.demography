@@ -21,20 +21,42 @@
                      :historic-population
                      "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"
                      :population-at-risk ;;this actually comes from the proj loop but for test use this csv
-                     "./datasets/test_datasets/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"}))
+                     "./datasets/test_datasets/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"
+                     :future-mortality-trend-assumption
+                     "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"}))
+
+(def proj-death-inputs
+  (assoc (ld/load-datasets {:population-at-risk ;;this actually comes from the proj loop but for test use this csv
+                            "./datasets/test_datasets/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"})
+         :loop-year 2015))
 
 ;;Output from R calc-historic-asmr function for comparison
 (def historic-asmr-r (:historic-asmr (ld/load-dataset
                                       :historic-asmr
                                       "./datasets/test_datasets/r_outputs_for_testing/mort/bristol_historic_asmr.csv")))
 
-(def proj-deaths-r (-> :deaths
-                       (ld/load-dataset "./datasets/test_datasets/r_outputs_for_testing/mort/bristol_mortality_module_r_output_2015.csv")
-                       :deaths
-                       (ds/rename-columns {:deaths :deaths-r})))
+(def proj-deaths-fixed-r (-> :deaths
+                             (ld/load-dataset "./datasets/test_datasets/r_outputs_for_testing/mort/bristol_mortality_module_r_output_2015.csv")
+                             :deaths
+                             (ds/rename-columns {:deaths :deaths-r})))
+
+(def proj-deaths-national-trend-r (-> :deaths
+                                      (ld/load-dataset "./datasets/test_datasets/r_outputs_for_testing/mort/bristol_mortality_module_r_output_2015.csv")
+                                      :deaths
+                                      (ds/rename-columns {:deaths :deaths-r})))
+
+(def proj-asmr-avg-applynationaltrend-r
+  (-> :projected-asmr
+      (ld/load-dataset "./datasets/test_datasets/r_outputs_for_testing/mort/bristol_projected_asmr_avg_applynationaltrend_r_output_2015_2017.csv")
+      :projected-asmr
+      (ds/rename-columns {:death-rate :death-rate-r})))
 
 (def params {:start-yr-avg-mort 2010
-             :end-yr-avg-mort 2014})
+             :end-yr-avg-mort 2014
+             :first-proj-yr 2015
+             :last-proj-yr 2017
+             :mort-scenario :principal
+             :mort-last-yr 2014})
 
 (deftest calc-historic-asmr-test
   (testing "Death rates are calculated correctly."
@@ -48,11 +70,11 @@
                                0.0000000001)
                   (range (first (:shape joined-asmr))))))))
 
-(deftest project-asmr-test
+(deftest project-asmr-average-fixed-test
   (testing "mortality rates projected correctly"
     (let [projected-asmr (-> hist-asmr-inputs
                              calc-historic-asmr
-                             (project-asmr params)
+                             (project-asmr-average-fixed params)
                              :initial-projected-mortality-rates)]
       (is (fp-equals? 2.049763E-03
                       (nth (plt/get-popn projected-asmr :death-rate 0 "F") 0)
@@ -61,13 +83,42 @@
                       (nth (plt/get-popn projected-asmr :death-rate 90 "M") 0)
                       0.0000001)))))
 
+(deftest project-asmr-average-applynationaltrend-test
+  (testing "mortality rates projected correctly"
+    (let [projected-asmr-clj (-> hist-asmr-inputs
+                                 calc-historic-asmr
+                                 (project-asmr-average-applynationaltrend params)
+                                 :initial-projected-mortality-rates)
+          joined-proj-asmr (wds/join proj-asmr-avg-applynationaltrend-r
+                                     projected-asmr-clj
+                                     [:gss-code :sex :age :year])]
+      (is (every? #(fp-equals? (i/sel joined-proj-asmr :rows % :cols :death-rate)
+                               (i/sel joined-proj-asmr :rows % :cols :death-rate-r)
+                               0.0000001)
+                  (range (first (:shape joined-proj-asmr))))))))
+
 (deftest project-deaths-from-fixed-rates-test
   (let [proj-deaths-clj (-> hist-asmr-inputs
                             calc-historic-asmr
-                            (project-asmr params)
+                            (project-asmr-average-fixed params)
                             project-deaths-from-fixed-rates
                             :deaths)
-        joined-proj-deaths (wds/join proj-deaths-r proj-deaths-clj
+        joined-proj-deaths (wds/join proj-deaths-fixed-r proj-deaths-clj
+                                     [:gss-code :sex :age :year])]
+    (is (every? #(fp-equals? (i/sel joined-proj-deaths :rows % :cols :deaths-r)
+                             (i/sel joined-proj-deaths :rows % :cols :deaths)
+                             0.0000001)
+                (range (first (:shape joined-proj-deaths)))))))
+
+(deftest project-deaths-test
+  (let [death-rates (-> hist-asmr-inputs
+                        calc-historic-asmr
+                        (project-asmr-average-applynationaltrend params))
+        proj-deaths-clj (-> death-rates
+                            (merge proj-death-inputs)
+                            project-deaths
+                            :deaths)
+        joined-proj-deaths (wds/join proj-deaths-national-trend-r proj-deaths-clj
                                      [:gss-code :sex :age :year])]
     (is (every? #(fp-equals? (i/sel joined-proj-deaths :rows % :cols :deaths-r)
                              (i/sel joined-proj-deaths :rows % :cols :deaths)

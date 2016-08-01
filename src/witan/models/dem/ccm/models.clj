@@ -168,7 +168,7 @@
     {:witan/name :project-asmr,
      :witan/version "1.0.0",
      :witan/type :function,
-     :witan/fn :ccm-mort/project-asmr,
+     :witan/fn :ccm-mort/project-asmr-average-fixed,
      :witan/params {:start-yr-avg-mort 2010, :end-yr-avg-mort 2014}}
     {:witan/name :proj-intl-in-migrants,
      :witan/version "1.0.0",
@@ -219,7 +219,7 @@
 
        mort/project-deaths-from-fixed-rates
        mort/calc-historic-asmr
-       mort/project-asmr
+       mort/project-asmr-average-fixed
 
        mig/project-domestic-in-migrants
        mig/project-domestic-out-migrants
@@ -238,3 +238,4 @@
        core/finished-looping?))
     (available-models [_]
       (map-meta cohort-component-model))))
+

@@ -36,7 +36,7 @@
    :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-from-fixed-rates}
    :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility/combine-into-births-by-sex
                                 :params {:proportion-male-newborns (double (/ 105 205))}}
-   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr
+   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-average-fixed
                                 :params {:start-yr-avg-mort 2010
                                          :end-yr-avg-mort 2014}}
    :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
@@ -84,8 +84,7 @@
                                             :key :international-out-migrants}}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Outputs
-   :out {:var #'witan.models.dem.ccm.models-utils/out}
-   })
+   :out {:var #'witan.models.dem.ccm.models-utils/out}})
 
 
 (deftest workspace-test
