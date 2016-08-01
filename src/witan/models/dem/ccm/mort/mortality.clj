@@ -122,7 +122,7 @@
                                      :death-rate :deaths)})
 
 (defworkflowfn project-deaths
-  ""
+  "Takes the current year of the projection, a dataset with population at risk from that year, and another dataset with death rates for the population for all projection years. Death rates are filtered for the current year. Returns a dataset with a column of deaths, which are the product of popn at risk & death rates"
   {:witan/name :ccm-mort/project-deaths
    :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjASMRSchema
