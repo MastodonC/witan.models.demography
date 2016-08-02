@@ -87,8 +87,10 @@
    :witan/version "1.0.0"
    :witan/input-schema {:historic-asmr HistASMRSchema
                         :future-mortality-trend-assumption NationalTrendsSchema}
-   :witan/param-schema {:start-yr-avg-mort (s/constrained s/Int m-utils/year?) :end-yr-avg-mort (s/constrained s/Int m-utils/year?)
-                        :first-proj-yr (s/constrained s/Int m-utils/year?) :last-proj-yr (s/constrained s/Int m-utils/year?)
+   :witan/param-schema {:start-yr-avg-mort (s/constrained s/Int m-utils/year?)
+                        :end-yr-avg-mort (s/constrained s/Int m-utils/year?)
+                        :first-proj-yr (s/constrained s/Int m-utils/year?)
+                        :last-proj-yr (s/constrained s/Int m-utils/year?)
                         :mort-scenario (s/enum :low :principal :high)
                         :mort-last-yr (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
@@ -125,7 +127,10 @@
                                      :death-rate :deaths)})
 
 (defworkflowfn project-deaths
-  "Takes the current year of the projection, a dataset with population at risk from that year, and another dataset with death rates for the population for all projection years. Death rates are filtered for the current year. Returns a dataset with a column of deaths, which are the product of popn at risk & death rates"
+  "Takes the current year of the projection, a dataset with population at risk from that year,
+  and another dataset with death rates for the population for all projection years. Death
+  rates are filtered for the current year. Returns a dataset with a column of deaths, which are
+  the product of popn at risk & death rates"
   {:witan/name :ccm-mort/project-deaths
    :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjASMRSchema
