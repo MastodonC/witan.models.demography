@@ -1,6 +1,7 @@
 (ns witan.models.dem.ccm.models
   (:require [witan.workspace-api :refer [defmodel]]
-            [witan.workspace-api.utils :refer [map-meta]]
+            [witan.workspace-api.utils :refer [map-fn-meta
+                                               map-model-meta]]
             [witan.workspace-api.protocols :as p]
             ;;
             [witan.models.dem.ccm.mort.mortality   :as mort]
@@ -211,7 +212,7 @@
   []
   (reify p/IModelLibrary
     (available-fns [_]
-      (map-meta
+      (map-fn-meta
        fert/project-asfr-finalyrhist-fixed
        fert/project-births-from-fixed-rates
        fert/combine-into-births-by-sex
@@ -237,5 +238,4 @@
 
        core/finished-looping?))
     (available-models [_]
-      (map-meta cohort-component-model))))
-
+      (map-model-meta cohort-component-model))))

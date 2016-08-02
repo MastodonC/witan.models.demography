@@ -8,7 +8,7 @@
                  [net.mikera/core.matrix "0.52.2"]
                  [kixi/incanter-core "1.9.1-p0-3bf644a"]
                  [org.clojure/data.csv "0.1.3"]
-                 [witan.workspace-api "0.1.15"]
+                 [witan.workspace-api "0.1.16"]
                  [org.clojure/tools.cli "0.3.5"]
                  [com.taoensso/timbre "4.7.3"]]
   :target-path "target/%s"
