@@ -15,11 +15,9 @@
   "Loads csv file with each row as a vector.
    Stored in map separating column-names from data"
   ([filename]
-   (load-csv filename nil))
-  ([filename eol]
    (let [file (io/file filename)]
      (when (.exists (io/as-file file))
-       (let [parsed-csv (data-csv/read-csv (io/reader file) :end-of-line eol)
+       (let [parsed-csv (data-csv/read-csv (slurp file))
              parsed-data (rest parsed-csv)
              headers (map str/lower-case (first parsed-csv))]
          {:column-names (custom-keyword headers)

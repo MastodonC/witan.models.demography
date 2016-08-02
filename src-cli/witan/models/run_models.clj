@@ -74,9 +74,7 @@
   "Takes a filepath to a csv file and outputs a map with
   the rank for each column name based on the columns order in the file."
   ([filename]
-   (get-sorted-colnames filename nil))
-  ([filename eol]
-   (let [parsed-csv (data-csv/read-csv (jio/reader filename) :end-of-line nil)
+   (let [parsed-csv (data-csv/read-csv (slurp filename))
          parsed-data (rest parsed-csv)
          headers (mapv keyword (first parsed-csv))]
      (zipmap headers
