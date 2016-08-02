@@ -20,15 +20,15 @@
   (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
         hist-latest-yr (reduce max (ds/column historical-data :year))]
     (-> start-yr-avg
+        (utils/property-holds?  m-utils/year?
+                                (str start-yr-avg " is not a year"))
         (utils/property-holds?  #(>= % hist-earliest-yr)
-                                "Start year must be more than or equal to earliest year in dataset")
-        (utils/property-holds?  m-utils/year?
-                                (str start-yr-avg " is not a year")))
+                                "Start year must be more than or equal to earliest year in dataset"))
     (-> end-yr-avg
-        (utils/property-holds?  #(>= % hist-latest-yr)
-                                "End year must be less than or equal to the latest year in the dataset")
         (utils/property-holds?  m-utils/year?
-                                (str end-yr-avg " is not a year")))
+                                (str end-yr-avg " is not a year"))
+        (utils/property-holds?  #(>= % hist-latest-yr)
+                                "End year must be less than or equal to the latest year in the dataset"))
     (-> (i/query-dataset historical-data
                          {:year {:$gte start-yr-avg
                                  :$lte end-yr-avg}})
@@ -43,15 +43,15 @@
   (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
         hist-latest-yr (reduce max (ds/column historical-data :year))
         _ (-> start-yr-avg
+              (utils/property-holds?  m-utils/year?
+                                      (str start-yr-avg " is not a year"))
               (utils/property-holds?  #(>= % hist-earliest-yr)
-                                      "Start year must be more than or equal to earliest year in dataset")
-              (utils/property-holds?  m-utils/year?
-                                      (str start-yr-avg " is not a year")))
+                                      "Start year must be more than or equal to earliest year in dataset"))
         _ (-> end-yr-avg
-              (utils/property-holds?  #(>= % hist-latest-yr)
-                                      "End year must be less than or equal to the latest year in the dataset")
               (utils/property-holds?  m-utils/year?
-                                      (str end-yr-avg " is not a year")))
+                                      (str end-yr-avg " is not a year"))
+              (utils/property-holds?  #(>= % hist-latest-yr)
+                                      "End year must be less than or equal to the latest year in the dataset"))
         grouped-data (->> historical-data
                           (#(i/query-dataset % {:year {:$gte start-yr-avg
                                                        :$lte end-yr-avg}}))
