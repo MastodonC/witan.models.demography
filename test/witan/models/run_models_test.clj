@@ -34,9 +34,43 @@
 
 (def gss-bristol "E06000023")
 
-(def params-2015 core-test/params)
+(def params-2015 { ;; Core module
+                  :first-proj-year 2014
+                  :last-proj-year 2015
+                  ;; Fertility module
+                  :fert-base-yr 2014
+                  :proportion-male-newborns (double (/ 105 205))
+                  ;; Mortality module
+                  :start-yr-avg-mort 2010
+                  :end-yr-avg-mort 2014
+                  ;; Migration module
+                  :start-yr-avg-domin-mig 2003
+                  :end-yr-avg-domin-mig 2014
+                  :start-yr-avg-domout-mig 2003
+                  :end-yr-avg-domout-mig 2014
+                  :start-yr-avg-intin-mig 2003
+                  :end-yr-avg-intin-mig 2014
+                  :start-yr-avg-intout-mig 2003
+                  :end-yr-avg-intout-mig 2014})
 
-(def params-2040 core-test/params-2040)
+(def params-2040 {;; Core module
+                  :first-proj-year 2014
+                  :last-proj-year 2040
+                  ;; Fertility module
+                  :fert-base-yr 2014
+                  :proportion-male-newborns (double (/ 105 205))
+                  ;; Mortality module
+                  :start-yr-avg-mort 2010
+                  :end-yr-avg-mort 2014
+                  ;; Migration module
+                  :start-yr-avg-domin-mig 2003
+                  :end-yr-avg-domin-mig 2014
+                  :start-yr-avg-domout-mig 2003
+                  :end-yr-avg-domout-mig 2014
+                  :start-yr-avg-intin-mig 2003
+                  :end-yr-avg-intin-mig 2014
+                  :start-yr-avg-intout-mig 2003
+                  :end-yr-avg-intout-mig 2014})
 
 (deftest get-dataset-test
   (testing "The data is filtered on local authority."
@@ -55,12 +89,13 @@
 
 (deftest run-workspace-test
   (testing "The historical and projection data is returned"
-    (let [proj-bristol-2015 (run-workspace datasets gss-bristol params-2015)
+    (let [proj-bristol-2015 (i/query-dataset (run-workspace datasets gss-bristol params-2015)
+                                             {:year 2015})
           r-proj-bristol-2015 (ds/rename-columns (:end-population r-output-2015)
                                                  {:popn :popn-r})
           joined-ds (wds/join proj-bristol-2015 r-proj-bristol-2015 [:gss-code :sex :age :year])]
       (is proj-bristol-2015)
-      (= (:shape proj-bristol-2015) (:shape r-proj-bristol-2015))
+      (is (= (:shape proj-bristol-2015) (:shape r-proj-bristol-2015)))
       (is (every? #(fp-equals? (i/sel joined-ds :rows % :cols :popn)
                                (i/sel joined-ds :rows % :cols :popn-r) 0.0000000001)
                   (range (first (:shape joined-ds))))))))

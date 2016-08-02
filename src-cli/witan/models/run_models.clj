@@ -96,7 +96,7 @@
   Writes to csv file with the filepath provided, for example 'folder1/folder2/filename.csv'
   or 'filename.csv'"
   [data filepath ordered-colnames]
-  (let [rows-as-maps (cond (i/dataset? data) (ds/row-maps data)
+  (let [rows-as-maps (cond (ds/dataset? data) (ds/row-maps data)
                            :else data)
         sorted-colnames (cond (string? ordered-colnames)
                               (get-sorted-colnames ordered-colnames)

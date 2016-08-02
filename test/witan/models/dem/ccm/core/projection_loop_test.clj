@@ -57,24 +57,7 @@
              ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-intout-mig)
              :end-yr-avg-intout-mig 2014})
 
-(def params-2040 {;; Core module
-                  :first-proj-year 2014
-                  :last-proj-year 2040
-                  ;; Fertility module
-                  :fert-base-yr 2014
-                  :proportion-male-newborns (double (/ 105 205))
-                  ;; Mortality module
-                  :start-yr-avg-mort 2010
-                  :end-yr-avg-mort 2014
-                  ;; Migration module
-                  :start-yr-avg-domin-mig 2003
-                  :end-yr-avg-domin-mig 2014
-                  :start-yr-avg-domout-mig 2003
-                  :end-yr-avg-domout-mig 2014
-                  :start-yr-avg-intin-mig 2003
-                  :end-yr-avg-intin-mig 2014
-                  :start-yr-avg-intout-mig 2003
-                  :end-yr-avg-intout-mig 2014})
+
 
 (def prepared-inputs (prepare-inputs data-inputs))
 
@@ -98,14 +81,6 @@
       (mig/project-international-in-migrants params)
       (mig/project-international-out-migrants params)
       mig/combine-into-net-flows))
-
-(def output-2015 (ld/load-datasets
-                  {:end-population
-                   "./datasets/test_datasets/r_outputs_for_testing/core/bristol_end_population_2015.csv"}))
-
-(def output-2040 (ld/load-datasets
-                  {:end-population
-                   "./datasets/test_datasets/r_outputs_for_testing/core/bristol_end_population_2040.csv"}))
 
 ;; Useful fns:
 (defn- same-coll? [coll1 coll2]
