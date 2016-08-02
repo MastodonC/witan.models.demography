@@ -15,10 +15,8 @@
                                                  model-library]]
             [witan.models.dem.ccm.models-utils :refer [make-catalog make-contracts]]))
 
-
-
 (def tasks
-  { ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  {;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Functions
    :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-finalyrhist-fixed}
    :join-popn-latest-yr        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-yr}
@@ -85,7 +83,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Outputs
    :out {:var #'witan.models.dem.ccm.models-utils/out}})
-
 
 (deftest workspace-test
   (let [workspace     {:workflow  (:workflow cohort-component-model)

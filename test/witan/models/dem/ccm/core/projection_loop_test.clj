@@ -57,8 +57,6 @@
              ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mig))) :end-yr-avg-intout-mig)
              :end-yr-avg-intout-mig 2014})
 
-
-
 (def prepared-inputs (prepare-inputs data-inputs))
 
 (defn fertility-module [inputs params]
@@ -127,8 +125,7 @@
 
 (deftest add-births-test
   (testing "Newborns are correctly added to projection year popn."
-    (let [
-          births-added (-> prepared-inputs
+    (let [births-added (-> prepared-inputs
                            select-starting-popn
                            (fertility-module params)
                            age-on

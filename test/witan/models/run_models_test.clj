@@ -34,7 +34,7 @@
 
 (def gss-bristol "E06000023")
 
-(def params-2015 { ;; Core module
+(def params-2015 {;; Core module
                   :first-proj-year 2014
                   :last-proj-year 2015
                   ;; Fertility module
