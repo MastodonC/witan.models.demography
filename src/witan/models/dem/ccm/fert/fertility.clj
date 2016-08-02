@@ -5,7 +5,9 @@
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
             [incanter.core :as i]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [witan.workspace-api.utils :as utils]
+            [witan.models.dem.ccm.models-utils :as m-utils]))
 
 (defn create-popn-at-risk-birth
   "Creates a population at risk for calculating historic age specific
@@ -80,13 +82,14 @@
    :witan/input-schema {:ons-proj-births-by-age-mother BirthsAgeSexMotherSchema
                         :historic-population PopulationSchema
                         :historic-births BirthsSchema}
-   :witan/param-schema {:fert-base-yr s/Int}
+   :witan/param-schema {:fert-base-yr (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:historic-asfr HistASFRSchema}
    :witan/exported? true}
   [{:keys [base-asfr ons-proj-births-by-age-mother historic-population historic-births]}
    {:keys [fert-base-yr]}]
   (let [birth-data-yr (reduce max (ds/column
                                    ons-proj-births-by-age-mother :year))
+        _ (utils/property-holds? birth-data-yr m-utils/year? (str birth-data-yr " is not a year"))
         popn-at-risk-birth-data-yr (-> historic-population
                                        (create-popn-at-risk-birth birth-data-yr)
                                        (ds/select-columns
@@ -114,6 +117,7 @@
    :witan/exported? true}
   [{:keys [historic-asfr]} _]
   (let [final-yr (reduce max (ds/column historic-asfr :year))
+        _ (utils/property-holds? final-yr m-utils/year? (str final-yr " is not a year"))
         final-yr-hist (i/query-dataset historic-asfr {:year final-yr})]
     {:initial-projected-fertility-rates
      (ds/select-columns final-yr-hist [:gss-code :sex :age :fert-rate])}))

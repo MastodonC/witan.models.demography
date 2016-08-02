@@ -4,7 +4,8 @@
             [clojure.data.csv :as data-csv]
             [schema.coerce :as coerce]
             [clojure.core.matrix.dataset :as ds]
-            [witan.models.dem.ccm.schemas :refer :all]))
+            [witan.models.dem.ccm.schemas :refer :all]
+            [witan.workspace-api.utils :as utils]))
 
 (defn- custom-keyword [coll]
   (mapv #(-> %
@@ -196,6 +197,7 @@
   "Input should be a map with keys for each dataset and filepaths to csv
    files as the values. Output is a map of core.matrix datasets."
   [file-map]
+  (utils/property-holds? file-map map? "Not a map")
   (->> file-map
        (mapv (fn [[k path]] (load-dataset k path)))
        (reduce merge)))
