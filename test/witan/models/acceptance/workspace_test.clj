@@ -101,5 +101,6 @@
         models (p/available-models ml)
         fns (p/available-fns ml)]
     (is (not-empty models))
-    (is (= (first models) (-> #'cohort-component-model meta :witan/metadata)))
+    (is (= (:metadata (first models)) (-> #'cohort-component-model meta :witan/metadata)))
+    (is (= (select-keys (first models) [:workflow :catalog]) cohort-component-model))
     (is (not-empty fns))))
