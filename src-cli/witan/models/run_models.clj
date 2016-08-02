@@ -76,7 +76,7 @@
   ([filename]
    (get-sorted-colnames filename nil))
   ([filename eol]
-   (let [parsed-csv (data-csv/read-csv (slurp filename) :end-of-line nil)
+   (let [parsed-csv (data-csv/read-csv (slurp filename) :end-of-line eol)
          parsed-data (rest parsed-csv)
          headers (mapv keyword (first parsed-csv))]
      (zipmap headers
