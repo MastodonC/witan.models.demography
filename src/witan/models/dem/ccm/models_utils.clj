@@ -6,7 +6,7 @@
             [witan.models.load-data :as ld]
             [schema.core :as s]))
 
-(defn year? [n] (and (>= n 1900) (<= n 2500)))
+(defn year? [n] (and (>= n 1900) (<= n 2100)))
 
 (defn get-meta
   [v]
