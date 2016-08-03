@@ -20,7 +20,7 @@
    :witan/param-schema {:last-proj-year (s/constrained s/Int m-utils/year?)}
    :witan/exported? true}
   [{:keys [loop-year]} {:keys [last-proj-year]}]
-  (> loop-year last-proj-year))
+  (>= loop-year last-proj-year))
 
 (defworkflowfn prepare-inputs
   "Step happening before the projection loop.

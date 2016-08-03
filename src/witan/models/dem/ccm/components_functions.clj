@@ -161,16 +161,6 @@
                        (range (inc first-proj-yr) (inc last-proj-yr))))
               [:sex :year :age])))
 
-;; Project component for fixed rates:
-(defn project-component-fixed-rates
-  "Takes in a population at risk and fixed rates for a component.
-  Outputs the result of applying the rates to that component."
-  [population-at-risk fixed-rates col-fixed-rates col-result]
-  (-> fixed-rates
-      (wds/join population-at-risk [:gss-code :age :sex])
-      (wds/add-derived-column col-result [col-fixed-rates :popn-at-risk] *)
-      (ds/select-columns [:gss-code :sex :age :year col-result])))
-
 (defn project-component
   [population-at-risk rates loop-year col-rates col-result]
   (-> rates
