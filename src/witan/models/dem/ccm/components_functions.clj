@@ -69,9 +69,17 @@
                                 [:regres-coef :intercept]
                                 (fn [y i] (let [t (+ i (* y (inc end-yr-avg)))]
                                             (if (neg? t)
-                                              0
+                                              0.0
                                               t))))
         (ds/select-columns [:gss-code :sex :age trend-out]))))
+
+(defn add-years-to-fixed-methods
+  "Plots fixed rates across all projected years"
+  [fixed-projection first-proj-yr last-proj-yr]
+  (let [n (wds/row-count fixed-projection)]
+    (->> (range first-proj-yr (inc last-proj-yr))
+         (map #(ds/add-column fixed-projection :year (repeat n %)))
+         (reduce ds/join-rows))))
 
 ;; Project component for fixed rates:
 (defn project-component-fixed-rates
@@ -110,9 +118,9 @@
   "Takes a dataset of projected rates and returns a dataset with the proportional
    difference in the rate between each year and the previous year. Also takes first
    and last years of projection, and keyword with the scenario :low, :principal or :high."
-  [future-rates-trend-assumption first-proj-year last-proj-year scenario]
+  [future-rates-trend-assumption first-proj-yr last-proj-yr scenario]
   (-> future-rates-trend-assumption
-      (wds/select-from-ds {:year {:$gte first-proj-year :$lte last-proj-year}})
+      (wds/select-from-ds {:year {:$gte first-proj-yr :$lte last-proj-yr}})
       (ds/select-columns [:sex :age :year scenario])
       (ds/rename-columns {scenario :national-trend})
       (order-ds [:sex :age :year])
@@ -120,7 +128,7 @@
       (wds/add-derived-column :age [:age] inc)
       (wds/add-derived-column :prop-diff [:national-trend :last-year-nt :year]
                               (fn [national-trend last-year-nt year]
-                                (if (== year first-proj-year)
+                                (if (== year first-proj-yr)
                                   0
                                   (wds/safe-divide [(- national-trend last-year-nt) last-year-nt]))))
       (ds/select-columns [:sex :age :year :prop-diff])))

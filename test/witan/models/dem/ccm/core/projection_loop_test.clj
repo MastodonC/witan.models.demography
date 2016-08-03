@@ -25,11 +25,13 @@
                    :international-in-migrants
                    "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
                    :international-out-migrants
-                   "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"}))
+                   "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"
+                   :future-mortality-trend-assumption
+                   "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"}))
 
 (def params {;; Core module
-             :first-proj-year 2014
-             :last-proj-year 2015
+             :first-proj-yr 2014
+             :last-proj-yr 2016
              ;; Fertility module
              :fert-base-yr 2014
              :proportion-male-newborns (double (/ 105 205))
@@ -38,6 +40,7 @@
              :start-yr-avg-mort 2010
              ;; (s/validate (s/pred (<= % (dec jumpoff-yr-mort))) :end-yr-avg-mort)
              :end-yr-avg-mort 2014
+             :variant :average-fixed
              ;; Migration module
              ;; (s/validate (s/pred (>= % earliest-domin-mig-yr)) :start-yr-avg-domin-mig)
              :start-yr-avg-domin-mig 2003
@@ -68,8 +71,8 @@
 (defn mortality-module [inputs params]
   (-> inputs
       mort/calc-historic-asmr
-      (mort/project-asmr-average-fixed params)
-      mort/project-deaths-from-fixed-rates))
+      (mort/project-asmr-1-0-0 params)
+      mort/project-deaths))
 
 (defn migration-module [inputs params]
   (-> inputs

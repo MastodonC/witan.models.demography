@@ -134,7 +134,7 @@
                                 :params {:fert-base-yr (:fert-base-yr params)}}
    :join-popn-latest-yr        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-yr}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
-   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths-from-fixed-rates}
+   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths}
    :proj-dom-in-migrants       {:var #'witan.models.dem.ccm.mig.migration/project-domestic-in-migrants
                                 :params {:start-yr-avg-domin-mig (:start-yr-avg-domin-mig params)
                                          :end-yr-avg-domin-mig (:end-yr-avg-domin-mig params)}}
@@ -148,9 +148,11 @@
    :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility/combine-into-births-by-sex
                                 :params {:proportion-male-newborns
                                          (:proportion-male-newborns params)}}
-   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-average-fixed
+   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-1-0-0
                                 :params {:start-yr-avg-mort (:start-yr-avg-mort params)
-                                         :end-yr-avg-mort (:end-yr-avg-mort params)}}
+                                         :end-yr-avg-mort (:end-yr-avg-mort params)
+                                         :last-proj-yr (:last-proj-yr params)
+                                         :first-proj-yr (:first-proj-yr params)}}
    :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
    :prepare-starting-popn      {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs}
    :calc-hist-asfr             {:var #'witan.models.dem.ccm.fert.fertility/calculate-historic-asfr
@@ -167,7 +169,7 @@
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Predicates
    :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?
-                                :params {:last-proj-year (:last-proj-year params)}
+                                :params {:last-proj-yr (:last-proj-yr params)}
                                 :pred? true}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Inputs
@@ -175,6 +177,9 @@
                                    :params {:gss-code gss-code
                                             :src (:historic-population inputs)
                                             :key :historic-population}}
+   :in-future-mort-trend          {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+                                   :params {:src (:future-mortality-trend-assumption inputs)
+                                            :key :future-mortality-trend-assumption}}
    :in-hist-total-births          {:var #'witan.models.run-models/resource-csv-loader-filtered
                                    :params {:gss-code gss-code
                                             :src (:historic-births inputs)

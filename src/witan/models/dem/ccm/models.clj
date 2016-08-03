@@ -26,6 +26,7 @@
     ;; asfr/asmr projections
     [:calc-hist-asfr :project-asfr]
     [:calc-hist-asmr :project-asmr]
+    [:in-future-mort-trend :project-asmr]
 
     ;; inputs for mig
     [:in-hist-dom-in-migrants   :proj-dom-in-migrants]
@@ -60,7 +61,7 @@
     [:apply-migration            :join-popn-latest-yr]
     [:join-popn-latest-yr        [:finish-looping? :out :select-starting-popn]]
     ;; --- end loop
-]
+    ]
    :catalog
    [{:witan/name :add-births
      :witan/version "1.0.0"
@@ -84,7 +85,7 @@
      :witan/version "1.0.0"
      :witan/type :predicate
      :witan/fn :ccm-core/ccm-loop-pred
-     :witan/params {:last-proj-year 2021}}
+     :witan/params {:last-proj-yr 2021}}
     {:witan/name :in-hist-deaths-by-age-and-sex
      :witan/version "1.0.0"
      :witan/type :input
@@ -127,10 +128,17 @@
      :witan/params
      {:src nil
       :key :historic-population}}
-    {:witan/name :in-hist-total-births
-     :witan/version "1.0.0"
-     :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader
+    {:witan/name :in-future-mort-trend,
+     :witan/version "1.0.0",
+     :witan/type :input,
+     :witan/fn :workspace-test/resource-csv-loader,
+     :witan/params
+     {:src nil,
+      :key :future-mortality-trend-assumption}}
+    {:witan/name :in-hist-total-births,
+     :witan/version "1.0.0",
+     :witan/type :input,
+     :witan/fn :workspace-test/resource-csv-loader,
      :witan/params
      {:src nil
       :key :historic-births}}
@@ -165,11 +173,11 @@
      :witan/type :function
      :witan/fn :ccm-fert/project-asfr-finalyrhist-fixed
      :witan/params {:fert-base-yr 2014, :start-yr-avg-fert 2014, :end-yr-avg-fert 2014}}
-    {:witan/name :project-asmr
-     :witan/version "1.0.0"
-     :witan/type :function
-     :witan/fn :ccm-mort/project-asmr-average-fixed
-     :witan/params {:start-yr-avg-mort 2010, :end-yr-avg-mort 2014}}
+    {:witan/name :project-asmr,
+     :witan/version "1.0.0",
+     :witan/type :function,
+     :witan/fn :ccm-mort/project-asmr
+     :witan/params {:start-yr-avg-mort 2010, :end-yr-avg-mort 2014, :last-proj-yr 2021 :first-proj-yr 2014}}
     {:witan/name :proj-intl-in-migrants
      :witan/version "1.0.0"
      :witan/type :function
@@ -196,7 +204,7 @@
     {:witan/name :project-deaths
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-mort/project-deaths-fixed-rates}
+     :witan/fn :ccm-mort/project-deaths}
     {:witan/name :remove-deaths
      :witan/version "1.0.0"
      :witan/type :function
@@ -216,9 +224,9 @@
        fert/combine-into-births-by-sex
        fert/calculate-historic-asfr
 
-       mort/project-deaths-from-fixed-rates
+       mort/project-deaths
        mort/calc-historic-asmr
-       mort/project-asmr-average-fixed
+       mort/project-asmr-1-0-0
 
        mig/project-domestic-in-migrants
        mig/project-domestic-out-migrants
