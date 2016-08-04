@@ -1,7 +1,6 @@
 (ns witan.models.dem.ccm.core.projection-loop
   (:require [schema.core :as s]
             [clojure.core.matrix.dataset :as ds]
-            [incanter.core :as i]
             [witan.workspace-api :refer [defworkflowfn defworkflowpred
                                          defworkflowoutput]]
             [witan.workspace-api.utils :as utils]
@@ -37,7 +36,7 @@
   [{:keys [historic-population]} _]
   (let [last-yr (reduce max (ds/column historic-population :year))
         _ (utils/property-holds? last-yr m-utils/year? (str last-yr " is not a year"))
-        last-yr-popn (i/query-dataset historic-population {:year last-yr})]
+        last-yr-popn (wds/select-from-ds historic-population {:year last-yr})]
     {:loop-year last-yr :latest-yr-popn last-yr-popn
      :population historic-population}))
 

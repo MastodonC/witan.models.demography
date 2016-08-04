@@ -3,7 +3,6 @@
             [clojure.walk :as walk]
             [clojure.java.io :as jio]
             [clojure.core.matrix.dataset :as ds]
-            [incanter.core :as i]
             [clojure.data.csv :as data-csv]
             [witan.models.load-data :as ld]
             [witan.models.dem.ccm.core.projection-loop :as core]
@@ -121,7 +120,7 @@
 
 (defn add-district-to-dataset-per-user-input
   [data gss-code]
-  (let [data-code (distinct (i/$ :gss-code data))]
+  (let [data-code (distinct (wds/subset-ds data :cols :gss-code))]
     (when (and (= 1 (count data-code))
                (= gss-code (first data-code)))
       (ds/add-column data :district

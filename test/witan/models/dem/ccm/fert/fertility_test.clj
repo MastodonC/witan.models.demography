@@ -2,7 +2,6 @@
   (:require [witan.models.dem.ccm.fert.fertility :refer :all]
             [witan.models.load-data :as ld]
             [clojure.test :refer :all]
-            [incanter.core :as i]
             [clojure.core.matrix.dataset :as ds]
             [witan.datasets :as wds]))
 
@@ -48,8 +47,8 @@
                               {:fert-rate :fert-rate-r})
           joined-hist-asfr (wds/join calc-hist-asfr r-output-hist-asfr
                                      [:gss-code :sex :age :year])]
-      (is (every? #(fp-equals? (i/sel joined-hist-asfr :rows % :cols :fert-rate)
-                               (i/sel joined-hist-asfr :rows % :cols :fert-rate-r)
+      (is (every? #(fp-equals? (wds/subset-ds joined-hist-asfr :rows % :cols :fert-rate)
+                               (wds/subset-ds joined-hist-asfr :rows % :cols :fert-rate-r)
                                0.0000000001)
                   (range (first (:shape joined-hist-asfr))))))))
 
@@ -63,8 +62,8 @@
                           project-asfr-finalyrhist-fixed
                           :initial-projected-fertility-rates
                           (wds/join proj-asfr-r [:gss-code :sex :age]))]
-      (is (every? #(fp-equals? (i/sel joined-asfr :rows % :cols :fert-rate-r)
-                               (i/sel joined-asfr :rows % :cols :fert-rate)
+      (is (every? #(fp-equals? (wds/subset-ds joined-asfr :rows % :cols :fert-rate-r)
+                               (wds/subset-ds joined-asfr :rows % :cols :fert-rate)
                                0.0000000001)
                   (range (first (:shape joined-asfr))))))))
 
@@ -79,8 +78,8 @@
                             project-births-from-fixed-rates
                             :births-by-age-sex-mother
                             (wds/join proj-births-r [:gss-code :sex :age :year]))]
-      (is (every? #(fp-equals? (i/sel joined-births :rows % :cols :births-r)
-                               (i/sel joined-births :rows % :cols :births)
+      (is (every? #(fp-equals? (wds/subset-ds joined-births :rows % :cols :births-r)
+                               (wds/subset-ds joined-births :rows % :cols :births)
                                0.00001)
                   (range (first (:shape joined-births))))))))
 
@@ -96,7 +95,7 @@
                                    (combine-into-births-by-sex params)
                                    :births
                                    (wds/join births-by-sex-r [:gss-code :sex]))]
-      (is (every? #(fp-equals? (i/sel joined-births-by-sex :rows % :cols :births-r)
-                               (i/sel joined-births-by-sex :rows % :cols :births)
+      (is (every? #(fp-equals? (wds/subset-ds joined-births-by-sex :rows % :cols :births-r)
+                               (wds/subset-ds joined-births-by-sex :rows % :cols :births)
                                0.00000001)
                   (range (first (:shape joined-births-by-sex))))))))

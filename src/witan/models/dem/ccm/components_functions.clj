@@ -1,9 +1,7 @@
 (ns witan.models.dem.ccm.components-functions
-  (:require [incanter.core :as i]
-            [clojure.core.matrix.dataset :as ds]
+  (:require [clojure.core.matrix.dataset :as ds]
             [witan.datasets :as wds]
             [schema.core :as s]
-            [incanter.stats :as st]
             [clojure.string :as str]
             [witan.workspace-api.utils :as utils]
             [witan.models.dem.ccm.models-utils :as m-utils]))
@@ -29,7 +27,7 @@
                                 (str end-yr-avg " is not a year"))
         (utils/property-holds?  #(>= % hist-latest-yr)
                                 "End year must be less than or equal to the latest year in the dataset"))
-    (-> (i/query-dataset historical-data
+    (-> (wds/select-from-ds historical-data
                          {:year {:$gte start-yr-avg
                                  :$lte end-yr-avg}})
         (ds/rename-columns {col-to-avg avg-name})
@@ -52,12 +50,13 @@
                                       (str end-yr-avg " is not a year"))
               (utils/property-holds?  #(>= % hist-latest-yr)
                                       "End year must be less than or equal to the latest year in the dataset"))
-        grouped-data (->> historical-data
-                          (#(i/query-dataset % {:year {:$gte start-yr-avg
-                                                       :$lte end-yr-avg}}))
-                          (i/$group-by [:sex :gss-code :age]))
+        grouped-data (-> historical-data
+                         (wds/select-from-ds {:year {:$gte start-yr-avg
+                                                     :$lte end-yr-avg}})
+                         (wds/group-ds [:sex :gss-code :age]))
         lm (map (fn [[k v]]
-                  (:coefs (st/linear-model (i/$ trend-col v) (i/$ :year v))))
+                  (:coefs (wds/linear-model (wds/subset-ds v :cols trend-col)
+                                            (wds/subset-ds v :cols :year))))
                 grouped-data)
         assoc-coefs (mapv (fn [[k v] i]
                             (assoc k
@@ -113,7 +112,7 @@
    and last years of projection, and keyword with the scenario :low, :principal or :high."
   [future-rates-trend-assumption first-proj-year last-proj-year scenario]
   (-> future-rates-trend-assumption
-      (i/query-dataset {:year {:$gte first-proj-year :$lte last-proj-year}})
+      (wds/select-from-ds {:year {:$gte first-proj-year :$lte last-proj-year}})
       (ds/select-columns [:sex :age :year scenario])
       (ds/rename-columns {scenario :national-trend})
       (order-ds [:sex :age :year])
@@ -147,7 +146,7 @@
     (order-ds (:accumulator
                (reduce (fn [{:keys [accumulator last-calculated]} current-yr]
                          (let [projection-this-yr (-> proportional-differences
-                                                      (i/query-dataset {:year current-yr})
+                                                      (wds/select-from-ds {:year current-yr})
                                                       (wds/join last-calculated [:sex :age])
                                                       (wds/add-derived-column assumption-col
                                                                               [assumption-col :prop-diff]
@@ -164,7 +163,7 @@
 (defn project-component
   [population-at-risk rates loop-year col-rates col-result]
   (-> rates
-      (i/query-dataset {:year loop-year})
+      (wds/select-from-ds {:year loop-year})
       (wds/join population-at-risk [:gss-code :age :sex])
       (wds/add-derived-column col-result [col-rates :popn-at-risk] *)
       (ds/select-columns [:gss-code :sex :age :year col-result])))
