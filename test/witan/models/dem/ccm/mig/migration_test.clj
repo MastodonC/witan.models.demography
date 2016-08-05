@@ -3,7 +3,6 @@
             [witan.models.load-data :as ld]
             [clojure.test :refer :all]
             [clojure.core.matrix.dataset :as ds]
-            [incanter.core :as i]
             [witan.datasets :as wds]))
 
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
@@ -42,7 +41,7 @@
                          combine-into-net-flows
                          :net-migration
                          (wds/join net-mig-r [:gss-code :sex :age]))]
-      (is (every? #(fp-equals? (i/sel joined-mig :rows % :cols :net-mig-r)
-                               (i/sel joined-mig :rows % :cols :net-mig)
+      (is (every? #(fp-equals? (wds/subset-ds joined-mig :rows % :cols :net-mig-r)
+                               (wds/subset-ds joined-mig :rows % :cols :net-mig)
                                0.0000000001)
                   (range (first (:shape joined-mig))))))))

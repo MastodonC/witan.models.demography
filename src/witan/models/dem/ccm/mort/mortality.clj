@@ -6,8 +6,7 @@
             [witan.workspace-api.utils :as utils]
             [witan.models.dem.ccm.models-utils :as m-utils]
             [clojure.core.matrix.dataset :as ds]
-            [schema.core :as s]
-            [incanter.core :as i]))
+            [schema.core :as s]))
 
 (defn create-popn-at-risk-death
   "Creates population at risk for calculating historic age specific mortality rates.
@@ -20,7 +19,7 @@
         _ (utils/property-holds? max-yr-deaths m-utils/year? (str max-yr-deaths " is not a year"))
         popn-not-age-0 (-> popn-ds
                            (ds/emap-column :year inc)
-                           (i/query-dataset {:year {:$lte max-yr-deaths}})
+                           (wds/select-from-ds {:year {:$lte max-yr-deaths}})
                            (ds/emap-column :age (fn [v] (if (< v 90) (inc v) v)))
                            (wds/rollup :sum :popn [:gss-code :sex :age :year])
                            (ds/rename-columns {:popn :popn-at-risk}))]

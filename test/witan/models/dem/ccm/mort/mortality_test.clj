@@ -2,7 +2,6 @@
   (:require [witan.models.dem.ccm.mort.mortality :refer :all]
             [witan.models.load-data :as ld]
             [clojure.test :refer :all]
-            [incanter.core :as i]
             [clojure.core.matrix.dataset :as ds]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.core.projection-loop-test :as plt]))
@@ -65,8 +64,8 @@
                           calc-historic-asmr
                           :historic-asmr
                           (wds/join hist-asmr-r [:gss-code :sex :age :year]))]
-      (is (every? #(fp-equals? (i/sel joined-asmr :rows % :cols :death-rate-r)
-                               (i/sel joined-asmr :rows % :cols :death-rate)
+      (is (every? #(fp-equals? (wds/subset-ds joined-asmr :rows % :cols :death-rate-r)
+                               (wds/subset-ds joined-asmr :rows % :cols :death-rate)
                                0.0000000001)
                   (range (first (:shape joined-asmr))))))))
 
@@ -92,8 +91,8 @@
           joined-proj-asmr (wds/join proj-asmr-avg-applynationaltrend-r
                                      projected-asmr-clj
                                      [:gss-code :sex :age :year])]
-      (is (every? #(fp-equals? (i/sel joined-proj-asmr :rows % :cols :death-rate)
-                               (i/sel joined-proj-asmr :rows % :cols :death-rate-r)
+      (is (every? #(fp-equals? (wds/subset-ds joined-proj-asmr :rows % :cols :death-rate)
+                               (wds/subset-ds joined-proj-asmr :rows % :cols :death-rate-r)
                                0.0000001)
                   (range (first (:shape joined-proj-asmr))))))))
 
@@ -105,8 +104,8 @@
                             :deaths)
         joined-proj-deaths (wds/join proj-deaths-fixed-r proj-deaths-clj
                                      [:gss-code :sex :age :year])]
-    (is (every? #(fp-equals? (i/sel joined-proj-deaths :rows % :cols :deaths-r)
-                             (i/sel joined-proj-deaths :rows % :cols :deaths)
+    (is (every? #(fp-equals? (wds/subset-ds joined-proj-deaths :rows % :cols :deaths-r)
+                             (wds/subset-ds joined-proj-deaths :rows % :cols :deaths)
                              0.0000001)
                 (range (first (:shape joined-proj-deaths)))))))
 
@@ -120,7 +119,7 @@
                             :deaths)
         joined-proj-deaths (wds/join proj-deaths-national-trend-r proj-deaths-clj
                                      [:gss-code :sex :age :year])]
-    (is (every? #(fp-equals? (i/sel joined-proj-deaths :rows % :cols :deaths-r)
-                             (i/sel joined-proj-deaths :rows % :cols :deaths)
+    (is (every? #(fp-equals? (wds/subset-ds joined-proj-deaths :rows % :cols :deaths-r)
+                             (wds/subset-ds joined-proj-deaths :rows % :cols :deaths)
                              0.0000001)
                 (range (first (:shape joined-proj-deaths)))))))

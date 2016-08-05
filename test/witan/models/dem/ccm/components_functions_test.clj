@@ -1,7 +1,6 @@
 (ns witan.models.dem.ccm.components-functions-test
   (:require [witan.models.dem.ccm.components-functions :refer :all]
             [clojure.test :refer :all]
-            [incanter.core :as i]
             [witan.models.load-data :as ld]
             [witan.datasets :as wds]))
 
@@ -41,29 +40,29 @@
           clj-results (jumpoffyr-method-average (:domestic-in-migrants migration-data)
                                                 :domin :domestic-in 2003 2014)
           joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
-      (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :domin)
-                               (i/sel joined-averages :rows % :cols :domestic-in) 0.0000000001)
+      (is (every? #(fp-equals? (wds/subset-ds joined-averages :rows % :cols :domin)
+                               (wds/subset-ds joined-averages :rows % :cols :domestic-in) 0.0000000001)
                   (range (first (:shape joined-averages))))))
     (let [r-results (:dom-out-averages dom-out-averages)
           clj-results (jumpoffyr-method-average (:domestic-out-migrants migration-data)
                                                 :domout :domestic-out 2003 2014)
           joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
-      (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :domout)
-                               (i/sel joined-averages :rows % :cols :domestic-out) 0.0000000001)
+      (is (every? #(fp-equals? (wds/subset-ds joined-averages :rows % :cols :domout)
+                               (wds/subset-ds joined-averages :rows % :cols :domestic-out) 0.0000000001)
                   (range (first (:shape joined-averages))))))
     (let [r-results (:inter-out-averages inter-out-averages)
           clj-results (jumpoffyr-method-average (:international-out-migrants migration-data)
                                                 :intout :international-out 2003 2014)
           joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
-      (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :intout)
-                               (i/sel joined-averages :rows % :cols :international-out) 0.0000000001)
+      (is (every? #(fp-equals? (wds/subset-ds joined-averages :rows % :cols :intout)
+                               (wds/subset-ds joined-averages :rows % :cols :international-out) 0.0000000001)
                   (range (first (:shape joined-averages))))))
     (let [r-results (:inter-in-averages inter-in-averages)
           clj-results (jumpoffyr-method-average (:international-in-migrants migration-data)
                                                 :intin :international-in 2003 2014)
           joined-averages (wds/join r-results clj-results [:gss-code :sex :age])]
-      (is (every? #(fp-equals? (i/sel joined-averages :rows % :cols :intin)
-                               (i/sel joined-averages :rows % :cols :international-in) 0.0000000001)
+      (is (every? #(fp-equals? (wds/subset-ds joined-averages :rows % :cols :intin)
+                               (wds/subset-ds joined-averages :rows % :cols :international-in) 0.0000000001)
                   (range (first (:shape joined-averages))))))))
 
 (deftest jumpoffyr-method-trend-test
@@ -72,6 +71,6 @@
           clj-results (jumpoffyr-method-trend (:domestic-in-migrants migration-data)
                                               :domin :domestic-in-clj 2003 2014)
           joined-trends (wds/join r-results clj-results [:gss-code :sex :age])]
-      (is (every? #(fp-equals? (i/sel joined-trends :rows % :cols :domestic-in)
-                               (i/sel joined-trends :rows % :cols :domestic-in-clj) 0.0000001)
+      (is (every? #(fp-equals? (wds/subset-ds joined-trends :rows % :cols :domestic-in)
+                               (wds/subset-ds joined-trends :rows % :cols :domestic-in-clj) 0.0000001)
                   (range (first (:shape joined-trends))))))))

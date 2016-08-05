@@ -89,15 +89,15 @@
 
 (deftest run-workspace-test
   (testing "The historical and projection data is returned"
-    (let [proj-bristol-2015 (i/query-dataset (run-workspace datasets gss-bristol params-2015)
-                                             {:year 2015})
+    (let [proj-bristol-2015 (wds/select-from-ds (run-workspace datasets gss-bristol params-2015)
+                                                {:year 2015})
           r-proj-bristol-2015 (ds/rename-columns (:end-population r-output-2015)
                                                  {:popn :popn-r})
           joined-ds (wds/join proj-bristol-2015 r-proj-bristol-2015 [:gss-code :sex :age :year])]
       (is proj-bristol-2015)
       (is (= (:shape proj-bristol-2015) (:shape r-proj-bristol-2015)))
-      (is (every? #(fp-equals? (i/sel joined-ds :rows % :cols :popn)
-                               (i/sel joined-ds :rows % :cols :popn-r) 0.0000000001)
+      (is (every? #(fp-equals? (wds/subset-ds joined-ds :rows % :cols :popn)
+                               (wds/subset-ds joined-ds :rows % :cols :popn-r) 0.0000000001)
                   (range (first (:shape joined-ds))))))))
 
 (deftest get-district-test
@@ -114,6 +114,6 @@
   (testing "district column added to dataset and populated"
     (let [district-added (add-district-to-dataset-per-user-input input-data-set "E06000023")
           joined-data (wds/join district-added output-data-set [:gss-code :year])]
-      (is (every? #(= (i/sel joined-data :rows % :cols :district)
-                      (i/sel joined-data :rows % :cols :district-out))
+      (is (every? #(= (wds/subset-ds joined-data :rows % :cols :district)
+                      (wds/subset-ds joined-data :rows % :cols :district-out))
                   (range (first (:shape joined-data))))))))

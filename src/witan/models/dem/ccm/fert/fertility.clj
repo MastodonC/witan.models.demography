@@ -4,7 +4,6 @@
             [clojure.core.matrix.dataset :as ds]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.schemas :refer :all]
-            [incanter.core :as i]
             [schema.core :as s]
             [witan.workspace-api.utils :as utils]
             [witan.models.dem.ccm.models-utils :as m-utils]))
@@ -14,7 +13,7 @@
   fertility rates. Takes in the historic population and a base year."
   [historic-population base-year]
   (-> historic-population
-      (i/query-dataset {:year (dec base-year)})
+      (wds/select-from-ds {:year (dec base-year)})
       (ds/rename-columns {:popn :popn-at-risk})))
 
 (defn calc-asfr-birth-data-yr
@@ -48,7 +47,7 @@
   and gss-code."
   [historic-births fert-base-yr]
   (-> historic-births
-      (i/query-dataset {:year fert-base-yr})
+      (wds/select-from-ds {:year fert-base-yr})
       (wds/rollup :sum :births [:gss-code :year])
       (ds/rename-columns {:births :actual-births})))
 
@@ -118,7 +117,7 @@
   [{:keys [historic-asfr]} _]
   (let [final-yr (reduce max (ds/column historic-asfr :year))
         _ (utils/property-holds? final-yr m-utils/year? (str final-yr " is not a year"))
-        final-yr-hist (i/query-dataset historic-asfr {:year final-yr})]
+        final-yr-hist (wds/select-from-ds historic-asfr {:year final-yr})]
     {:initial-projected-fertility-rates
      (ds/select-columns final-yr-hist [:gss-code :sex :age :fert-rate])}))
 

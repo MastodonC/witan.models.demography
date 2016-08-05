@@ -2,7 +2,6 @@
   (:require [clojure.test :refer :all]
             [witan.models.dem.ccm.core.projection-loop :refer :all]
             [clojure.core.matrix.dataset :as ds]
-            [incanter.core :as i]
             [witan.models.load-data :as ld]
             [witan.datasets :as wds]
             [witan.models.dem.ccm.fert.fertility :as fert]
@@ -88,14 +87,14 @@
 
 ;;get sum of population for particular year & age group in dataset with :popn column
 (def sum-popn (fn [popn year age]
-                (apply + (ds/column (i/query-dataset popn {:year year :age age}) :popn))))
+                (apply + (ds/column (wds/select-from-ds popn {:year year :age age}) :popn))))
 
 ;;returns a vector
 (def get-popn (fn
                 ([ds col-name age sex]
-                 (ds/column (i/query-dataset ds {:age age :sex sex}) col-name))
+                 (ds/column (wds/select-from-ds ds {:age age :sex sex}) col-name))
                 ([ds col-name year age sex]
-                 (ds/column (i/query-dataset ds {:year year :age age :sex sex}) col-name))))
+                 (ds/column (wds/select-from-ds ds {:year year :age age :sex sex}) col-name))))
 
 ;; Tests:
 (deftest select-starting-popn-test
@@ -105,12 +104,12 @@
                       (ds/column-names (:latest-yr-popn get-start-popn))))
       (is (true? (every? #(= % 2015) (ds/column (:latest-yr-popn get-start-popn) :year))))
       ;; Total number of 15 yrs old in 2015:
-      (is (= 4386.0 (apply + (ds/column (i/query-dataset (:latest-yr-popn get-start-popn)
-                                                         {:year 2015 :age 15}) :popn))))
+      (is (= 4386.0 (apply + (ds/column (wds/select-from-ds (:latest-yr-popn get-start-popn)
+                                                            {:year 2015 :age 15}) :popn))))
       ;; Total number of women aged between 40 and 43 in 2015:
-      (is (= 5394.0 (apply + (ds/column (i/query-dataset (:latest-yr-popn get-start-popn)
-                                                         {:sex "F" :age {:$gt 40 :lt 43}
-                                                          :year 2015}) :popn)))))))
+      (is (= 5394.0 (apply + (ds/column (wds/select-from-ds (:latest-yr-popn get-start-popn)
+                                                            {:sex "F" :age {:$gt 40 :lt 43}
+                                                             :year 2015}) :popn)))))))
 
 (deftest age-on-test
   (testing "Popn is aged on correctly, 90 grouping is handled correctly."
@@ -121,7 +120,7 @@
              (sum-popn aged-popn 2015 16)))
       (is (= (+ (sum-popn starting-popn 2015 89) (sum-popn starting-popn 2015 90))
              (sum-popn aged-popn 2015 90)))
-      (is (= 2 (first (:shape (i/query-dataset aged-popn {:year 2015 :age 90}))))))))
+      (is (= 2 (first (:shape (wds/select-from-ds aged-popn {:year 2015 :age 90}))))))))
 
 (deftest add-births-test
   (testing "Newborns are correctly added to projection year popn."
@@ -132,7 +131,7 @@
                            add-births)
           popn-with-births (:latest-yr-popn births-added)
           latest-yr (:loop-year births-added)
-          latest-newborns (i/query-dataset popn-with-births {:year latest-yr :age 0})]
+          latest-newborns (wds/select-from-ds popn-with-births {:year latest-yr :age 0})]
       (is (= 2 (first (:shape latest-newborns))))
       (is (fp-equals? (+ 3189.57438270303 3349.0531018318)
                       (#(apply + (ds/column % :popn)) latest-newborns) 0.0001)))))
