@@ -2,7 +2,7 @@
 
 [![Build Status](https://circleci.com/gh/MastodonC/witan.models.demography.svg?style=shield)](https://circleci.com/gh/MastodonC/witan.models.demography) [![Dependencies Status](https://jarkeeper.com/MastodonC/witan.models.demography/status.svg)](https://jarkeeper.com/MastodonC/witan.models.demography)
 
-Table of content:
+## Table of content:
 
 * [Description](#description)
 
@@ -35,19 +35,19 @@ See the [docs](https://github.com/MastodonC/witan.models.demography/blob/master/
 
 ### General practices
 
-If you wish to contribute to `witan.models.demography`, please follow read the following guidelines.
+If you wish to contribute to `witan.models.demography`, please read the following guidelines.
 
 #### Github guidelines
-* **Fork this repository** (or clone it if you have writing writes to the reposotory).
+* **Fork this repository** (or clone it if you have writing rights to the reposotory).
 * **Create a new branch**. Let's try and keep the following naming conventions for branches:
-  * `feature/<what-this-branch-solves>`, example: `feature/exception-logging`
+  * `feature/<what-this-branch-solves>`, example: `feature/project-mortality-rates`
   * `doc/<what-this-branch-solves>`, example: `doc/contributors-practices`
   * `fix/<what-this-branch-solves>`, example: `fix/run-ccm-from-cli`
   * `tidy-up/<what-this-branch-solves>`, example: `tidy-up/upgrade-deps`
 
   This way, when you see a branch starting by `fix/` we know something is broken and someone is repairing it.
 * **Keep branches short** so that the reviewing process is easier and faster
-* Start a pull request (PR) as earlier as possible. You can add a `WIP` in the title to specify it's in progress.
+* Start a pull request (PR) as early as possible. You can add a `WIP` in the title to specify it's in progress.
 * Describe the aim of your changes in the PR description box.
 * Before asking for a review of your PR:
   * **run all the tests** from the commmand line with `$ lein test`
@@ -60,7 +60,7 @@ If you wish to contribute to `witan.models.demography`, please follow read the f
 #### Coding guidelines
 
 * Write unit tests, docstrings, and documentation.
-* As much as possible try to not have data changes and code changes on the same branch or the same commit.
+* Try to not have data changes and code changes in the same commit, and preferably not the same branch, as the data tends to swamp the code and hinder reviewing.
 * Avoid modifying a file that is being modified on another branch.
 * Avoid changing the name of a file while someone is working on another branch.
 * We moved away from using Incanter library.
@@ -180,7 +180,6 @@ The geographical area for the projection must be specified. This is done with th
   * an English non-metropolitan district (starts with "E07")
   * an English metropolitan borough (starts with "E08")
   * a London borough (starts with "E09")
-  * Northern Ireland, Scotland, or Wales (country codes "N92000002", "S92000003", or "W92000004"; smaller geographies not yet available)
 
 #### input-config
 
