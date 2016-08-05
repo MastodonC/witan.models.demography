@@ -90,7 +90,7 @@
 (deftest run-workspace-test
   (testing "The historical and projection data is returned"
     (let [proj-bristol-2015 (wds/select-from-ds (run-workspace datasets gss-bristol params-2015)
-                                             {:year 2015})
+                                                {:year 2015})
           r-proj-bristol-2015 (ds/rename-columns (:end-population r-output-2015)
                                                  {:popn :popn-r})
           joined-ds (wds/join proj-bristol-2015 r-proj-bristol-2015 [:gss-code :sex :age :year])]

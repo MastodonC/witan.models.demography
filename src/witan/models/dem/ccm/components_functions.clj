@@ -28,8 +28,8 @@
         (utils/property-holds?  #(>= % hist-latest-yr)
                                 "End year must be less than or equal to the latest year in the dataset"))
     (-> (wds/select-from-ds historical-data
-                         {:year {:$gte start-yr-avg
-                                 :$lte end-yr-avg}})
+                            {:year {:$gte start-yr-avg
+                                    :$lte end-yr-avg}})
         (ds/rename-columns {col-to-avg avg-name})
         (wds/rollup :mean avg-name [:gss-code :sex :age]))))
 
