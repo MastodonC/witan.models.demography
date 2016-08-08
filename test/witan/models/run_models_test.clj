@@ -16,21 +16,21 @@
 
 ;; Load testing data
 (def datasets  {:ons-proj-births-by-age-mother
-                "./datasets/default_datasets/fertility/proj-births-by-age-mother.csv"
+                "./datasets/default_datasets/fertility/historic_births_by_age_of_mother.csv"
                 :historic-births
                 "./datasets/default_datasets/fertility/historic_births.csv"
                 :historic-population
-                "./datasets/default_datasets/core/historic-population.csv"
+                "./datasets/default_datasets/core/historic_population.csv"
                 :historic-deaths
                 "./datasets/default_datasets/mortality/historic_deaths.csv"
                 :domestic-in-migrants
-                "./datasets/default_datasets/migration/domestic_in_migrants.csv"
+                "./datasets/default_datasets/migration/historic_migration_flows_domestic_in.csv"
                 :domestic-out-migrants
-                "./datasets/default_datasets/migration/domestic_out_migrants.csv"
+                "./datasets/default_datasets/migration/historic_migration_flows_domestic_out.csv"
                 :international-in-migrants
-                "./datasets/default_datasets/migration/international_in_migrants.csv"
+                "./datasets/default_datasets/migration/historic_migration_flows_international_in.csv"
                 :international-out-migrants
-                "./datasets/default_datasets/migration/international_out_migrants.csv"
+                "./datasets/default_datasets/migration/historic_migration_flows_international_out.csv"
                 :future-mortality-trend-assumption
                 "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"})
 
@@ -60,7 +60,7 @@
     (let [dataset (:ons-proj-births-by-age-mother
                    (get-dataset
                     :ons-proj-births-by-age-mother
-                    "./datasets/default_datasets/fertility/proj-births-by-age-mother.csv"
+                    "./datasets/default_datasets/fertility/historic_births_by_age_of_mother.csv"
                     "E06000023"))
           gss-dataset (i/$ :gss-code dataset)]
       (is (true?

@@ -37,7 +37,6 @@ The geographical area for the projection must be specified. This is done with th
   * an English non-metropolitan district (starts with "E07")
   * an English metropolitan borough (starts with "E08")
   * a London borough (starts with "E09")
-  * Northern Ireland, Scotland, or Wales (country codes "N92000002", "S92000003", or "W92000004"; smaller geographis not yet available)
   
 
 ## Data inputs
