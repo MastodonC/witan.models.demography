@@ -75,7 +75,7 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-fert/calc-hist-asfr
-     :witan/params {:fert-last-yr 2014}}
+     :witan/params {:fert-base-yr 2014}}
     {:witan/name :calc-hist-asmr
      :witan/version "1.0.0"
      :witan/type :function
@@ -164,7 +164,7 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-fert/project-asfr-finalyrhist-fixed
-     :witan/params {:fert-last-yr 2014, :start-yr-avg-fert 2014, :end-yr-avg-fert 2014}}
+     :witan/params {:fert-base-yr 2014, :start-yr-avg-fert 2014, :end-yr-avg-fert 2014}}
     {:witan/name :project-asmr
      :witan/version "1.0.0"
      :witan/type :function
@@ -192,8 +192,7 @@
     {:witan/name :project-births
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-fert/births-projection
-     :witan/params {:proportion-male-newborns 0.5121951219512195}}
+     :witan/fn :ccm-fert/project-births-fixed-rates}
     {:witan/name :project-deaths
      :witan/version "1.0.0"
      :witan/type :function
