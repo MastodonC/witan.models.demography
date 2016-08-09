@@ -5,7 +5,7 @@
 
 The aim of `witan.models.demography` is to offer "generic" models in the sense that our models will be adaptable to different methodologies and data inputs. To learn more about the methodology, see the [modelling docs](intro.md). To learn more about the data inputs currently being used, jump to the [data inputs](#data-inputs) section.
 
-A minimal version of the population projection is now available for English unitary authorities, non-metropolitan districts, and boroughs. Projections are also available for the countries of Northern Ireland, Scotland, and Wales. 
+A minimal version of the population projection is now available for English unitary authorities, non-metropolitan districts, and boroughs.
 
 ## Running a population projection
 
