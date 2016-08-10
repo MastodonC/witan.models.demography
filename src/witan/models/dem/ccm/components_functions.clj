@@ -25,7 +25,7 @@
     (-> end-yr-avg
         (utils/property-holds?  m-utils/year?
                                 (str end-yr-avg " is not a year"))
-        (utils/property-holds?  #(>= % hist-latest-yr)
+        (utils/property-holds?  #(<= % hist-latest-yr)
                                 "End year must be less than or equal to the latest year in the dataset"))
     (-> (wds/select-from-ds historical-data
                             {:year {:$gte start-yr-avg
@@ -48,7 +48,7 @@
         _ (-> end-yr-avg
               (utils/property-holds?  m-utils/year?
                                       (str end-yr-avg " is not a year"))
-              (utils/property-holds?  #(>= % hist-latest-yr)
+              (utils/property-holds?  #(<= % hist-latest-yr)
                                       "End year must be less than or equal to the latest year in the dataset"))
         grouped-data (-> historical-data
                          (wds/select-from-ds {:year {:$gte start-yr-avg
