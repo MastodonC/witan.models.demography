@@ -58,31 +58,31 @@
                                 :params {:last-proj-yr 2021}}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Inputs
-   :in-hist-popn                  {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-hist-popn                  {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"
                                             :key :historic-population}}
-   :in-hist-total-births          {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-hist-total-births          {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
                                             :key :historic-births}}
-   :in-future-mort-trend          {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-future-mort-trend          {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"
                                             :key :future-mortality-trend-assumption}}
-   :in-proj-births-by-age-of-mother  {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-proj-births-by-age-of-mother  {:var #'witan.models.load-data/resource-csv-loader
                                       :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
                                                :key :ons-proj-births-by-age-mother}}
-   :in-hist-deaths-by-age-and-sex {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-hist-deaths-by-age-and-sex {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"
                                             :key :historic-deaths}}
-   :in-hist-dom-in-migrants       {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-hist-dom-in-migrants       {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
                                             :key :domestic-in-migrants}}
-   :in-hist-dom-out-migrants      {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-hist-dom-out-migrants      {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
                                             :key :domestic-out-migrants}}
-   :in-hist-intl-in-migrants      {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-hist-intl-in-migrants      {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
                                             :key :international-in-migrants}}
-   :in-hist-intl-out-migrants     {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-hist-intl-out-migrants     {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"
                                             :key :international-out-migrants}}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
