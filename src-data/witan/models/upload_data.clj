@@ -12,20 +12,24 @@
 
 (defn upload-file
   [dir bucket file]
-  (when (and (not (.isDirectory file))
-             (re-find filename-regex (str file)))
-    (let [name (->>
-                (str/replace (str file) (str dir) "")
-                (str default-folder))]
-      (println "Uploading" (str file) "to" name)
-      (aws/put-object {:profile default-profile}
-                      :bucket-name bucket
-                      :key name
-                      :file file))))
+  (let [name (->>
+              (str/replace (str file) (str dir) "")
+              (str default-folder))]
+    (println "Uploading" (str file) "to" name)
+    (aws/put-object {:profile default-profile}
+                    :bucket-name bucket
+                    :key name
+                    :file file)))
+
+(defn valid?
+  [file]
+  (and (not (.isDirectory file))
+       (re-find filename-regex (str file))))
 
 (defn -main
   "Uploads the data to S3"
   []
   (let [dir (clojure.java.io/file default-directory)
-        files (file-seq dir)]
-    (run! (partial upload-file dir default-bucket) files)))
+        files (file-seq dir)
+        valid-files (filter valid? files)]
+    (run! (partial upload-file dir default-bucket) valid-files)))
