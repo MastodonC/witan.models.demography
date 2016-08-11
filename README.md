@@ -191,6 +191,15 @@ The [default config file](https://github.com/MastodonC/witan.models.demography/b
 
 This is the path to the file where the final projection should be saved. The projections are returned in one csv file. This file contains the historical population data used in the projection, with the projected population appended. The output path can be anywhere on your machine as long as the directories on the path exist.
 
+## Uploading data
+
+To upload all the default datasets to S3, use
+
+```
+lein upload
+```
+
+This assumes a valid AWS profile, called 'witan', is installed.
 
 ## License
 
