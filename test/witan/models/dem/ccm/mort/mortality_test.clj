@@ -55,7 +55,8 @@
              :first-proj-yr 2015
              :last-proj-yr 2017
              :mort-scenario :principal
-             :mort-last-yr 2014})
+             :mort-last-yr 2014
+             :variant :average-fixed})
 
 (deftest calc-historic-asmr-test
   (testing "Death rates are calculated correctly."
@@ -69,11 +70,11 @@
                                0.0000000001)
                   (range (first (:shape joined-asmr))))))))
 
-(deftest project-asmr-average-fixed-test
+(deftest project-asmr-1-0-0-test
   (testing "mortality rates projected correctly"
     (let [projected-asmr (-> hist-asmr-inputs
                              calc-historic-asmr
-                             (project-asmr-average-fixed params)
+                             (project-asmr-1-0-0 params)
                              :initial-projected-mortality-rates)]
       (is (fp-equals? 2.049763E-03
                       (nth (plt/get-popn projected-asmr :death-rate 0 "F") 0)
@@ -86,7 +87,8 @@
   (testing "mortality rates projected correctly"
     (let [projected-asmr-clj (-> hist-asmr-inputs
                                  calc-historic-asmr
-                                 (project-asmr-average-applynationaltrend params)
+                                 (project-asmr-1-1-0
+                                  (assoc params :variant :average-applynationaltrend))
                                  :initial-projected-mortality-rates)
           joined-proj-asmr (wds/join proj-asmr-avg-applynationaltrend-r
                                      projected-asmr-clj
@@ -99,8 +101,9 @@
 (deftest project-deaths-from-fixed-rates-test
   (let [proj-deaths-clj (-> hist-asmr-inputs
                             calc-historic-asmr
-                            (project-asmr-average-fixed params)
-                            project-deaths-from-fixed-rates
+                            (project-asmr-1-0-0 params)
+                            (assoc :loop-year 2017)
+                            project-deaths
                             :deaths)
         joined-proj-deaths (wds/join proj-deaths-fixed-r proj-deaths-clj
                                      [:gss-code :sex :age :year])]
@@ -112,7 +115,7 @@
 (deftest project-deaths-test
   (let [death-rates (-> hist-asmr-inputs
                         calc-historic-asmr
-                        (project-asmr-average-applynationaltrend params))
+                        (project-asmr-1-1-0 (assoc params :variant :average-applynationaltrend)))
         proj-deaths-clj (-> death-rates
                             (merge proj-death-inputs)
                             project-deaths

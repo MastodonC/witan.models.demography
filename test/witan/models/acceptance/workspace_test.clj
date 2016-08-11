@@ -21,7 +21,7 @@
    :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-finalyrhist-fixed}
    :join-popn-latest-yr        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-yr}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
-   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths-from-fixed-rates}
+   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths}
    :proj-dom-in-migrants       {:var #'witan.models.dem.ccm.mig.migration/project-domestic-in-migrants
                                 :params {:start-yr-avg-domin-mig 2003
                                          :end-yr-avg-domin-mig 2014}}
@@ -34,9 +34,11 @@
    :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-from-fixed-rates}
    :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility/combine-into-births-by-sex
                                 :params {:proportion-male-newborns (double (/ 105 205))}}
-   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-average-fixed
+   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-1-0-0
                                 :params {:start-yr-avg-mort 2010
-                                         :end-yr-avg-mort 2014}}
+                                         :end-yr-avg-mort 2014
+                                         :last-proj-yr 2021
+                                         :first-proj-yr 2014}}
    :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
    :prepare-starting-popn      {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs}
    :calc-hist-asfr             {:var #'witan.models.dem.ccm.fert.fertility/calculate-historic-asfr
@@ -53,7 +55,7 @@
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Predicates
    :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?
-                                :params {:last-proj-year 2021}}
+                                :params {:last-proj-yr 2021}}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Inputs
    :in-hist-popn                  {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
@@ -62,6 +64,9 @@
    :in-hist-total-births          {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
                                             :key :historic-births}}
+   :in-future-mort-trend          {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+                                   :params {:src "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"
+                                            :key :future-mortality-trend-assumption}}
    :in-proj-births-by-age-of-mother  {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
                                       :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
                                                :key :ons-proj-births-by-age-mother}}

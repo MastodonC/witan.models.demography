@@ -55,7 +55,56 @@
        (calc-death-rates historic-deaths)
        (hash-map :historic-asmr)))
 
-(defworkflowfn project-asmr-average-fixed
+(defn project-asmr [{:keys [historic-asmr future-mortality-trend-assumption]}
+                    {:keys [start-yr-avg-mort end-yr-avg-mort variant first-proj-yr
+                            last-proj-yr mort-scenario mort-last-yr]}]
+  (case variant
+    :average-fixed {:initial-projected-mortality-rates
+                    (-> (cf/jumpoffyr-method-average historic-asmr
+                                                     :death-rate
+                                                     :death-rate
+                                                     start-yr-avg-mort
+                                                     end-yr-avg-mort)
+                        (cf/add-years-to-fixed-methods first-proj-yr
+                                                       last-proj-yr)
+                        (ds/select-columns [:gss-code :sex :age :year :death-rate]))}
+    :trend-fixed {:initial-projected-mortality-rates
+                  (-> (cf/jumpoffyr-method-trend historic-asmr
+                                                 :death-rate
+                                                 :death-rate
+                                                 start-yr-avg-mort
+                                                 end-yr-avg-mort)
+                      (cf/add-years-to-fixed-methods first-proj-yr
+                                                     last-proj-yr)
+                      (ds/select-columns [:gss-code :sex :age :year :death-rate]))}
+    :average-applynationaltrend (let [projected-rates-jumpoffyr
+                                      (cf/jumpoffyr-method-average historic-asmr
+                                                                   :death-rate
+                                                                   :death-rate
+                                                                   start-yr-avg-mort
+                                                                   end-yr-avg-mort)]
+                                  {:initial-projected-mortality-rates
+                                   (cf/apply-national-trend projected-rates-jumpoffyr
+                                                            future-mortality-trend-assumption
+                                                            first-proj-yr
+                                                            last-proj-yr
+                                                            mort-scenario
+                                                            :death-rate)})
+    :trend-applynationaltrend (let [projected-rates-jumpoffyr
+                                    (cf/jumpoffyr-method-trend historic-asmr
+                                                               :death-rate
+                                                               :death-rate
+                                                               start-yr-avg-mort
+                                                               end-yr-avg-mort)]
+                                {:initial-projected-mortality-rates
+                                 (cf/apply-national-trend projected-rates-jumpoffyr
+                                                          future-mortality-trend-assumption
+                                                          first-proj-yr
+                                                          last-proj-yr
+                                                          mort-scenario
+                                                          :death-rate)})))
+
+(defworkflowfn project-asmr-1-0-0
   "Takes a dataset with historic mortality rates, and parameters for
   the number of years of data to average for the calculation, and the
   jumpoff year. Returns a dataset that now includes projected
@@ -63,67 +112,45 @@
   docs)"
   {:witan/name :ccm-mort/project-asmr
    :witan/version "1.0.0"
-   :witan/input-schema {:historic-asmr HistASMRSchema}
-   :witan/param-schema {:start-yr-avg-mort s/Int :end-yr-avg-mort s/Int}
-   :witan/output-schema {:initial-projected-mortality-rates ProjFixedASMRSchema}
-   :witan/exported? true}
-  [{:keys [historic-asmr]} {:keys [start-yr-avg-mort end-yr-avg-mort]}]
-  {:initial-projected-mortality-rates (cf/jumpoffyr-method-average historic-asmr
-                                                                   :death-rate
-                                                                   :death-rate
-                                                                   start-yr-avg-mort
-                                                                   end-yr-avg-mort)})
-
-(defworkflowfn project-asmr-average-applynationaltrend
-  "Takes a dataset with projected death rates for the future, a dataset with
-  historic mortality rates, and parameters for: first projection year, last
-  projection year, the scenario to use in the future rates dataset (e.g. :low,
-  :principal or :high), the start and end  years of data to average for the calculation,
-  and the last year of mortality data. Returns a dataset that now includes projected
-  mortality rates, projected with the jumpoff year average method combined with an
-  applied national trend (see docs)"
-  {:witan/name :ccm-mort/project-asmr-average-applynationaltrend
-   :witan/version "1.0.0"
    :witan/input-schema {:historic-asmr HistASMRSchema
                         :future-mortality-trend-assumption NationalTrendsSchema}
-   :witan/param-schema {:start-yr-avg-mort (s/constrained s/Int m-utils/year?)
-                        :end-yr-avg-mort (s/constrained s/Int m-utils/year?)
+   :witan/param-schema {:start-yr-avg-mort s/Int
+                        :end-yr-avg-mort s/Int
+                        :last-proj-yr s/Int
+                        :first-proj-yr s/Int}
+   :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
+   :witan/exported? true}
+  [inputs params]
+  (project-asmr inputs (assoc params
+                              :variant :average-fixed
+                              :mort-scenario :principal
+                              :mort-last-yr 1900)))
+
+(defworkflowfn project-asmr-1-1-0
+  "Takes a back series of age-specific mortality rates and a start and end year on which to
+  base calculation of the projected mortality rates in the first loop projection year from
+  the historic mortality rates (method dependent on average or trend jump off year method
+  variant). For projecting mortality rates in years following the first projection year up
+  until the last projection year: the fixed method applies the jump off year rates each
+  year; the apply national trend method requires a national trend dataset and a scenario to
+  use as the future mortality trend assumption, and generates variable rates for each year.
+  Outputs a dataset of projected age-specific mortality rates for each projection year"
+  {:witan/name :ccm-mort/project-asmr
+   :witan/version "1.1.0"
+   :witan/input-schema {:historic-asmr HistASMRSchema
+                        :future-mortality-trend-assumption NationalTrendsSchema}
+   :witan/param-schema {:start-yr-avg-mort s/Int
+                        :end-yr-avg-mort s/Int
+                        :variant (s/enum :average-fixed :trend-fixed
+                                         :average-applynationaltrend :trend-applynationaltrend)
                         :first-proj-yr (s/constrained s/Int m-utils/year?)
                         :last-proj-yr (s/constrained s/Int m-utils/year?)
                         :mort-scenario (s/enum :low :principal :high)
                         :mort-last-yr (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
-   :witan/exported? false}
-  [{:keys [historic-asmr future-mortality-trend-assumption]}
-   {:keys [start-yr-avg-mort end-yr-avg-mort first-proj-yr
-           last-proj-yr mort-scenario mort-last-yr]}]
-  (let [projected-rates-jumpoffyr (cf/jumpoffyr-method-average historic-asmr
-                                                               :death-rate
-                                                               :death-rate
-                                                               start-yr-avg-mort
-                                                               end-yr-avg-mort)]
-    {:initial-projected-mortality-rates (cf/apply-national-trend projected-rates-jumpoffyr
-                                                                 future-mortality-trend-assumption
-                                                                 first-proj-yr
-                                                                 last-proj-yr
-                                                                 mort-scenario
-                                                                 :death-rate)}))
-
-(defworkflowfn project-deaths-from-fixed-rates
-  "Takes a dataset with population at risk from the current year of the projection
-  loop and another dataset with fixed death rates for the population. Returns a
-  dataset with a column of deaths, which are the product of popn at risk & death rates"
-  {:witan/name :ccm-mort/project-deaths-fixed-rates
-   :witan/version "1.0.0"
-   :witan/input-schema {:initial-projected-mortality-rates ProjFixedASMRSchema
-                        :population-at-risk PopulationAtRiskSchema}
-   :witan/output-schema {:deaths DeathsOutputSchema}
    :witan/exported? true}
-  [{:keys [initial-projected-mortality-rates population-at-risk]} _]
-  {:deaths
-   (cf/project-component-fixed-rates population-at-risk
-                                     initial-projected-mortality-rates
-                                     :death-rate :deaths)})
+  [inputs params]
+  (project-asmr inputs params))
 
 (defworkflowfn project-deaths
   "Takes the current year of the projection, a dataset with population at risk from that year,
@@ -138,8 +165,9 @@
    :witan/output-schema  {:deaths DeathsOutputSchema}
    :witan/exported? true}
   [{:keys [initial-projected-mortality-rates population-at-risk loop-year]} _]
-  {:deaths
-   (cf/project-component population-at-risk
-                         initial-projected-mortality-rates
-                         loop-year
-                         :death-rate :deaths)})
+  (let [max-yr (reduce max (ds/column initial-projected-mortality-rates :year))
+        _ (utils/property-holds? max-yr #(<= loop-year %) #(str % " is less than loop year"))]
+    {:deaths (cf/project-component population-at-risk
+                                   initial-projected-mortality-rates
+                                   loop-year
+                                   :death-rate :deaths)}))

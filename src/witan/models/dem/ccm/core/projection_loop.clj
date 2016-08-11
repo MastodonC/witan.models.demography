@@ -16,10 +16,10 @@
   {:witan/name :ccm-core/ccm-loop-pred
    :witan/version "1.0.0"
    :witan/input-schema {:population PopulationSchema :loop-year (s/constrained s/Int m-utils/year?)}
-   :witan/param-schema {:last-proj-year (s/constrained s/Int m-utils/year?)}
+   :witan/param-schema {:last-proj-yr (s/constrained s/Int m-utils/year?)}
    :witan/exported? true}
-  [{:keys [loop-year]} {:keys [last-proj-year]}]
-  (>= loop-year last-proj-year))
+  [{:keys [loop-year]} {:keys [last-proj-yr]}]
+  (>= loop-year last-proj-yr))
 
 (defworkflowfn prepare-inputs
   "Step happening before the projection loop.
