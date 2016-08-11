@@ -3,7 +3,6 @@
             [witan.workspace-api :refer [defworkflowfn
                                          defworkflowoutput
                                          defworkflowinput]]
-            [witan.models.load-data :as ld]
             [schema.core :as s]))
 
 (defn year? [n] (and (>= n 1900) (<= n 2100)))
@@ -26,16 +25,6 @@
             (if (:params v)
               (assoc m :witan/params (:params v))
               m))) task-coll))
-
-(defworkflowinput resource-csv-loader
-  "Loads CSV files from resources"
-  {:witan/name :workspace-test/resource-csv-loader
-   :witan/version "1.0.0"
-   :witan/output-schema {:* s/Any}
-   :witan/param-schema {:src s/Str
-                        :key s/Keyword}}
-  [_ {:keys [src key]}]
-  (ld/load-dataset key src))
 
 (defworkflowfn fn-out
   {:witan/name :workspace-test/fn-out

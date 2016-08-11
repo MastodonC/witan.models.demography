@@ -5,7 +5,9 @@
             [schema.coerce :as coerce]
             [clojure.core.matrix.dataset :as ds]
             [witan.models.dem.ccm.schemas :refer :all]
-            [witan.workspace-api.utils :as utils]))
+            [witan.workspace-api.utils :as utils]
+            [witan.workspace-api :refer [defworkflowinput]]
+            [schema.core :as s]))
 
 (defn- custom-keyword [coll]
   (mapv #(-> %
@@ -201,3 +203,13 @@
   (->> file-map
        (mapv (fn [[k path]] (load-dataset k path)))
        (reduce merge)))
+
+(defworkflowinput resource-csv-loader
+  "Loads CSV files from resources"
+  {:witan/name :workspace-test/resource-csv-loader
+   :witan/version "1.0.0"
+   :witan/output-schema {:* s/Any}
+   :witan/param-schema {:src s/Str
+                        :key s/Keyword}}
+  [_ {:keys [src key]}]
+  (load-dataset key src))

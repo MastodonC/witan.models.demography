@@ -177,7 +177,7 @@
                                    :params {:gss-code gss-code
                                             :src (:historic-population inputs)
                                             :key :historic-population}}
-   :in-future-mort-trend          {:var #'witan.models.dem.ccm.models-utils/resource-csv-loader
+   :in-future-mort-trend          {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src (:future-mortality-trend-assumption inputs)
                                             :key :future-mortality-trend-assumption}}
    :in-hist-total-births          {:var #'witan.models.run-models/resource-csv-loader-filtered
