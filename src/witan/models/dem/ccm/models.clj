@@ -91,63 +91,63 @@
      :witan/type :input
      :witan/fn :workspace-test/resource-csv-loader
      :witan/params
-     {:src nil
+     {:src "witan.models.demography/mortality/historic_deaths.csv"
       :key :historic-deaths}}
     {:witan/name :in-hist-dom-in-migrants
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :workspace-test/resource-csv-loader
      :witan/params
-     {:src nil
+     {:src "witan.models.demography/migration/domestic_in_migrants.csv"
       :key :domestic-in-migrants}}
     {:witan/name :in-hist-dom-out-migrants
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :workspace-test/resource-csv-loader
      :witan/params
-     {:src nil
+     {:src "witan.models.demography/migration/domestic_out_migrants.csv"
       :key :domestic-out-migrants}}
     {:witan/name :in-hist-intl-in-migrants
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :workspace-test/resource-csv-loader
      :witan/params
-     {:src nil
+     {:src "witan.models.demography/migration/international_in_migrants.csv"
       :key :international-in-migrants}}
     {:witan/name :in-hist-intl-out-migrants
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :workspace-test/resource-csv-loader
      :witan/params
-     {:src nil
+     {:src "witan.models.demography/migration/international_out_migrants.csv"
       :key :international-out-migrants}}
     {:witan/name :in-hist-popn
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :workspace-test/resource-csv-loader
      :witan/params
-     {:src nil
+     {:src "witan.models.demography/core/historic-population.csv"
       :key :historic-population}}
-    {:witan/name :in-future-mort-trend,
-     :witan/version "1.0.0",
-     :witan/type :input,
-     :witan/fn :workspace-test/resource-csv-loader,
+    {:witan/name :in-future-mort-trend
+     :witan/version "1.0.0"
+     :witan/type :input
+     :witan/fn :workspace-test/resource-csv-loader
      :witan/params
-     {:src nil,
+     {:src "witan.models.demography/mortality/death_improvement.csv"
       :key :future-mortality-trend-assumption}}
-    {:witan/name :in-hist-total-births,
-     :witan/version "1.0.0",
-     :witan/type :input,
+    {:witan/name :in-hist-total-births
+     :witan/version "1.0.0"
+     :witan/type :input
      :witan/fn :workspace-test/resource-csv-loader,
      :witan/params
-     {:src nil
+     {:src "witan.models.demography/fertility/historic_births.csv"
       :key :historic-births}}
     {:witan/name :in-proj-births-by-age-of-mother
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :workspace-test/resource-csv-loader
      :witan/params
-     {:src nil
+     {:src "witan.models.demography/fertility/proj-births-by-age-mother.csv"
       :key :ons-proj-births-by-age-mother}}
     {:witan/name :join-popn-latest-yr
      :witan/version "1.0.0"

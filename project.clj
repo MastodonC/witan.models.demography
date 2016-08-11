@@ -18,5 +18,9 @@
              :cli {:main witan.models.run-models
                    :source-paths ["src" "src-cli"]
                    :dependencies [[witan.workspace-executor "0.2.3"
-                                   :exclusions [witan.workspace-api]]]}}
-  :exclusions [prismatic/schema org.clojure/clojure])
+                                   :exclusions [witan.workspace-api]]]}
+             :data {:main witan.models.upload-data
+                    :source-paths ["src-data"]
+                    :dependencies [[amazonica "0.3.73"]]}}
+  :exclusions [prismatic/schema org.clojure/clojure]
+  :aliases {"upload" ["with-profile" "data" "run"]})
