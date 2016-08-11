@@ -58,8 +58,8 @@
     [:add-births                 :remove-deaths]
     [:project-deaths             :remove-deaths]
     [:remove-deaths              :apply-migration]
-    [:apply-migration            :join-popn-latest-yr]
-    [:join-popn-latest-yr        [:finish-looping? :out :select-starting-popn]]
+    [:apply-migration            :join-popn-latest-year]
+    [:join-popn-latest-year      [:finish-looping? :out :select-starting-popn]]
     ;; --- end loop
     ]
    :catalog
@@ -76,7 +76,7 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-fert/calc-hist-asfr
-     :witan/params {:fert-base-yr 2014}}
+     :witan/params {:fert-base-year 2014}}
     {:witan/name :calc-hist-asmr
      :witan/version "1.0.0"
      :witan/type :function
@@ -85,7 +85,7 @@
      :witan/version "1.0.0"
      :witan/type :predicate
      :witan/fn :ccm-core/ccm-loop-pred
-     :witan/params {:last-proj-yr 2021}}
+     :witan/params {:last-proj-year 2021}}
     {:witan/name :in-hist-deaths-by-age-and-sex
      :witan/version "1.0.0"
      :witan/type :input
@@ -149,10 +149,10 @@
      :witan/params
      {:src "witan.models.demography/fertility/proj-births-by-age-mother.csv"
       :key :ons-proj-births-by-age-mother}}
-    {:witan/name :join-popn-latest-yr
+    {:witan/name :join-popn-latest-year
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-core/join-yrs}
+     :witan/fn :ccm-core/join-years}
     {:witan/name :out, :witan/version "1.0.0", :witan/type :output, :witan/fn :workspace-test/out}
     {:witan/name :prepare-starting-popn
      :witan/version "1.0.0"
@@ -162,32 +162,32 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-dom-in-mig
-     :witan/params {:start-yr-avg-dom-mig 2003, :end-yr-avg-dom-mig 2014}}
+     :witan/params {:start-year-avg-dom-mig 2003, :end-year-avg-dom-mig 2014}}
     {:witan/name :proj-dom-out-migrants
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-dom-out-mig
-     :witan/params {:start-yr-avg-dom-mig 2003, :end-yr-avg-dom-mig 2014}}
+     :witan/params {:start-year-avg-dom-mig 2003, :end-year-avg-dom-mig 2014}}
     {:witan/name :project-asfr
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-fert/project-asfr-finalyrhist-fixed
-     :witan/params {:fert-base-yr 2014, :start-yr-avg-fert 2014, :end-yr-avg-fert 2014}}
+     :witan/fn :ccm-fert/project-asfr-finalyearhist-fixed
+     :witan/params {:fert-base-year 2014, :start-year-avg-fert 2014, :end-year-avg-fert 2014}}
     {:witan/name :project-asmr,
      :witan/version "1.0.0",
      :witan/type :function,
      :witan/fn :ccm-mort/project-asmr
-     :witan/params {:start-yr-avg-mort 2010, :end-yr-avg-mort 2014, :last-proj-yr 2021 :first-proj-yr 2014}}
+     :witan/params {:start-year-avg-mort 2010, :end-year-avg-mort 2014, :last-proj-year 2021 :first-proj-year 2014}}
     {:witan/name :proj-intl-in-migrants
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-inter-in-mig
-     :witan/params {:start-yr-avg-inter-mig 2003, :end-yr-avg-inter-mig 2014}}
+     :witan/params {:start-year-avg-inter-mig 2003, :end-year-avg-inter-mig 2014}}
     {:witan/name :proj-intl-out-migrants
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-inter-out-mig
-     :witan/params {:start-yr-avg-inter-mig 2003, :end-yr-avg-inter-mig 2014}}
+     :witan/params {:start-year-avg-inter-mig 2003, :end-year-avg-inter-mig 2014}}
     {:witan/name :combine-into-births-by-sex
      :witan/version "1.0.0"
      :witan/type :function
@@ -219,7 +219,7 @@
   (reify p/IModelLibrary
     (available-fns [_]
       (map-fn-meta
-       fert/project-asfr-finalyrhist-fixed
+       fert/project-asfr-finalyearhist-fixed
        fert/project-births-from-fixed-rates
        fert/combine-into-births-by-sex
        fert/calculate-historic-asfr
@@ -234,7 +234,7 @@
        mig/project-international-out-migrants
        mig/combine-into-net-flows
 
-       core/join-popn-latest-yr
+       core/join-popn-latest-year
        core/add-births
        core/remove-deaths
        core/age-on

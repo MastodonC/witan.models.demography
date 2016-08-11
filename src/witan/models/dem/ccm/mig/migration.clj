@@ -12,53 +12,53 @@
   {:witan/name :ccm-mig/proj-dom-in-mig
    :witan/version "1.0.0"
    :witan/input-schema {:domestic-in-migrants DomesticInmigrants}
-   :witan/param-schema {:start-yr-avg-domin-mig (s/constrained s/Int m-utils/year?)
-                        :end-yr-avg-domin-mig (s/constrained s/Int m-utils/year?)}
+   :witan/param-schema {:start-year-avg-domin-mig (s/constrained s/Int m-utils/year?)
+                        :end-year-avg-domin-mig (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:projected-domestic-in-migrants ProjDomInSchema}
    :witan/exported? true}
-  [{:keys [domestic-in-migrants]} {:keys [start-yr-avg-domin-mig end-yr-avg-domin-mig]}]
+  [{:keys [domestic-in-migrants]} {:keys [start-year-avg-domin-mig end-year-avg-domin-mig]}]
   {:projected-domestic-in-migrants
-   (cf/jumpoffyr-method-average domestic-in-migrants :domin
-                                :domestic-in start-yr-avg-domin-mig end-yr-avg-domin-mig)})
+   (cf/jumpoff-year-method-average domestic-in-migrants :domin
+                                   :domestic-in start-year-avg-domin-mig end-year-avg-domin-mig)})
 
 (defworkflowfn project-domestic-out-migrants
   {:witan/name :ccm-mig/proj-dom-out-mig
    :witan/version "1.0.0"
    :witan/input-schema {:domestic-out-migrants DomesticOutmigrants}
-   :witan/param-schema {:start-yr-avg-domout-mig (s/constrained s/Int m-utils/year?)
-                        :end-yr-avg-domout-mig (s/constrained s/Int m-utils/year?)}
+   :witan/param-schema {:start-year-avg-domout-mig (s/constrained s/Int m-utils/year?)
+                        :end-year-avg-domout-mig (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:projected-domestic-out-migrants ProjDomOutSchema}
    :witan/exported? true}
-  [{:keys [domestic-out-migrants]} {:keys [start-yr-avg-domout-mig end-yr-avg-domout-mig]}]
+  [{:keys [domestic-out-migrants]} {:keys [start-year-avg-domout-mig end-year-avg-domout-mig]}]
   {:projected-domestic-out-migrants
-   (cf/jumpoffyr-method-average domestic-out-migrants :domout
-                                :domestic-out start-yr-avg-domout-mig end-yr-avg-domout-mig)})
+   (cf/jumpoff-year-method-average domestic-out-migrants :domout
+                                   :domestic-out start-year-avg-domout-mig end-year-avg-domout-mig)})
 
 (defworkflowfn project-international-in-migrants
   {:witan/name :ccm-mig/proj-inter-in-mig
    :witan/version "1.0.0"
    :witan/input-schema {:international-in-migrants InternationalInmigrants}
-   :witan/param-schema {:start-yr-avg-intin-mig (s/constrained s/Int m-utils/year?)
-                        :end-yr-avg-intin-mig (s/constrained s/Int m-utils/year?)}
+   :witan/param-schema {:start-year-avg-intin-mig (s/constrained s/Int m-utils/year?)
+                        :end-year-avg-intin-mig (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:projected-international-in-migrants ProjInterInSchema}
    :witan/exported? true}
-  [{:keys [international-in-migrants]} {:keys [start-yr-avg-intin-mig end-yr-avg-intin-mig]}]
+  [{:keys [international-in-migrants]} {:keys [start-year-avg-intin-mig end-year-avg-intin-mig]}]
   {:projected-international-in-migrants
-   (cf/jumpoffyr-method-average international-in-migrants :intin
-                                :international-in start-yr-avg-intin-mig end-yr-avg-intin-mig)})
+   (cf/jumpoff-year-method-average international-in-migrants :intin
+                                   :international-in start-year-avg-intin-mig end-year-avg-intin-mig)})
 
 (defworkflowfn project-international-out-migrants
   {:witan/name :ccm-mig/proj-inter-out-mig
    :witan/version "1.0.0"
    :witan/input-schema {:international-out-migrants InternationalOutmigrants}
-   :witan/param-schema {:start-yr-avg-intout-mig (s/constrained s/Int m-utils/year?)
-                        :end-yr-avg-intout-mig (s/constrained s/Int m-utils/year?)}
+   :witan/param-schema {:start-year-avg-intout-mig (s/constrained s/Int m-utils/year?)
+                        :end-year-avg-intout-mig (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:projected-international-out-migrants ProjInterOutSchema}
    :witan/exported? true}
-  [{:keys [international-out-migrants]} {:keys [start-yr-avg-intout-mig end-yr-avg-intout-mig]}]
+  [{:keys [international-out-migrants]} {:keys [start-year-avg-intout-mig end-year-avg-intout-mig]}]
   {:projected-international-out-migrants
-   (cf/jumpoffyr-method-average international-out-migrants :intout
-                                :international-out start-yr-avg-intout-mig end-yr-avg-intout-mig)})
+   (cf/jumpoff-year-method-average international-out-migrants :intout
+                                   :international-out start-year-avg-intout-mig end-year-avg-intout-mig)})
 
 (defworkflowfn combine-into-net-flows
   {:witan/name :ccm-mig/combine-mig-flows

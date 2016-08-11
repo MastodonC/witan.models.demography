@@ -120,28 +120,29 @@
 
 (defn add-district-to-dataset-per-user-input
   [data gss-code]
-  (let [data-code (distinct (wds/subset-ds data :cols :gss-code))]
+  (let [data-n (wds/row-count data)
+        data-code (distinct (wds/subset-ds data :cols :gss-code))]
     (when (and (= 1 (count data-code))
                (= gss-code (first data-code)))
       (ds/add-column data :district
-                     (repeat (get-district gss-code))))))
+                     (repeat data-n (get-district gss-code))))))
 
 ;; Building the workspace:
 (defn tasks [inputs params gss-code]
   {;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Functions
-   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-finalyrhist-fixed
-                                :params {:fert-base-yr (:fert-base-yr params)}}
-   :join-popn-latest-yr        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-yr}
+   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-finalyearhist-fixed
+                                :params {:fert-base-year (:fert-base-year params)}}
+   :join-popn-latest-year        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-year}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
    :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths}
    :proj-dom-in-migrants       {:var #'witan.models.dem.ccm.mig.migration/project-domestic-in-migrants
-                                :params {:start-yr-avg-domin-mig (:start-yr-avg-domin-mig params)
-                                         :end-yr-avg-domin-mig (:end-yr-avg-domin-mig params)}}
+                                :params {:start-year-avg-domin-mig (:start-year-avg-domin-mig params)
+                                         :end-year-avg-domin-mig (:end-year-avg-domin-mig params)}}
    :calc-hist-asmr             {:var #'witan.models.dem.ccm.mort.mortality/calc-historic-asmr}
    :proj-dom-out-migrants      {:var #'witan.models.dem.ccm.mig.migration/project-domestic-out-migrants
-                                :params {:start-yr-avg-domout-mig (:start-yr-avg-domout-mig params)
-                                         :end-yr-avg-domout-mig (:end-yr-avg-domout-mig params)}}
+                                :params {:start-year-avg-domout-mig (:start-year-avg-domout-mig params)
+                                         :end-year-avg-domout-mig (:end-year-avg-domout-mig params)}}
    :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
    :age-on                     {:var #'witan.models.dem.ccm.core.projection-loop/age-on}
    :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-from-fixed-rates}
@@ -149,27 +150,27 @@
                                 :params {:proportion-male-newborns
                                          (:proportion-male-newborns params)}}
    :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-1-0-0
-                                :params {:start-yr-avg-mort (:start-yr-avg-mort params)
-                                         :end-yr-avg-mort (:end-yr-avg-mort params)
-                                         :last-proj-yr (:last-proj-yr params)
-                                         :first-proj-yr (:first-proj-yr params)}}
+                                :params {:start-year-avg-mort (:start-year-avg-mort params)
+                                         :end-year-avg-mort (:end-year-avg-mort params)
+                                         :last-proj-year (:last-proj-year params)
+                                         :first-proj-year (:first-proj-year params)}}
    :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
    :prepare-starting-popn      {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs}
    :calc-hist-asfr             {:var #'witan.models.dem.ccm.fert.fertility/calculate-historic-asfr
-                                :params {:fert-base-yr (:fert-base-yr params)}}
+                                :params {:fert-base-year (:fert-base-year params)}}
    :apply-migration            {:var #'witan.models.dem.ccm.core.projection-loop/apply-migration}
    :proj-intl-in-migrants      {:var #'witan.models.dem.ccm.mig.migration/project-international-in-migrants
-                                :params {:start-yr-avg-intin-mig (:start-yr-avg-intin-mig params)
-                                         :end-yr-avg-intin-mig (:end-yr-avg-intin-mig params)}}
+                                :params {:start-year-avg-intin-mig (:start-year-avg-intin-mig params)
+                                         :end-year-avg-intin-mig (:end-year-avg-intin-mig params)}}
    :proj-intl-out-migrants     {:var #'witan.models.dem.ccm.mig.migration/project-international-out-migrants
-                                :params {:start-yr-avg-intout-mig (:start-yr-avg-intout-mig params)
-                                         :end-yr-avg-intout-mig (:end-yr-avg-intout-mig params)}}
+                                :params {:start-year-avg-intout-mig (:start-year-avg-intout-mig params)
+                                         :end-year-avg-intout-mig (:end-year-avg-intout-mig params)}}
 
    :combine-into-net-flows {:var #'witan.models.dem.ccm.mig.migration/combine-into-net-flows}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Predicates
    :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?
-                                :params {:last-proj-yr (:last-proj-yr params)}
+                                :params {:last-proj-year (:last-proj-year params)}
                                 :pred? true}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Inputs

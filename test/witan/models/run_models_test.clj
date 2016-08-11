@@ -37,23 +37,23 @@
 (def gss-bristol "E06000023")
 
 (def params-2015 {;; Core module
-                  :first-proj-yr 2014
-                  :last-proj-yr 2015
+                  :first-proj-year 2014
+                  :last-proj-year 2015
                   ;; Fertility module
-                  :fert-base-yr 2014
+                  :fert-base-year 2014
                   :proportion-male-newborns (double (/ 105 205))
                   ;; Mortality module
-                  :start-yr-avg-mort 2010
-                  :end-yr-avg-mort 2014
+                  :start-year-avg-mort 2010
+                  :end-year-avg-mort 2014
                   ;; Migration module
-                  :start-yr-avg-domin-mig 2003
-                  :end-yr-avg-domin-mig 2014
-                  :start-yr-avg-domout-mig 2003
-                  :end-yr-avg-domout-mig 2014
-                  :start-yr-avg-intin-mig 2003
-                  :end-yr-avg-intin-mig 2014
-                  :start-yr-avg-intout-mig 2003
-                  :end-yr-avg-intout-mig 2014})
+                  :start-year-avg-domin-mig 2003
+                  :end-year-avg-domin-mig 2014
+                  :start-year-avg-domout-mig 2003
+                  :end-year-avg-domout-mig 2014
+                  :start-year-avg-intin-mig 2003
+                  :end-year-avg-intin-mig 2014
+                  :start-year-avg-intout-mig 2003
+                  :end-year-avg-intout-mig 2014})
 
 (deftest get-dataset-test
   (testing "The data is filtered on local authority."

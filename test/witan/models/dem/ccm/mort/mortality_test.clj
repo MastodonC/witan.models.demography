@@ -50,12 +50,12 @@
       :projected-asmr
       (ds/rename-columns {:death-rate :death-rate-r})))
 
-(def params {:start-yr-avg-mort 2010
-             :end-yr-avg-mort 2014
-             :first-proj-yr 2015
-             :last-proj-yr 2017
+(def params {:start-year-avg-mort 2010
+             :end-year-avg-mort 2014
+             :first-proj-year 2015
+             :last-proj-year 2017
              :mort-scenario :principal
-             :mort-last-yr 2014
+             :mort-last-year 2014
              :variant :average-fixed})
 
 (deftest calc-historic-asmr-test

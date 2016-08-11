@@ -153,7 +153,7 @@
   {:column-names (apply-col-names-schema HistASFRSchema csv-data)
    :columns (vec (apply-row-schema HistASFRSchema csv-data))})
 
-(defmethod apply-record-coercion :projected-asfr-finalyrfixed
+(defmethod apply-record-coercion :projected-asfr-finalyearfixed
   [data-info csv-data]
   {:column-names (apply-col-names-schema ProjFixedASFRSchema csv-data)
    :columns (vec (apply-row-schema ProjFixedASFRSchema csv-data))})

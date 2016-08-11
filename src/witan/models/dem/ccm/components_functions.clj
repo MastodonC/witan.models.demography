@@ -9,50 +9,50 @@
 ;; Calculate rates/values for alternative ways to project components of change:
 
 ;; Calculate averages for fixed values/rates or trends:
-(defn jumpoffyr-method-average
+(defn jumpoff-year-method-average
   "Takes in a dataset with historical data, a column name to be averaged,
   a name for the average column, and years to start and end averaging for.
   Returns a dataset where the column to be averaged contains the averages
   for all the years of interest and is named to avg-name."
-  [historical-data col-to-avg avg-name start-yr-avg end-yr-avg]
-  (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
-        hist-latest-yr (reduce max (ds/column historical-data :year))]
-    (-> start-yr-avg
+  [historical-data col-to-avg avg-name start-year-avg end-year-avg]
+  (let [hist-earliest-year (reduce min (ds/column historical-data :year))
+        hist-latest-year (reduce max (ds/column historical-data :year))]
+    (-> start-year-avg
         (utils/property-holds?  m-utils/year?
-                                (str start-yr-avg " is not a year"))
-        (utils/property-holds?  #(>= % hist-earliest-yr)
+                                (str start-year-avg " is not a year"))
+        (utils/property-holds?  #(>= % hist-earliest-year)
                                 "Start year must be more than or equal to earliest year in dataset"))
-    (-> end-yr-avg
+    (-> end-year-avg
         (utils/property-holds?  m-utils/year?
-                                (str end-yr-avg " is not a year"))
-        (utils/property-holds?  #(<= % hist-latest-yr)
+                                (str end-year-avg " is not a year"))
+        (utils/property-holds?  #(<= % hist-latest-year)
                                 "End year must be less than or equal to the latest year in the dataset"))
     (-> (wds/select-from-ds historical-data
-                            {:year {:$gte start-yr-avg
-                                    :$lte end-yr-avg}})
+                            {:year {:$gte start-year-avg
+                                    :$lte end-year-avg}})
         (ds/rename-columns {col-to-avg avg-name})
         (wds/rollup :mean avg-name [:gss-code :sex :age]))))
 
-(defn jumpoffyr-method-trend
+(defn jumpoff-year-method-trend
   "Takes in a dataset with historical data, a column name for a trend to be
   calculated for, a name for the trend col and years to start and end to
   calculate the trend for. Returns a dataset with a new col for the calculated trend"
-  [historical-data trend-col trend-out start-yr-avg end-yr-avg]
-  (let [hist-earliest-yr (reduce min (ds/column historical-data :year))
-        hist-latest-yr (reduce max (ds/column historical-data :year))
-        _ (-> start-yr-avg
+  [historical-data trend-col trend-out start-year-avg end-year-avg]
+  (let [hist-earliest-year (reduce min (ds/column historical-data :year))
+        hist-latest-year (reduce max (ds/column historical-data :year))
+        _ (-> start-year-avg
               (utils/property-holds?  m-utils/year?
-                                      (str start-yr-avg " is not a year"))
-              (utils/property-holds?  #(>= % hist-earliest-yr)
+                                      (str start-year-avg " is not a year"))
+              (utils/property-holds?  #(>= % hist-earliest-year)
                                       "Start year must be more than or equal to earliest year in dataset"))
-        _ (-> end-yr-avg
+        _ (-> end-year-avg
               (utils/property-holds?  m-utils/year?
-                                      (str end-yr-avg " is not a year"))
-              (utils/property-holds?  #(<= % hist-latest-yr)
+                                      (str end-year-avg " is not a year"))
+              (utils/property-holds?  #(<= % hist-latest-year)
                                       "End year must be less than or equal to the latest year in the dataset"))
         grouped-data (-> historical-data
-                         (wds/select-from-ds {:year {:$gte start-yr-avg
-                                                     :$lte end-yr-avg}})
+                         (wds/select-from-ds {:year {:$gte start-year-avg
+                                                     :$lte end-year-avg}})
                          (wds/group-ds [:sex :gss-code :age]))
         lm (map (fn [[k v]]
                   (:coefs (wds/linear-model (wds/subset-ds v :cols trend-col)
@@ -67,7 +67,7 @@
         ds/dataset
         (wds/add-derived-column trend-out
                                 [:regres-coef :intercept]
-                                (fn [y i] (let [t (+ i (* y (inc end-yr-avg)))]
+                                (fn [y i] (let [t (+ i (* y (inc end-year-avg)))]
                                             (if (neg? t)
                                               0.0
                                               t))))
@@ -75,9 +75,9 @@
 
 (defn add-years-to-fixed-methods
   "Plots fixed rates across all projected years"
-  [fixed-projection first-proj-yr last-proj-yr]
+  [fixed-projection first-proj-year last-proj-year]
   (let [n (wds/row-count fixed-projection)]
-    (->> (range first-proj-yr (inc last-proj-yr))
+    (->> (range first-proj-year (inc last-proj-year))
          (map #(ds/add-column fixed-projection :year (repeat n %)))
          (reduce ds/join-rows))))
 
@@ -118,9 +118,9 @@
   "Takes a dataset of projected rates and returns a dataset with the proportional
    difference in the rate between each year and the previous year. Also takes first
    and last years of projection, and keyword with the scenario :low, :principal or :high."
-  [future-rates-trend-assumption first-proj-yr last-proj-yr scenario]
+  [future-rates-trend-assumption first-proj-year last-proj-year scenario]
   (-> future-rates-trend-assumption
-      (wds/select-from-ds {:year {:$gte first-proj-yr :$lte last-proj-yr}})
+      (wds/select-from-ds {:year {:$gte first-proj-year :$lte last-proj-year}})
       (ds/select-columns [:sex :age :year scenario])
       (ds/rename-columns {scenario :national-trend})
       (order-ds [:sex :age :year])
@@ -128,7 +128,7 @@
       (wds/add-derived-column :age [:age] inc)
       (wds/add-derived-column :prop-diff [:national-trend :last-year-nt :year]
                               (fn [national-trend last-year-nt year]
-                                (if (== year first-proj-yr)
+                                (if (== year first-proj-year)
                                   0
                                   (wds/safe-divide [(- national-trend last-year-nt) last-year-nt]))))
       (ds/select-columns [:sex :age :year :prop-diff])))
@@ -142,30 +142,32 @@
    (e.g. :death-rate or :death). Returns a dataset with projected rates or values
    for each age, sex, and projection year, calculated by applying the trend from
    the projected national rates to the data from the jumpoff year dataset."
-  [jumpoffyr-projection future-assumption
-   first-proj-yr last-proj-yr scenario assumption-col]
+  [jumpoff-year-projection future-assumption
+   first-proj-year last-proj-year scenario assumption-col]
   (let [proportional-differences (calc-proportional-differences future-assumption
-                                                                first-proj-yr
-                                                                last-proj-yr
+                                                                first-proj-year
+                                                                last-proj-year
                                                                 scenario)
-        projection-first-proj-yr (-> jumpoffyr-projection
-                                     (ds/add-column :year (repeat first-proj-yr))
-                                     (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
+        jumpoff-year-projection-n (wds/row-count jumpoff-year-projection)
+        projection-first-proj-year (-> jumpoff-year-projection
+                                       (ds/add-column :year (repeat jumpoff-year-projection-n
+                                                                    first-proj-year))
+                                       (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
     (order-ds (:accumulator
-               (reduce (fn [{:keys [accumulator last-calculated]} current-yr]
-                         (let [projection-this-yr (-> proportional-differences
-                                                      (wds/select-from-ds {:year current-yr})
-                                                      (wds/join last-calculated [:sex :age])
-                                                      (wds/add-derived-column assumption-col
-                                                                              [assumption-col :prop-diff]
-                                                                              (fn [assumption-col prop-diff]
-                                                                                (* ^double assumption-col (inc prop-diff))))
-                                                      (wds/add-derived-column :year [:year] (fn [y] current-yr))
-                                                      (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
-                           {:accumulator (ds/join-rows accumulator projection-this-yr)
-                            :last-calculated projection-this-yr}))
-                       {:accumulator projection-first-proj-yr :last-calculated projection-first-proj-yr}
-                       (range (inc first-proj-yr) (inc last-proj-yr))))
+               (reduce (fn [{:keys [accumulator last-calculated]} current-year]
+                         (let [projection-this-year (-> proportional-differences
+                                                        (wds/select-from-ds {:year current-year})
+                                                        (wds/join last-calculated [:sex :age])
+                                                        (wds/add-derived-column assumption-col
+                                                                                [assumption-col :prop-diff]
+                                                                                (fn [assumption-col prop-diff]
+                                                                                  (* ^double assumption-col (inc prop-diff))))
+                                                        (wds/add-derived-column :year [:year] (fn [y] current-year))
+                                                        (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
+                           {:accumulator (ds/join-rows accumulator projection-this-year)
+                            :last-calculated projection-this-year}))
+                       {:accumulator projection-first-proj-year :last-calculated projection-first-proj-year}
+                       (range (inc first-proj-year) (inc last-proj-year))))
               [:sex :year :age])))
 
 (defn project-component

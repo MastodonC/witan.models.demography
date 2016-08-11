@@ -28,22 +28,22 @@
   :last-proj-year 2040
 
   ;; Fertility module
-  :fert-base-yr 2014
+  :fert-base-year 2014
   ;; proportion of male newborns in the UK -> 105/205
   :number-male-newborns 105 ;; <- keep that value for a population projection for the UK
   :number-all-newborns 205 ;; <- keep that value for a population projection for the UK
 
   ;; Mortality module
-  :start-yr-avg-mort 2010 ;; 2002 to 2014
-  :end-yr-avg-mort 2014 ;; 2002 to 2014
+  :start-year-avg-mort 2010 ;; 2002 to 2014
+  :end-year-avg-mort 2014 ;; 2002 to 2014
 
   ;; Migration module
-  :start-yr-avg-domin-mig 2003 ;; 2002 to 2014
-  :end-yr-avg-domin-mig 2014 ;; 2002 to 2014
-  :start-yr-avg-domout-mig 2003 ;; 2002 to 2014
-  :end-yr-avg-domout-mig 2014 ;; 2002 to 2014
-  :start-yr-avg-intin-mig 2003 ;; 2002 to 2014
-  :end-yr-avg-intin-mig 2014 ;; 2002 to 2014
-  :start-yr-avg-intout-mig 2003 ;; 2002 to 2014
-  :end-yr-avg-intout-mig 2014 ;; 2002 to 2014
+  :start-year-avg-domin-mig 2003 ;; 2002 to 2014
+  :end-year-avg-domin-mig 2014 ;; 2002 to 2014
+  :start-year-avg-domout-mig 2003 ;; 2002 to 2014
+  :end-year-avg-domout-mig 2014 ;; 2002 to 2014
+  :start-year-avg-intin-mig 2003 ;; 2002 to 2014
+  :end-year-avg-intin-mig 2014 ;; 2002 to 2014
+  :start-year-avg-intout-mig 2003 ;; 2002 to 2014
+  :end-year-avg-intout-mig 2014 ;; 2002 to 2014
   }}
