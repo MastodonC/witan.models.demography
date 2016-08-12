@@ -145,11 +145,11 @@
    gather function in witan.datasets similar to gather in tidyR"
   [births-by-mf]
   (let [births-f (-> births-by-mf
-                     (ds/add-column :sex (repeat 1 "F"))
+                     (ds/add-column :sex ["F"])
                      (ds/rename-columns {:f :births})
                      (ds/select-columns [:gss-code :sex :births]))
         births-m (-> births-by-mf
-                     (ds/add-column :sex (repeat 1 "M"))
+                     (ds/add-column :sex ["M"])
                      (ds/rename-columns {:m :births})
                      (ds/select-columns [:gss-code :sex :births]))]
     (ds/join-rows births-m births-f)))
