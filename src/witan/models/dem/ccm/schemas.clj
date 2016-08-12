@@ -25,101 +25,101 @@
 ;;Historic data used in core loop & component modules
 (def DomesticInmigrants
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:domin double]]))
+                           [:year s/Int] [:domin java.lang.Double]]))
 
 (def DomesticOutmigrants
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:domout double]]))
+                           [:year s/Int] [:domout java.lang.Double]]))
 
 (def InternationalInmigrants
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:intin double]]))
+                           [:year s/Int] [:intin java.lang.Double]]))
 
 (def InternationalOutmigrants
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:intout double]]))
+                           [:year s/Int] [:intout java.lang.Double]]))
 (def DeathsSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:deaths double]]))
+                           [:year s/Int] [:deaths java.lang.Double]]))
 
 (def BirthsSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:births double]]))
+                           [:year s/Int] [:births java.lang.Double]]))
 
 ;;For core CCM projection loop using fert/mort/mig inputs from files
 (def BirthsBySexSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:births double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:births java.lang.Double]]))
 
 (def DeathsOutputSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
-                           [:deaths double]]))
+                           [:deaths java.lang.Double]]))
 
 (def NetMigrationSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig java.lang.Double]]))
 
 ;;For load-data test
 (def BirthsDataSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:births double] [:year s/Int]]))
+                           [:births java.lang.Double] [:year s/Int]]))
 
 ;; For the migration component
 (def ProjDomInSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:domestic-in double]]))
+                           [:domestic-in java.lang.Double]]))
 
 (def ProjDomOutSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:domestic-out double]]))
+                           [:domestic-out java.lang.Double]]))
 
 (def ProjInterInSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:international-in double]]))
+                           [:international-in java.lang.Double]]))
 
 (def ProjInterOutSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:international-out double]]))
+                           [:international-out java.lang.Double]]))
 
 (def DomInAverageSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domin double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domin java.lang.Double]]))
 
 (def DomOutAverageSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domout double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:domout java.lang.Double]]))
 
 (def InterInAverageSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intin double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intin java.lang.Double]]))
 
 (def InterOutAverageSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intout double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:intout java.lang.Double]]))
 
 ;; For the core module
 (def PopulationSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:popn double]]))
+                           [:year s/Int] [:popn java.lang.Double]]))
 
 (def PopulationAtRiskSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:popn-at-risk double]]))
+                           [:year s/Int] [:popn-at-risk java.lang.Double]]))
 
 ;; For the mortality component
 (def HistASMRSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:death-rate double]]))
+                           [:year s/Int] [:death-rate java.lang.Double]]))
 
 (def ProjASMRSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int] [:death-rate double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int] [:death-rate java.lang.Double]]))
 
 (def NationalTrendsSchema
-  (make-ordered-ds-schema [[:sex s/Str] [:age s/Int] [:year s/Int] [:principal double]
-                           [:low double] [:high double]]))
+  (make-ordered-ds-schema [[:sex s/Str] [:age s/Int] [:year s/Int] [:principal java.lang.Double]
+                           [:low java.lang.Double] [:high java.lang.Double]]))
 
 ;; For the fertility component
 (def HistASFRSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:fert-rate double]]))
+                           [:year s/Int] [:fert-rate java.lang.Double]]))
 
 (def ProjFixedASFRSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:fert-rate double]]))
+                           [:fert-rate java.lang.Double]]))
 (def BirthsAgeSexMotherSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
-                           [:year s/Int] [:births double]]))
+                           [:year s/Int] [:births java.lang.Double]]))
