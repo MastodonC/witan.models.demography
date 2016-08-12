@@ -153,7 +153,10 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-core/join-years}
-    {:witan/name :out, :witan/version "1.0.0", :witan/type :output, :witan/fn :workspace-test/out}
+    {:witan/name :out
+     :witan/version "1.0.0"
+     :witan/type :output
+     :witan/fn :ccm-core-out/population}
     {:witan/name :prepare-starting-popn
      :witan/version "1.0.0"
      :witan/type :function
@@ -219,21 +222,25 @@
   (reify p/IModelLibrary
     (available-fns [_]
       (map-fn-meta
+       ;; fertility fns
        fert/project-asfr-finalyearhist-fixed
        fert/project-births-from-fixed-rates
        fert/combine-into-births-by-sex
        fert/calculate-historic-asfr
 
+       ;; mortality fns
        mort/project-deaths
        mort/calc-historic-asmr
        mort/project-asmr-1-0-0
 
+       ;; migration fns
        mig/project-domestic-in-migrants
        mig/project-domestic-out-migrants
        mig/project-international-in-migrants
        mig/project-international-out-migrants
        mig/combine-into-net-flows
 
+       ;; core fns
        core/join-popn-latest-year
        core/add-births
        core/remove-deaths
@@ -242,6 +249,10 @@
        core/prepare-inputs
        core/apply-migration
 
-       core/finished-looping?))
+       ;; core preds
+       core/finished-looping?
+
+       ;; core outputs
+       core/population-out))
     (available-models [_]
       (map-model-meta cohort-component-model))))
