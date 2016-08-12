@@ -21,7 +21,7 @@
                         :population-at-risk ;;this actually comes from the proj loop but for test use this csv
                         "./datasets/test_datasets/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"}))
 
-(def params {:fert-base-yr 2014
+(def params {:fert-base-year 2014
              :proportion-male-newborns (double (/ 105 205))})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -29,7 +29,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def fertility-outputs-r (ld/load-datasets
-                          {:projected-asfr-finalyrfixed
+                          {:projected-asfr-finalyearfixed
                            "./datasets/test_datasets/r_outputs_for_testing/fert/bristol_initial_proj_asfr_finalyrfixed_2015.csv"
                            :births
                            "./datasets/test_datasets/r_outputs_for_testing/fert/bristol_fertility_module_r_output_2015.csv"
@@ -52,14 +52,14 @@
                                0.0000000001)
                   (range (first (:shape joined-hist-asfr))))))))
 
-(deftest project-asfr-finalyrhist-fixed-test
+(deftest project-asfr-finalyearhist-fixed-test
   (testing "Fertility rates are projected correctly."
     (let [proj-asfr-r (-> fertility-outputs-r
-                          :projected-asfr-finalyrfixed
+                          :projected-asfr-finalyearfixed
                           (ds/rename-columns {:fert-rate :fert-rate-r}))
           joined-asfr (-> fertility-inputs
                           (calculate-historic-asfr params)
-                          project-asfr-finalyrhist-fixed
+                          project-asfr-finalyearhist-fixed
                           :initial-projected-fertility-rates
                           (wds/join proj-asfr-r [:gss-code :sex :age]))]
       (is (every? #(fp-equals? (wds/subset-ds joined-asfr :rows % :cols :fert-rate-r)
@@ -74,7 +74,7 @@
                             (ds/rename-columns {:births :births-r}))
           joined-births (-> fertility-inputs
                             (calculate-historic-asfr params)
-                            project-asfr-finalyrhist-fixed
+                            project-asfr-finalyearhist-fixed
                             project-births-from-fixed-rates
                             :births-by-age-sex-mother
                             (wds/join proj-births-r [:gss-code :sex :age :year]))]
@@ -90,7 +90,7 @@
                               (ds/rename-columns {:births :births-r}))
           joined-births-by-sex (-> fertility-inputs
                                    (calculate-historic-asfr params)
-                                   project-asfr-finalyrhist-fixed
+                                   project-asfr-finalyearhist-fixed
                                    project-births-from-fixed-rates
                                    (combine-into-births-by-sex params)
                                    :births
