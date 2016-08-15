@@ -32,7 +32,7 @@
                 :international-out-migrants
                 "./datasets/default_datasets/migration/historic_migration_flows_international_out.csv"
                 :future-mortality-trend-assumption
-                "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"})
+                "./datasets/default_datasets/mortality/future_mortality_trend_assumption.csv"})
 
 (def gss-bristol "E06000023")
 
