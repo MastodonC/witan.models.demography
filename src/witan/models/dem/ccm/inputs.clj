@@ -53,5 +53,5 @@
 (definput in-proj-births-by-age-of-mother-1-0-0
   {:witan/name :ccm-core-input/in-proj-births-by-age-of-mother
    :witan/version "1.0.0"
-   :witan/key :ons-proj-births-by-age-mother
+   :witan/key :historic-births-by-age-mother
    :witan/schema s/BirthsAgeSexMotherSchema})

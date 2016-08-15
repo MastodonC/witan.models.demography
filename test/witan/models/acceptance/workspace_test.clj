@@ -15,46 +15,53 @@
                                                  model-library]]
             [witan.models.dem.ccm.models-utils :refer [make-catalog make-contracts]]))
 
+(def gss-code "E07000155")
+
+(defn with-gss
+  [id]
+  (str id "_" gss-code ".csv"))
+
 (def local-inputs
   {:ccm-core-input/in-hist-popn
    [:historic-population
-    "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"]
+    (with-gss "./datasets/default_datasets/core/historic_population")]
 
    :ccm-core-input/in-hist-total-births
    [:historic-births
-    "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"]
+    (with-gss "./datasets/default_datasets/fertility/historic_births")]
 
    :ccm-core-input/in-future-mort-trend
    [:future-mortality-trend-assumption
-    "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"]
+    "./datasets/default_datasets/mortality/future_mortality_trend_assumption.csv"]
 
    :ccm-core-input/in-proj-births-by-age-of-mother
-   [:ons-proj-births-by-age-mother
-    "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"]
+   [:historic-births-by-age-mother
+    (with-gss "./datasets/default_datasets/fertility/historic_births_by_age_of_mother")]
 
    :ccm-core-input/in-hist-deaths-by-age-and-sex
    [:historic-deaths
-    "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"]
+    (with-gss "./datasets/default_datasets/mortality/historic_deaths")]
 
    :ccm-core-input/in-hist-dom-in-migrants
    [:domestic-in-migrants
-    "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"]
+    (with-gss "./datasets/default_datasets/migration/historic_migration_flows_domestic_in")]
 
    :ccm-core-input/in-hist-dom-out-migrants
    [:domestic-out-migrants
-    "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"]
+    (with-gss "./datasets/default_datasets/migration/historic_migration_flows_domestic_out")]
 
    :ccm-core-input/in-hist-intl-in-migrants
    [:international-in-migrants
-    "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"]
+    (with-gss "./datasets/default_datasets/migration/historic_migration_flows_international_in")]
 
    :ccm-core-input/in-hist-intl-out-migrants
    [:international-out-migrants
-    "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"]})
+    (with-gss "./datasets/default_datasets/migration/historic_migration_flows_international_out")]})
 
 (defn local-download
   [input _ schema]
-  (let [[key src] (get local-inputs (:witan/fn input))
+  (let [[key src] (get local-inputs (or (:witan/fn input)
+                                        (:witan/name input)))
         r (ld/load-dataset key src)]
     (get r key)))
 

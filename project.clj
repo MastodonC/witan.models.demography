@@ -7,7 +7,7 @@
                  [prismatic/schema "1.1.3"]
                  [net.mikera/core.matrix "0.52.2"]
                  [org.clojure/data.csv "0.1.3"]
-                 [witan.workspace-api "0.1.19-SNAPSHOT"]
+                 [witan.workspace-api "0.1.19"]
                  [org.clojure/tools.cli "0.3.5"]
                  [com.taoensso/timbre "4.7.3"]]
   :target-path "target/%s"
@@ -19,8 +19,9 @@
                    :source-paths ["src" "src-cli"]
                    :dependencies [[witan.workspace-executor "0.2.3"
                                    :exclusions [witan.workspace-api]]]}
-             :data {:main witan.models.upload-data
-                    :source-paths ["src-data"]
-                    :dependencies [[amazonica "0.3.73"]]}}
+             :data {:source-paths ["src-data"]
+                    :dependencies [[amazonica "0.3.73"]
+                                   [me.raynes/fs "1.4.6"]]}}
   :exclusions [prismatic/schema org.clojure/clojure]
-  :aliases {"upload" ["with-profile" "data" "run"]})
+  :aliases {"split-data"  ["with-profile" "data" "run" "-m" "witan.models.split-data"]
+            "upload-data" ["with-profile" "data" "run" "-m" "witan.models.upload-data"]})

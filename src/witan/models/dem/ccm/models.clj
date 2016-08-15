@@ -10,6 +10,10 @@
             [witan.models.dem.ccm.mig.migration    :as mig]
             [witan.models.dem.ccm.core.projection-loop :as core]))
 
+(defn with-gss
+  [id]
+  (str id "_{{GSS-Code}}.csv.gz"))
+
 (defmodel cohort-component-model
   "The CCM model"
   {:witan/name :ccm-model/cohort-component-model
@@ -92,55 +96,55 @@
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :ccm-core-input/in-hist-deaths-by-age-and-sex
-     :witan/params {:src "witan.models.demography/mortality/historic_deaths.csv"}}
+     :witan/params {:src (with-gss "witan.models.demography/mortality/historic_deaths")}}
     {:witan/name :in-hist-dom-in-migrants
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :ccm-core-input/in-hist-dom-in-migrants
      :witan/params
-     {:src "witan.models.demography/migration/domestic_in_migrants.csv"}}
+     {:src (with-gss "witan.models.demography/migration/domestic_in_migrants")}}
     {:witan/name :in-hist-dom-out-migrants
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :ccm-core-input/in-hist-dom-out-migrants
      :witan/params
-     {:src "witan.models.demography/migration/domestic_out_migrants.csv"}}
+     {:src (with-gss "witan.models.demography/migration/domestic_out_migrants")}}
     {:witan/name :in-hist-intl-in-migrants
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :ccm-core-input/in-hist-intl-in-migrants
      :witan/params
-     {:src "witan.models.demography/migration/international_in_migrants.csv"}}
+     {:src (with-gss "witan.models.demography/migration/international_in_migrants")}}
     {:witan/name :in-hist-intl-out-migrants
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :ccm-core-input/in-hist-intl-out-migrants
      :witan/params
-     {:src "witan.models.demography/migration/international_out_migrants.csv"}}
+     {:src (with-gss "witan.models.demography/migration/international_out_migrants")}}
     {:witan/name :in-hist-popn
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :ccm-core-input/in-hist-popn
      :witan/params
-     {:src "witan.models.demography/core/historic-population.csv"}}
+     {:src (with-gss "witan.models.demography/core/historic-population")}}
     {:witan/name :in-future-mort-trend
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :ccm-core-input/in-future-mort-trend
      :witan/params
-     {:src "witan.models.demography/mortality/death_improvement.csv"}}
+     {:src (with-gss "witan.models.demography/mortality/death_improvement")}}
     {:witan/name :in-hist-total-births
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :ccm-core-input/in-hist-total-births
      :witan/params
-     {:src "witan.models.demography/fertility/historic_births.csv"}}
+     {:src (with-gss "witan.models.demography/fertility/historic_births")}}
     {:witan/name :in-proj-births-by-age-of-mother
      :witan/version "1.0.0"
      :witan/type :input
      :witan/fn :ccm-core-input/in-proj-births-by-age-of-mother
      :witan/params
-     {:src "witan.models.demography/fertility/proj-births-by-age-mother.csv"}}
+     {:src (with-gss "witan.models.demography/fertility/proj-births-by-age-mother")}}
     {:witan/name :join-popn-latest-year
      :witan/version "1.0.0"
      :witan/type :function
