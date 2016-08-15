@@ -1,12 +1,18 @@
 (ns witan.models.dem.ccm.models
-  (:require [witan.workspace-api :refer [defmodel]]
+  (:require [witan.workspace-api :refer [defmodel
+                                         definput]]
             [witan.workspace-api.utils :refer [map-fn-meta
                                                map-model-meta]]
             [witan.workspace-api.protocols :as p]
+            [witan.models.dem.ccm.inputs           :as inputs]
             [witan.models.dem.ccm.mort.mortality   :as mort]
             [witan.models.dem.ccm.fert.fertility   :as fert]
             [witan.models.dem.ccm.mig.migration    :as mig]
             [witan.models.dem.ccm.core.projection-loop :as core]))
+
+(defn with-gss
+  [id]
+  (str id "_{{GSS-Code}}.csv.gz"))
 
 (defmodel cohort-component-model
   "The CCM model"
@@ -89,66 +95,56 @@
     {:witan/name :in-hist-deaths-by-age-and-sex
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader
-     :witan/params
-     {:src "witan.models.demography/mortality/historic_deaths.csv"
-      :key :historic-deaths}}
+     :witan/fn :ccm-core-input/in-hist-deaths-by-age-and-sex
+     :witan/params {:src (with-gss "witan.models.demography/mortality/historic_deaths")}}
     {:witan/name :in-hist-dom-in-migrants
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader
+     :witan/fn :ccm-core-input/in-hist-dom-in-migrants
      :witan/params
-     {:src "witan.models.demography/migration/domestic_in_migrants.csv"
-      :key :domestic-in-migrants}}
+     {:src (with-gss "witan.models.demography/migration/domestic_in_migrants")}}
     {:witan/name :in-hist-dom-out-migrants
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader
+     :witan/fn :ccm-core-input/in-hist-dom-out-migrants
      :witan/params
-     {:src "witan.models.demography/migration/domestic_out_migrants.csv"
-      :key :domestic-out-migrants}}
+     {:src (with-gss "witan.models.demography/migration/domestic_out_migrants")}}
     {:witan/name :in-hist-intl-in-migrants
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader
+     :witan/fn :ccm-core-input/in-hist-intl-in-migrants
      :witan/params
-     {:src "witan.models.demography/migration/international_in_migrants.csv"
-      :key :international-in-migrants}}
+     {:src (with-gss "witan.models.demography/migration/international_in_migrants")}}
     {:witan/name :in-hist-intl-out-migrants
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader
+     :witan/fn :ccm-core-input/in-hist-intl-out-migrants
      :witan/params
-     {:src "witan.models.demography/migration/international_out_migrants.csv"
-      :key :international-out-migrants}}
+     {:src (with-gss "witan.models.demography/migration/international_out_migrants")}}
     {:witan/name :in-hist-popn
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader
+     :witan/fn :ccm-core-input/in-hist-popn
      :witan/params
-     {:src "witan.models.demography/core/historic-population.csv"
-      :key :historic-population}}
+     {:src (with-gss "witan.models.demography/core/historic-population")}}
     {:witan/name :in-future-mort-trend
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader
+     :witan/fn :ccm-core-input/in-future-mort-trend
      :witan/params
-     {:src "witan.models.demography/mortality/death_improvement.csv"
-      :key :future-mortality-trend-assumption}}
+     {:src (with-gss "witan.models.demography/mortality/death_improvement")}}
     {:witan/name :in-hist-total-births
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader,
+     :witan/fn :ccm-core-input/in-hist-total-births
      :witan/params
-     {:src "witan.models.demography/fertility/historic_births.csv"
-      :key :historic-births}}
+     {:src (with-gss "witan.models.demography/fertility/historic_births")}}
     {:witan/name :in-proj-births-by-age-of-mother
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :workspace-test/resource-csv-loader
+     :witan/fn :ccm-core-input/in-proj-births-by-age-of-mother
      :witan/params
-     {:src "witan.models.demography/fertility/proj-births-by-age-mother.csv"
-      :key :historic-births-by-age-mother}}
+     {:src (with-gss "witan.models.demography/fertility/proj-births-by-age-mother")}}
     {:witan/name :join-popn-latest-year
      :witan/version "1.0.0"
      :witan/type :function
@@ -165,12 +161,12 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-dom-in-mig
-     :witan/params {:start-year-avg-dom-mig 2003, :end-year-avg-dom-mig 2014}}
+     :witan/params {:start-year-avg-domin-mig 2003, :end-year-avg-domin-mig 2014}}
     {:witan/name :proj-dom-out-migrants
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-dom-out-mig
-     :witan/params {:start-year-avg-dom-mig 2003, :end-year-avg-dom-mig 2014}}
+     :witan/params {:start-year-avg-domout-mig 2003, :end-year-avg-domout-mig 2014}}
     {:witan/name :project-asfr
      :witan/version "1.0.0"
      :witan/type :function
@@ -185,12 +181,13 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-inter-in-mig
-     :witan/params {:start-year-avg-inter-mig 2003, :end-year-avg-inter-mig 2014}}
+     :witan/params {:start-year-avg-intin-mig 2003,
+                    :end-year-avg-intin-mig 2014}}
     {:witan/name :proj-intl-out-migrants
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-inter-out-mig
-     :witan/params {:start-year-avg-inter-mig 2003, :end-year-avg-inter-mig 2014}}
+     :witan/params {:start-year-avg-intout-mig 2003, :end-year-avg-intout-mig 2014}}
     {:witan/name :combine-into-births-by-sex
      :witan/version "1.0.0"
      :witan/type :function
@@ -222,6 +219,17 @@
   (reify p/IModelLibrary
     (available-fns [_]
       (map-fn-meta
+       ;; inputs
+       inputs/in-hist-deaths-by-age-and-sex-1-0-0
+       inputs/in-hist-dom-in-migrants-1-0-0
+       inputs/in-hist-dom-out-migrants-1-0-0
+       inputs/in-hist-intl-in-migrants-1-0-0
+       inputs/in-hist-intl-out-migrants-1-0-0
+       inputs/in-hist-popn-1-0-0
+       inputs/in-future-mort-trend-1-0-0
+       inputs/in-hist-total-births-1-0-0
+       inputs/in-proj-births-by-age-of-mother-1-0-0
+
        ;; fertility fns
        fert/project-asfr-finalyearhist-fixed
        fert/project-births-from-fixed-rates

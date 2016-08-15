@@ -15,88 +15,70 @@
                                                  model-library]]
             [witan.models.dem.ccm.models-utils :refer [make-catalog make-contracts]]))
 
-(def tasks
-  {;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   ;; Functions
-   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-finalyearhist-fixed}
-   :join-popn-latest-year        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-year}
-   :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
-   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths}
-   :proj-dom-in-migrants       {:var #'witan.models.dem.ccm.mig.migration/project-domestic-in-migrants
-                                :params {:start-year-avg-domin-mig 2003
-                                         :end-year-avg-domin-mig 2014}}
-   :calc-hist-asmr             {:var #'witan.models.dem.ccm.mort.mortality/calc-historic-asmr}
-   :proj-dom-out-migrants      {:var #'witan.models.dem.ccm.mig.migration/project-domestic-out-migrants
-                                :params {:start-year-avg-domout-mig 2003
-                                         :end-year-avg-domout-mig 2014}}
-   :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
-   :age-on                     {:var #'witan.models.dem.ccm.core.projection-loop/age-on}
-   :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-from-fixed-rates}
-   :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility/combine-into-births-by-sex
-                                :params {:proportion-male-newborns (double (/ 105 205))}}
-   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-1-0-0
-                                :params {:start-year-avg-mort 2010
-                                         :end-year-avg-mort 2014
-                                         :last-proj-year 2021
-                                         :first-proj-year 2014}}
-   :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
-   :prepare-starting-popn      {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs}
-   :calc-hist-asfr             {:var #'witan.models.dem.ccm.fert.fertility/calculate-historic-asfr
-                                :params {:fert-base-year 2014}}
-   :apply-migration            {:var #'witan.models.dem.ccm.core.projection-loop/apply-migration}
-   :proj-intl-in-migrants      {:var #'witan.models.dem.ccm.mig.migration/project-international-in-migrants
-                                :params {:start-year-avg-intin-mig 2003
-                                         :end-year-avg-intin-mig 2014}}
-   :proj-intl-out-migrants     {:var #'witan.models.dem.ccm.mig.migration/project-international-out-migrants
-                                :params {:start-year-avg-intout-mig 2003
-                                         :end-year-avg-intout-mig 2014}}
+(def gss-code "E07000155")
 
-   :combine-into-net-flows {:var #'witan.models.dem.ccm.mig.migration/combine-into-net-flows}
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   ;; Predicates
-   :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?
-                                :params {:last-proj-year 2021}}
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   ;; Inputs
-   :in-hist-popn                  {:var #'witan.models.load-data/resource-csv-loader
-                                   :params {:src "./datasets/test_datasets/model_inputs/bristol_hist_popn_mye.csv"
-                                            :key :historic-population}}
-   :in-hist-total-births          {:var #'witan.models.load-data/resource-csv-loader
-                                   :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
-                                            :key :historic-births}}
-   :in-future-mort-trend          {:var #'witan.models.load-data/resource-csv-loader
-                                   :params {:src "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"
-                                            :key :future-mortality-trend-assumption}}
-   :in-proj-births-by-age-of-mother  {:var #'witan.models.load-data/resource-csv-loader
-                                      :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
-                                               :key :historic-births-by-age-mother}}
-   :in-hist-deaths-by-age-and-sex {:var #'witan.models.load-data/resource-csv-loader
-                                   :params {:src "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"
-                                            :key :historic-deaths}}
-   :in-hist-dom-in-migrants       {:var #'witan.models.load-data/resource-csv-loader
-                                   :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
-                                            :key :domestic-in-migrants}}
-   :in-hist-dom-out-migrants      {:var #'witan.models.load-data/resource-csv-loader
-                                   :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
-                                            :key :domestic-out-migrants}}
-   :in-hist-intl-in-migrants      {:var #'witan.models.load-data/resource-csv-loader
-                                   :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
-                                            :key :international-in-migrants}}
-   :in-hist-intl-out-migrants     {:var #'witan.models.load-data/resource-csv-loader
-                                   :params {:src "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"
-                                            :key :international-out-migrants}}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   ;; Outputs
-   :out {:var #'witan.models.dem.ccm.models-utils/out}})
+(defn with-gss
+  [id]
+  (str id "_" gss-code ".csv"))
+
+(def local-inputs
+  {:ccm-core-input/in-hist-popn
+   [:historic-population
+    (with-gss "./datasets/default_datasets/core/historic_population")]
+
+   :ccm-core-input/in-hist-total-births
+   [:historic-births
+    (with-gss "./datasets/default_datasets/fertility/historic_births")]
+
+   :ccm-core-input/in-future-mort-trend
+   [:future-mortality-trend-assumption
+    "./datasets/default_datasets/mortality/future_mortality_trend_assumption.csv"]
+
+   :ccm-core-input/in-proj-births-by-age-of-mother
+   [:historic-births-by-age-mother
+    (with-gss "./datasets/default_datasets/fertility/historic_births_by_age_of_mother")]
+
+   :ccm-core-input/in-hist-deaths-by-age-and-sex
+   [:historic-deaths
+    (with-gss "./datasets/default_datasets/mortality/historic_deaths")]
+
+   :ccm-core-input/in-hist-dom-in-migrants
+   [:domestic-in-migrants
+    (with-gss "./datasets/default_datasets/migration/historic_migration_flows_domestic_in")]
+
+   :ccm-core-input/in-hist-dom-out-migrants
+   [:domestic-out-migrants
+    (with-gss "./datasets/default_datasets/migration/historic_migration_flows_domestic_out")]
+
+   :ccm-core-input/in-hist-intl-in-migrants
+   [:international-in-migrants
+    (with-gss "./datasets/default_datasets/migration/historic_migration_flows_international_in")]
+
+   :ccm-core-input/in-hist-intl-out-migrants
+   [:international-out-migrants
+    (with-gss "./datasets/default_datasets/migration/historic_migration_flows_international_out")]})
+
+(defn local-download
+  [input _ schema]
+  (let [[key src] (get local-inputs (or (:witan/fn input)
+                                        (:witan/name input)))
+        r (ld/load-dataset key src)]
+    (get r key)))
+
+(defn fix-input
+  [input]
+  (assoc-in input [:witan/params :fn] (partial local-download input)))
 
 (deftest workspace-test
-  (let [workspace     {:workflow  (:workflow cohort-component-model)
-                       :catalog   (make-catalog tasks)
-                       :contracts (make-contracts tasks)}
+  (let [fixed-catalog (mapv #(if (= (:witan/type %) :input) (fix-input %) %) (:catalog cohort-component-model))
+        workspace     {:workflow  (:workflow cohort-component-model)
+                       :catalog   fixed-catalog
+                       :contracts (p/available-fns (model-library))}
         workspace'    (s/with-fn-validation (wex/build! workspace))
         result        (wex/run!! workspace' {})]
     (is (not-empty result))
-    (is (:finished? (first result)))))
+    (is (= 1 (count (first result))))
+    (is (contains? (first result) :population))))
 
 (deftest imodellibrary-test
   (let [ml (model-library)

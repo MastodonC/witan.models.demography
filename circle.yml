@@ -6,5 +6,6 @@ machine:
 
 test:
   override:
+    - lein split-data
     - lein test
     - lein uberjar
