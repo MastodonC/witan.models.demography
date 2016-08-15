@@ -187,8 +187,8 @@
                                             :key :historic-births}}
    :in-proj-births-by-age-of-mother  {:var #'witan.models.run-models/resource-csv-loader-filtered
                                       :params {:gss-code gss-code
-                                               :src (:ons-proj-births-by-age-mother inputs)
-                                               :key :ons-proj-births-by-age-mother}}
+                                               :src (:historic-births-by-age-mother inputs)
+                                               :key :historic-births-by-age-mother}}
    :in-hist-deaths-by-age-and-sex {:var #'witan.models.run-models/resource-csv-loader-filtered
                                    :params {:gss-code gss-code
                                             :src (:historic-deaths inputs)

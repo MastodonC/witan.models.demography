@@ -22,7 +22,7 @@
                      :population-at-risk ;;this actually comes from the proj loop but for test use this csv
                      "./datasets/test_datasets/r_outputs_for_testing/core/bristol_popn_at_risk_2015.csv"
                      :future-mortality-trend-assumption
-                     "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"}))
+                     "./datasets/test_datasets/model_inputs/mort/future_mortality_trend_assumption.csv"}))
 
 (def proj-death-inputs
   (assoc (ld/load-datasets {:population-at-risk ;;this actually comes from the proj loop but for test use this csv

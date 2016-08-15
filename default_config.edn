@@ -1,10 +1,10 @@
 {:input-datasets
  {;; General population dataset
   :historic-population
-  "./datasets/default_datasets/core/historic-population.csv"
+  "./datasets/default_datasets/core/historic_population.csv"
   ;; Fertility datasets
-  :ons-proj-births-by-age-mother
-  "./datasets/default_datasets/fertility/proj-births-by-age-mother.csv"
+  :historic-births-by-age-mother
+  "./datasets/default_datasets/fertility/historic_births_by_age_of_mother.csv"
   :historic-births
   "./datasets/default_datasets/fertility/historic_births.csv"
   ;; Mortality dataset
@@ -12,15 +12,16 @@
   "./datasets/default_datasets/mortality/historic_deaths.csv"
   ;; Migration dataset
   :domestic-in-migrants
-  "./datasets/default_datasets/migration/domestic_in_migrants.csv"
+  "./datasets/default_datasets/migration/historic_migration_flows_domestic_in.csv"
   :domestic-out-migrants
-  "./datasets/default_datasets/migration/domestic_out_migrants.csv"
+  "./datasets/default_datasets/migration/historic_migration_flows_domestic_out.csv"
   :international-in-migrants
-  "./datasets/default_datasets/migration/international_in_migrants.csv"
+  "./datasets/default_datasets/migration/historic_migration_flows_international_in.csv"
   :international-out-migrants
-  "./datasets/default_datasets/migration/international_out_migrants.csv"
+  "./datasets/default_datasets/migration/historic_migration_flows_international_out.csv"
   :future-mortality-trend-assumption
   "./datasets/default_datasets/mortality/death_improvement.csv"}
+}
 
  :user-parameters
  {;; Core module

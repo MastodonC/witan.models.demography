@@ -163,7 +163,7 @@
   {:column-names (apply-col-names-schema BirthsAgeSexMotherSchema csv-data)
    :columns (vec (apply-row-schema BirthsAgeSexMotherSchema csv-data))})
 
-(defmethod apply-record-coercion :ons-proj-births-by-age-mother
+(defmethod apply-record-coercion :historic-births-by-age-mother
   [data-info csv-data]
   {:column-names (apply-col-names-schema BirthsAgeSexMotherSchema csv-data)
    :columns (vec (apply-row-schema BirthsAgeSexMotherSchema csv-data))})
