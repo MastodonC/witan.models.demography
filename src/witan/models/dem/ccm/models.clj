@@ -148,7 +148,7 @@
      :witan/fn :workspace-test/resource-csv-loader
      :witan/params
      {:src "witan.models.demography/fertility/proj-births-by-age-mother.csv"
-      :key :ons-proj-births-by-age-mother}}
+      :key :historic-births-by-age-mother}}
     {:witan/name :join-popn-latest-year
      :witan/version "1.0.0"
      :witan/type :function

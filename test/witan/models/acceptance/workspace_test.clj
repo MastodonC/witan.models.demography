@@ -69,7 +69,7 @@
                                             :key :future-mortality-trend-assumption}}
    :in-proj-births-by-age-of-mother  {:var #'witan.models.load-data/resource-csv-loader
                                       :params {:src "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
-                                               :key :ons-proj-births-by-age-mother}}
+                                               :key :historic-births-by-age-mother}}
    :in-hist-deaths-by-age-and-sex {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"
                                             :key :historic-deaths}}

@@ -3,7 +3,7 @@
   :historic-population
   "./datasets/default_datasets/core/historic_population.csv"
   ;; Fertility datasets
-  :ons-proj-births-by-age-mother
+  :historic-births-by-age-mother
   "./datasets/default_datasets/fertility/historic_births_by_age_of_mother.csv"
   :historic-births
   "./datasets/default_datasets/fertility/historic_births.csv"

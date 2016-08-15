@@ -10,7 +10,7 @@
 
 ;; Load testing data
 (def data-inputs (ld/load-datasets
-                  {:ons-proj-births-by-age-mother
+                  {:historic-births-by-age-mother
                    "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
                    :historic-births
                    "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
@@ -67,6 +67,10 @@
       fert/project-asfr-finalyearhist-fixed
       fert/project-births-from-fixed-rates
       (fert/combine-into-births-by-sex params)))
+
+(defn fertility-module-1 [inputs params]
+  (-> inputs
+      (fert/calculate-historic-asfr params)))
 
 (defn mortality-module [inputs params]
   (-> inputs

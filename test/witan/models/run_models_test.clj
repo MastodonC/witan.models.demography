@@ -15,7 +15,7 @@
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
 ;; Load testing data
-(def datasets  {:ons-proj-births-by-age-mother
+(def datasets  {:historic-births-by-age-mother
                 "./datasets/default_datasets/fertility/historic_births_by_age_of_mother.csv"
                 :historic-births
                 "./datasets/default_datasets/fertility/historic_births.csv"
@@ -57,9 +57,9 @@
 
 (deftest get-dataset-test
   (testing "The data is filtered on local authority."
-    (let [dataset (:ons-proj-births-by-age-mother
+    (let [dataset (:historic-births-by-age-mother
                    (get-dataset
-                    :ons-proj-births-by-age-mother
+                    :historic-births-by-age-mother
                     "./datasets/default_datasets/fertility/historic_births_by_age_of_mother.csv"
                     "E06000023"))
           gss-dataset (i/$ :gss-code dataset)]

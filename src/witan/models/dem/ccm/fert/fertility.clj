@@ -20,8 +20,8 @@
   "Takes the population at risk for the birth data year and ONS
   projections for births by age of mother. Returns fertility
   rates for the birth data year."
-  [popn-at-risk-birth-data-year ons-proj-births-by-age-mother]
-  (-> ons-proj-births-by-age-mother
+  [popn-at-risk-birth-data-year hist-births-by-age-mother]
+  (-> hist-births-by-age-mother
       (wds/join popn-at-risk-birth-data-year [:gss-code :sex :age])
       (wds/add-derived-column :births [:births] (fn [b] (or b 0.0)))
       (wds/add-derived-column :fert-rate-birth-data-year [:births :popn-at-risk]
@@ -78,23 +78,23 @@
    Returns a dataset containing the historic age specific fertility rates."
   {:witan/name :ccm-fert/calc-hist-asfr
    :witan/version "1.0.0"
-   :witan/input-schema {:ons-proj-births-by-age-mother BirthsAgeSexMotherSchema
+   :witan/input-schema {:historic-births-by-age-mother BirthsAgeSexMotherSchema
                         :historic-population PopulationSchema
                         :historic-births BirthsSchema}
    :witan/param-schema {:fert-base-year (s/constrained s/Int m-utils/year?)}
    :witan/output-schema {:historic-asfr HistASFRSchema}
    :witan/exported? true}
-  [{:keys [base-asfr ons-proj-births-by-age-mother historic-population historic-births]}
+  [{:keys [base-asfr historic-births-by-age-mother historic-population historic-births]}
    {:keys [fert-base-year]}]
   (let [birth-data-year (reduce max (ds/column
-                                     ons-proj-births-by-age-mother :year))
+                                     historic-births-by-age-mother :year))
         _ (utils/property-holds? birth-data-year m-utils/year? (str birth-data-year " is not a year"))
         popn-at-risk-birth-data-year (-> historic-population
                                          (create-popn-at-risk-birth birth-data-year)
                                          (ds/select-columns
                                           [:gss-code :sex :age :popn-at-risk]))
         asfr-birth-data-year (calc-asfr-birth-data-year popn-at-risk-birth-data-year
-                                                        ons-proj-births-by-age-mother)
+                                                        historic-births-by-age-mother)
         popn-at-risk-fert-proj-base-year (create-popn-at-risk-birth historic-population fert-base-year)
         estimated-births (calc-estimated-births popn-at-risk-fert-proj-base-year asfr-birth-data-year)]
     {:historic-asfr
