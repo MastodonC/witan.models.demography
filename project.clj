@@ -1,6 +1,6 @@
 (defproject witan.models.demography "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "witan.models.demography is a Clojure library to run demographic models."
+  :url "https://github.com/MastodonC/witan.models.demography"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
@@ -24,4 +24,8 @@
                                    [me.raynes/fs "1.4.6"]]}}
   :exclusions [prismatic/schema org.clojure/clojure]
   :aliases {"split-data"  ["with-profile" "data" "run" "-m" "witan.models.split-data"]
-            "upload-data" ["with-profile" "data" "run" "-m" "witan.models.upload-data"]})
+            "upload-data" ["with-profile" "data" "run" "-m" "witan.models.upload-data"]}
+  :repositories [["releases" {:url "https://clojars.org/repo"
+                              :creds :gpg}]
+                 ["snapshots" {:url "https://clojars.org/repo"
+                               :creds :gpg}]])
