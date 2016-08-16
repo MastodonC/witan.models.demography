@@ -26,24 +26,15 @@
          {:column-names (custom-keyword headers)
           :columns (vec parsed-data)})))))
 
-(defn record-coercion
-  "Coerce numbers by matching them to the
-    type specified in the schema"
-  [schema data]
-  (let [coerce-data-fn
-        (coerce/coercer schema
-                        coerce/string-coercion-matcher)]
-    (coerce-data-fn data)))
-
 (defn apply-row-schema
   [col-schema csv-data]
   (let [row-schema (make-row-schema col-schema)]
-    (map #((partial (fn [s r] (record-coercion s r)) row-schema) %) (:columns csv-data))))
+    (map (coerce/coercer row-schema coerce/string-coercion-matcher) (:columns csv-data))))
 
 (defn apply-col-names-schema
   [col-schema csv-data]
   (let [col-names-schema (make-col-names-schema col-schema)]
-    (record-coercion col-names-schema (:column-names csv-data))))
+    ((coerce/coercer col-names-schema coerce/string-coercion-matcher) (:column-names csv-data))))
 
 (defmulti apply-record-coercion
   (fn [data-info csv-data]
