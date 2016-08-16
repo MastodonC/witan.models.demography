@@ -4,7 +4,7 @@
             [clojure.test :refer :all]))
 
 (deftest inputs
-  (is (contains? (sut/in-hist-deaths-by-age-and-sex-1-0-0
-                  nil {:src "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
-                       :fn (partial wt/local-download (:witan/metadata (meta #'sut/in-hist-deaths-by-age-and-sex-1-0-0)))})
-                 :historic-deaths)))
+  (let [r (sut/in-hist-deaths-by-age-and-sex-1-0-0
+           nil {:src "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"
+                :fn (partial wt/local-download (:witan/metadata (meta #'sut/in-hist-deaths-by-age-and-sex-1-0-0)))})]
+    (is (contains? r :historic-deaths))))
