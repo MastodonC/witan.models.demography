@@ -132,7 +132,7 @@
      :witan/type :input
      :witan/fn :ccm-core-input/in-future-mort-trend
      :witan/params
-     {:src (with-gss "witan.models.demography/mortality/death_improvement")}}
+     {:src "witan.models.demography/mortality/future_mortality_trend_assumption.csv.gz"}}
     {:witan/name :in-hist-total-births
      :witan/version "1.0.0"
      :witan/type :input
