@@ -1,4 +1,4 @@
-(defproject witan.models.demography "0.1.0-SNAPSHOT"
+(defproject witan.models.demography "0.1.0"
   :description "witan.models.demography is a Clojure library to run demographic models."
   :url "https://github.com/MastodonC/witan.models.demography"
   :license {:name "Eclipse Public License"
