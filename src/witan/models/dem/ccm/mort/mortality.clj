@@ -57,7 +57,7 @@
 
 (defn project-asmr [{:keys [historic-asmr future-mortality-trend-assumption]}
                     {:keys [start-year-avg-mort end-year-avg-mort variant first-proj-year
-                            last-proj-year mort-scenario mort-last-year]}]
+                            last-proj-year mort-scenario]}]
   (case variant
     :average-fixed {:initial-projected-mortality-rates
                     (-> (cf/jumpoff-year-method-average historic-asmr
@@ -123,8 +123,7 @@
   [inputs params]
   (project-asmr inputs (assoc params
                               :variant :average-fixed
-                              :mort-scenario :principal
-                              :mort-last-year 1900)))
+                              :mort-scenario :principal)))
 
 (defworkflowfn project-asmr-1-1-0
   "Takes a back series of age-specific mortality rates and a start and end year on which to
@@ -145,8 +144,7 @@
                                          :average-applynationaltrend :trend-applynationaltrend)
                         :first-proj-year (s/constrained s/Int m-utils/year?)
                         :last-proj-year (s/constrained s/Int m-utils/year?)
-                        :mort-scenario (s/enum :low :principal :high)
-                        :mort-last-year (s/constrained s/Int m-utils/year?)}
+                        :mort-scenario (s/enum :low :principal :high)}
    :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
    :witan/exported? true}
   [inputs params]

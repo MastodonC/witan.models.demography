@@ -55,7 +55,6 @@
              :first-proj-year 2015
              :last-proj-year 2017
              :mort-scenario :principal
-             :mort-last-year 2014
              :variant :average-fixed})
 
 (deftest calc-historic-asmr-test
