@@ -15,7 +15,7 @@
   (age 0) joined with the aged on population dataset (age 1 to 90) for years less than
   or equal to the latest year of deaths data.."
   [popn-ds deaths-ds births-ds]
-  (let [max-year-deaths (reduce max (ds/column deaths-ds :year))
+  (let [max-year-deaths (m-utils/get-last-year deaths-ds)
         _ (utils/property-holds? max-year-deaths m-utils/year? (str max-year-deaths " is not a year"))
         popn-not-age-0 (-> popn-ds
                            (ds/emap-column :year inc)
@@ -84,12 +84,12 @@
                                                                       start-year-avg-mort
                                                                       end-year-avg-mort)]
                                   {:initial-projected-mortality-rates
-                                   (cf/apply-national-trend projected-rates-jumpoff-year
-                                                            future-mortality-trend-assumption
-                                                            first-proj-year
-                                                            last-proj-year
-                                                            mort-scenario
-                                                            :death-rate)})
+                                   (cf/apply-national-trend-mortality projected-rates-jumpoff-year
+                                                                      future-mortality-trend-assumption
+                                                                      first-proj-year
+                                                                      last-proj-year
+                                                                      mort-scenario
+                                                                      :death-rate)})
     :trend-applynationaltrend (let [projected-rates-jumpoff-year
                                     (cf/jumpoff-year-method-trend historic-asmr
                                                                   :death-rate
@@ -97,12 +97,12 @@
                                                                   start-year-avg-mort
                                                                   end-year-avg-mort)]
                                 {:initial-projected-mortality-rates
-                                 (cf/apply-national-trend projected-rates-jumpoff-year
-                                                          future-mortality-trend-assumption
-                                                          first-proj-year
-                                                          last-proj-year
-                                                          mort-scenario
-                                                          :death-rate)})))
+                                 (cf/apply-national-trend-mortality projected-rates-jumpoff-year
+                                                                    future-mortality-trend-assumption
+                                                                    first-proj-year
+                                                                    last-proj-year
+                                                                    mort-scenario
+                                                                    :death-rate)})))
 
 (defworkflowfn project-asmr-1-0-0
   "Takes a dataset with historic mortality rates, and parameters for
@@ -163,7 +163,7 @@
    :witan/output-schema  {:deaths DeathsOutputSchema}
    :witan/exported? true}
   [{:keys [initial-projected-mortality-rates population-at-risk loop-year]} _]
-  (let [max-year (reduce max (ds/column initial-projected-mortality-rates :year))
+  (let [max-year (m-utils/get-last-year initial-projected-mortality-rates)
         _ (utils/property-holds? max-year #(<= loop-year %) #(str % " is less than loop year"))]
     {:deaths (cf/project-component population-at-risk
                                    initial-projected-mortality-rates

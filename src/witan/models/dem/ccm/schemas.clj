@@ -120,6 +120,16 @@
 (def ProjFixedASFRSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:fert-rate java.lang.Double]]))
+
+(def ProjASFRSchema
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
+                           [:fert-rate java.lang.Double]]))
+
 (def BirthsAgeSexMotherSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
                            [:year s/Int] [:births java.lang.Double]]))
+
+(def NationalFertilityTrendsSchema
+  (make-ordered-ds-schema [[:age s/Int] [:year s/Int] [:principal java.lang.Double]
+                           [:low java.lang.Double] [:high java.lang.Double] [:principal-2012 java.lang.Double]
+                           [:low-2012 java.lang.Double] [:high-2012 java.lang.Double]]))

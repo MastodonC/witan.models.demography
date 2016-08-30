@@ -86,8 +86,7 @@
    :witan/exported? true}
   [{:keys [base-asfr historic-births-by-age-mother historic-population historic-births]}
    {:keys [fert-base-year]}]
-  (let [birth-data-year (reduce max (ds/column
-                                     historic-births-by-age-mother :year))
+  (let [birth-data-year (m-utils/get-last-year historic-births-by-age-mother)
         _ (utils/property-holds? birth-data-year m-utils/year? (str birth-data-year " is not a year"))
         popn-at-risk-birth-data-year (-> historic-population
                                          (create-popn-at-risk-birth birth-data-year)
@@ -104,28 +103,74 @@
          (calc-scaled-fert-rates asfr-birth-data-year)
          (ds/select-columns [:gss-code :sex :age :year :fert-rate]))}))
 
-(defworkflowfn project-asfr-finalyearhist-fixed
-  "Takes dataset of historic age specific fertility rates, and parameter
-   for the base year of fertility data. Returns dataset with projected
-   age specific fertility rates, calculated using the jumpoff year average
-   method (see docs)."
-  {:witan/name :ccm-fert/project-asfr-finalyearhist-fixed
+(defworkflowfn project-asfr-1-0-0
+  "Project ASFR finalyearhist fixed. Takes dataset of historic age specific 
+   fertility rates, and parameter for the base year of fertility data. 
+   Returns dataset with projected age specific fertility rates, calculated 
+   using the jumpoff year finalyearhist method (see docs)."
+  {:witan/name :ccm-fert/project-asfr
    :witan/version "1.0.0"
    :witan/input-schema {:historic-asfr HistASFRSchema}
    :witan/output-schema {:initial-projected-fertility-rates ProjFixedASFRSchema}
    :witan/exported? true}
   [{:keys [historic-asfr]} _]
-  (let [final-year (reduce max (ds/column historic-asfr :year))
+  (let [final-year (m-utils/get-last-year historic-asfr)
         _ (utils/property-holds? final-year m-utils/year? (str final-year " is not a year"))
         final-year-hist (wds/select-from-ds historic-asfr {:year final-year})]
     {:initial-projected-fertility-rates
      (ds/select-columns final-year-hist [:gss-code :sex :age :fert-rate])}))
 
-(defworkflowfn project-births-from-fixed-rates
-  "Takes a dataset with population at risk from the current year of the projection
-  loop and another dataset with fixed fertility rates for the population. Returns a
-  dataset with a column of births, which are the product of popn at risk & the rates"
-  {:witan/name :ccm-fert/project-births-fixed-rates
+(defn project-asfr
+  "Given historic fertility rates, project asfr using specified variant of the projection method.
+   Currently there is only 1 year of data so the jumpoff year method is set to finalyearhist. 
+   Returns dataset with projected fertility rate in :fert-rate column for all years of projection."
+  [{:keys [historic-asfr future-fertility-trend-assumption]}
+   {:keys [variant first-proj-year last-proj-year fert-scenario]}]
+  (case variant
+    :fixed {:initial-projected-fertility-rates
+            (-> (cf/jumpoff-year-method-final-year-hist historic-asfr :fert-rate)
+                (cf/add-years-to-fixed-methods first-proj-year
+                                               last-proj-year)
+                (ds/select-columns [:gss-code :sex :age :year :fert-rate]))}
+    
+    :applynationaltrend (let [projected-rates-jumpoff-year (wds/add-derived-column historic-asfr
+                                                                                   :year
+                                                                                   [:year]
+                                                                                   (fn [y] first-proj-year))]
+                          {:initial-projected-fertility-rates
+                           (cf/apply-national-trend-fertility projected-rates-jumpoff-year
+                                                              future-fertility-trend-assumption
+                                                              first-proj-year
+                                                              last-proj-year
+                                                              fert-scenario
+                                                              :fert-rate)})))
+
+(defworkflowfn project-asfr-1-1-0
+  "Takes a back series of age-specific fertility rates. For projecting fertility rates in years 
+  following the first projection year up until the last projection year: the fixed method applies 
+  the jump off year rates each year; the apply national trend method requires a national trend 
+  dataset and a scenario to use as the future mortality trend assumption, and generates variable 
+  rates for each year. Both methods use the final year of historic data for the jumpoff method.
+  Outputs a dataset of projected age-specific fertility rates for each projection year. "
+  {:witan/name :ccm-fert/project-asfr
+   :witan/version "1.1.0"
+   :witan/input-schema {:historic-asfr HistASFRSchema
+                        :future-fertility-trend-assumption NationalFertilityTrendsSchema}
+   :witan/param-schema {:variant (s/enum :fixed :applynationaltrend)
+                        :first-proj-year (s/constrained s/Int m-utils/year?)
+                        :last-proj-year (s/constrained s/Int m-utils/year?)
+                        :fert-scenario (s/enum :low :principal :high :low-2012 :principal-2012 :high-2012)}
+   :witan/output-schema {:initial-projected-fertility-rates ProjASFRSchema}
+   :witan/exported? true}
+  [inputs params]
+  (project-asfr inputs params))
+
+(defworkflowfn project-births-1-0-0
+  "Project births from fixed rates. Takes a dataset with population at risk 
+   from the current year of the projection loop and another dataset with 
+   fixed fertility rates for the population. Returns a dataset with a column 
+   of births, which are the product of popn at risk & the rates"
+  {:witan/name :ccm-fert/project-births
    :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjFixedASFRSchema
                         :population-at-risk PopulationAtRiskSchema}
@@ -137,6 +182,26 @@
                           initial-projected-fertility-rates
                           :fert-rate :births)]
     {:births-by-age-sex-mother projected-births}))
+
+(defworkflowfn project-births-1-1-0
+  "Takes the current year of the projection, a dataset with population at risk from that year,
+  and another dataset with birth rates for the population for all projection years. Birth
+  rates are filtered for the current year. Returns a dataset with a column of births, which are
+  the product of popn at risk & birth rates"
+  {:witan/name :ccm-fert/project-births
+   :witan/version "1.1.0"
+   :witan/input-schema {:initial-projected-fertility-rates ProjASFRSchema
+                        :population-at-risk PopulationAtRiskSchema
+                        :loop-year (s/constrained s/Int m-utils/year?)}
+   :witan/output-schema  {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
+   :witan/exported? true}
+  [{:keys [initial-projected-fertility-rates population-at-risk loop-year]} _]
+  (let [max-year (m-utils/get-last-year initial-projected-fertility-rates)
+        _ (utils/property-holds? max-year #(<= loop-year %) #(str % " is less than loop year"))]
+    {:births-by-age-sex-mother (cf/project-component population-at-risk
+                                                     initial-projected-fertility-rates
+                                                     loop-year
+                                                     :fert-rate :births)}))
 
 (defn- gather-births-by-sex
   "Given a dataset with columns :gss-code, :m, and :f (where :m and :f are

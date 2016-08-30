@@ -170,7 +170,7 @@
     {:witan/name :project-asfr
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-fert/project-asfr-finalyearhist-fixed}
+     :witan/fn :ccm-fert/project-asfr}
     {:witan/name :project-asmr,
      :witan/version "1.0.0",
      :witan/type :function,
@@ -199,7 +199,7 @@
     {:witan/name :project-births
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-fert/project-births-fixed-rates}
+     :witan/fn :ccm-fert/project-births}
     {:witan/name :project-deaths
      :witan/version "1.0.0"
      :witan/type :function
@@ -230,8 +230,8 @@
        inputs/in-proj-births-by-age-of-mother-1-0-0
 
        ;; fertility fns
-       fert/project-asfr-finalyearhist-fixed
-       fert/project-births-from-fixed-rates
+       fert/project-asfr-1-0-0
+       fert/project-births-1-0-0
        fert/combine-into-births-by-sex
        fert/calculate-historic-asfr
 

@@ -131,7 +131,7 @@
 (defn tasks [inputs params gss-code]
   {;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Functions
-   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-finalyearhist-fixed
+   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-1-0-0
                                 :params {:fert-base-year (:fert-base-year params)}}
    :join-popn-latest-year        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-year}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
@@ -145,7 +145,7 @@
                                          :end-year-avg-domout-mig (:end-year-avg-domout-mig params)}}
    :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
    :age-on                     {:var #'witan.models.dem.ccm.core.projection-loop/age-on}
-   :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-from-fixed-rates}
+   :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-1-0-0}
    :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility/combine-into-births-by-sex
                                 :params {:proportion-male-newborns
                                          (:proportion-male-newborns params)}}

@@ -149,6 +149,11 @@
   {:column-names (apply-col-names-schema ProjFixedASFRSchema csv-data)
    :columns (vec (apply-row-schema ProjFixedASFRSchema csv-data))})
 
+(defmethod apply-record-coercion :projected-asfr-finalyearapplynationaltrend
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema ProjASFRSchema csv-data)
+   :columns (vec (apply-row-schema ProjASFRSchema csv-data))})
+
 (defmethod apply-record-coercion :births-by-age-sex-mother
   [data-info csv-data]
   {:column-names (apply-col-names-schema BirthsAgeSexMotherSchema csv-data)
@@ -168,6 +173,11 @@
   [data-info csv-data]
   {:column-names (apply-col-names-schema NationalTrendsSchema csv-data)
    :columns (vec (apply-row-schema NationalTrendsSchema csv-data))})
+
+(defmethod apply-record-coercion :future-fertility-trend-assumption
+  [data-info csv-data]
+  {:column-names (apply-col-names-schema NationalFertilityTrendsSchema csv-data)
+   :columns (vec (apply-row-schema NationalFertilityTrendsSchema csv-data))})
 
 (defmethod apply-record-coercion :projected-asmr
   [data-info csv-data]
