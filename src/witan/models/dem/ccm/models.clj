@@ -170,8 +170,7 @@
     {:witan/name :project-asfr
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-fert/project-asfr-finalyearhist-fixed
-     :witan/params {:fert-base-year 2014, :start-year-avg-fert 2014, :end-year-avg-fert 2014}}
+     :witan/fn :ccm-fert/project-asfr-finalyearhist-fixed}
     {:witan/name :project-asmr,
      :witan/version "1.0.0",
      :witan/type :function,
