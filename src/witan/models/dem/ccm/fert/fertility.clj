@@ -103,6 +103,65 @@
          (calc-scaled-fert-rates asfr-birth-data-year)
          (ds/select-columns [:gss-code :sex :age :year :fert-rate]))}))
 
+(defn calc-proportional-differences-fertility
+  "Takes a dataset of projected birth rates and returns a dataset with the proportional
+   difference in the rate between each year and the previous year. Also takes first
+   and last years of projection, and keyword with the scenario :low, :principal, :high,
+   :low-2012, :principal-2012, or :high-2012."
+  [future-rates-trend-assumption first-proj-year last-proj-year scenario]
+  (-> future-rates-trend-assumption
+      (ds/select-columns [:year :age scenario])
+      (ds/rename-columns {scenario :national-trend})
+      (cf/order-ds [:age :year])
+      (as-> rates (ds/add-column rates :last-year-nt (cf/lag rates :national-trend)))
+      (wds/select-from-ds {:year {:$lte last-proj-year}})
+      (wds/add-derived-column :prop-diff [:national-trend :last-year-nt :year]
+                              (fn [national-trend last-year-nt year]
+                                (if (== year (m-utils/get-first-year future-rates-trend-assumption))
+                                  0
+                                  (wds/safe-divide [(- national-trend last-year-nt) last-year-nt]))))
+      (ds/select-columns [:age :year :prop-diff])))
+
+(defn apply-national-trend-fertility
+  "Takes a dataset of projected rates or values for the jumpoff year, and a dataset of
+   projected national rates for the following years of the projection (currently
+   this is ONS data). Takes parameters for first & last projection years, the
+   scenario to be used from the future rates dataset (e.g. :low, :principal, or
+   :high), and the name of the column with rates or value in the jumpoff year dataset
+   (e.g. :fert-rate or :births). Returns a dataset with projected rates or values
+   for each age, sex, and projection year, calculated by applying the trend from
+   the projected national rates to the data from the jumpoff year dataset."
+  [jumpoff-year-projection future-assumption
+   first-proj-year last-proj-year scenario assumption-col]
+  (let [proportional-differences (calc-proportional-differences-fertility future-assumption
+                                                                          first-proj-year
+                                                                          last-proj-year
+                                                                          scenario)
+        jumpoff-year-projection-n (wds/row-count jumpoff-year-projection)
+        projection-first-proj-year (-> jumpoff-year-projection
+                                       (ds/add-column :year (repeat jumpoff-year-projection-n
+                                                                    first-proj-year))
+                                       (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
+    (cf/order-ds (:accumulator
+                  (reduce (fn [{:keys [accumulator last-calculated]} current-year]
+                            (let [projection-this-year (-> proportional-differences
+                                                           (wds/select-from-ds {:year current-year})
+                                                           (wds/join last-calculated [:age])
+                                                           (wds/add-derived-column :prop-diff
+                                                                                   [:prop-diff]                   
+                                                                                   (fn [pd] (or pd 0.0)))
+                                                           (wds/add-derived-column assumption-col
+                                                                                   [assumption-col :prop-diff]
+                                                                                   (fn [assumption-col prop-diff]
+                                                                                     (* ^double assumption-col (inc prop-diff))))
+                                                           (wds/add-derived-column :year [:year] (fn [_] current-year))
+                                                           (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
+                              {:accumulator (ds/join-rows accumulator projection-this-year)
+                               :last-calculated projection-this-year}))
+                          {:accumulator projection-first-proj-year :last-calculated projection-first-proj-year}
+                          (range (inc first-proj-year) (inc last-proj-year))))
+                 [:sex :year :age])))
+
 (defworkflowfn project-asfr-1-0-0
   "Project ASFR finalyearhist fixed. Takes dataset of historic age specific 
    fertility rates, and parameter for the base year of fertility data. 
@@ -120,7 +179,7 @@
     {:initial-projected-fertility-rates
      (ds/select-columns final-year-hist [:gss-code :sex :age :fert-rate])}))
 
-(defn project-asfr
+(defn project-asfr-internal
   "Given historic fertility rates, project asfr using specified variant of the projection method.
    Currently there is only 1 year of data so the jumpoff year method is set to finalyearhist. 
    Returns dataset with projected fertility rate in :fert-rate column for all years of projection."
@@ -136,14 +195,14 @@
     :applynationaltrend (let [projected-rates-jumpoff-year (wds/add-derived-column historic-asfr
                                                                                    :year
                                                                                    [:year]
-                                                                                   (fn [y] first-proj-year))]
+                                                                                   (fn [_] first-proj-year))]
                           {:initial-projected-fertility-rates
-                           (cf/apply-national-trend-fertility projected-rates-jumpoff-year
-                                                              future-fertility-trend-assumption
-                                                              first-proj-year
-                                                              last-proj-year
-                                                              fert-scenario
-                                                              :fert-rate)})))
+                           (apply-national-trend-fertility projected-rates-jumpoff-year
+                                                           future-fertility-trend-assumption
+                                                           first-proj-year
+                                                           last-proj-year
+                                                           fert-scenario
+                                                           :fert-rate)})))
 
 (defworkflowfn project-asfr-1-1-0
   "Takes a back series of age-specific fertility rates. For projecting fertility rates in years 
@@ -163,7 +222,7 @@
    :witan/output-schema {:initial-projected-fertility-rates ProjASFRSchema}
    :witan/exported? true}
   [inputs params]
-  (project-asfr inputs params))
+  (project-asfr-internal inputs params))
 
 (defworkflowfn project-births-1-0-0
   "Project births from fixed rates. Takes a dataset with population at risk 

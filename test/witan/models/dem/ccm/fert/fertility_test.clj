@@ -106,10 +106,6 @@
                           :projected-asfr-finalyearapplynationaltrend
                           (ds/rename-columns {:fert-rate :fert-rate-r})
                           (ds/select-columns [:gss-code :sex :age :year :fert-rate-r]))
-          init-asfr (-> fertility-inputs
-                        (calculate-historic-asfr params-applynationaltrend)
-                        (project-asfr-1-1-0 params-applynationaltrend)
-                        :initial-projected-fertility-rates)
           joined-asfr (-> fertility-inputs
                           (calculate-historic-asfr params-applynationaltrend)
                           (project-asfr-1-1-0 params-applynationaltrend)

@@ -55,9 +55,65 @@
        (calc-death-rates historic-deaths)
        (hash-map :historic-asmr)))
 
-(defn project-asmr [{:keys [historic-asmr future-mortality-trend-assumption]}
-                    {:keys [start-year-avg-mort end-year-avg-mort variant first-proj-year
-                            last-proj-year mort-scenario]}]
+(defn calc-proportional-differences-mortality
+  "Takes a dataset of projected death rates and returns a dataset with the proportional
+   difference in the rate between each year and the previous year. Also takes first
+   and last years of projection, and keyword with the scenario :low, :principal or :high."
+  [future-rates-trend-assumption first-proj-year last-proj-year scenario]
+  (-> future-rates-trend-assumption
+      (wds/select-from-ds {:year {:$gte first-proj-year :$lte last-proj-year}})
+      (ds/select-columns [:sex :age :year scenario])
+      (ds/rename-columns {scenario :national-trend})
+      (cf/order-ds [:sex :age :year])
+      (as-> rates (ds/add-column rates :last-year-nt (cf/lag rates :national-trend)))
+      (wds/add-derived-column :age [:age] inc)
+      (wds/add-derived-column :prop-diff [:national-trend :last-year-nt :year]
+                              (fn [national-trend last-year-nt year]
+                                (if (== year first-proj-year)
+                                  0
+                                  (wds/safe-divide [(- national-trend last-year-nt) last-year-nt]))))
+      (ds/select-columns [:sex :age :year :prop-diff])))
+
+(defn apply-national-trend-mortality
+  "Takes a dataset of projected rates or values for the jumpoff year, and a dataset of
+   projected national rates for the following years of the projection (currently
+   this is ONS data). Takes parameters for first & last projection years, the
+   scenario to be used from the future rates dataset (e.g. :low, :principal, or
+   :high), and the name of the column with rates or value in the jumpoff year dataset
+   (e.g. :death-rate or :deaths). Returns a dataset with projected rates or values
+   for each age, sex, and projection year, calculated by applying the trend from
+   the projected national rates to the data from the jumpoff year dataset."
+  [jumpoff-year-projection future-assumption
+   first-proj-year last-proj-year scenario assumption-col]
+  (let [proportional-differences (calc-proportional-differences-mortality future-assumption
+                                                                          first-proj-year
+                                                                          last-proj-year
+                                                                          scenario)
+        jumpoff-year-projection-n (wds/row-count jumpoff-year-projection)
+        projection-first-proj-year (-> jumpoff-year-projection
+                                       (ds/add-column :year (repeat jumpoff-year-projection-n
+                                                                    first-proj-year))
+                                       (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
+    (cf/order-ds (:accumulator
+                  (reduce (fn [{:keys [accumulator last-calculated]} current-year]
+                            (let [projection-this-year (-> proportional-differences
+                                                           (wds/select-from-ds {:year current-year})
+                                                           (wds/join last-calculated [:sex :age])
+                                                           (wds/add-derived-column assumption-col
+                                                                                   [assumption-col :prop-diff]
+                                                                                   (fn [assumption-col prop-diff]
+                                                                                     (* ^double assumption-col (inc prop-diff))))
+                                                           (wds/add-derived-column :year [:year] (fn [_] current-year))
+                                                           (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
+                              {:accumulator (ds/join-rows accumulator projection-this-year)
+                               :last-calculated projection-this-year}))
+                          {:accumulator projection-first-proj-year :last-calculated projection-first-proj-year}
+                          (range (inc first-proj-year) (inc last-proj-year))))
+                 [:sex :year :age])))
+
+(defn project-asmr-internal [{:keys [historic-asmr future-mortality-trend-assumption]}
+                             {:keys [start-year-avg-mort end-year-avg-mort variant first-proj-year
+                                     last-proj-year mort-scenario]}]
   (case variant
     :average-fixed {:initial-projected-mortality-rates
                     (-> (cf/jumpoff-year-method-average historic-asmr
@@ -84,12 +140,12 @@
                                                                       start-year-avg-mort
                                                                       end-year-avg-mort)]
                                   {:initial-projected-mortality-rates
-                                   (cf/apply-national-trend-mortality projected-rates-jumpoff-year
-                                                                      future-mortality-trend-assumption
-                                                                      first-proj-year
-                                                                      last-proj-year
-                                                                      mort-scenario
-                                                                      :death-rate)})
+                                   (apply-national-trend-mortality projected-rates-jumpoff-year
+                                                                   future-mortality-trend-assumption
+                                                                   first-proj-year
+                                                                   last-proj-year
+                                                                   mort-scenario
+                                                                   :death-rate)})
     :trend-applynationaltrend (let [projected-rates-jumpoff-year
                                     (cf/jumpoff-year-method-trend historic-asmr
                                                                   :death-rate
@@ -97,12 +153,12 @@
                                                                   start-year-avg-mort
                                                                   end-year-avg-mort)]
                                 {:initial-projected-mortality-rates
-                                 (cf/apply-national-trend-mortality projected-rates-jumpoff-year
-                                                                    future-mortality-trend-assumption
-                                                                    first-proj-year
-                                                                    last-proj-year
-                                                                    mort-scenario
-                                                                    :death-rate)})))
+                                 (apply-national-trend-mortality projected-rates-jumpoff-year
+                                                                 future-mortality-trend-assumption
+                                                                 first-proj-year
+                                                                 last-proj-year
+                                                                 mort-scenario
+                                                                 :death-rate)})))
 
 (defworkflowfn project-asmr-1-0-0
   "Takes a dataset with historic mortality rates, and parameters for
@@ -121,9 +177,9 @@
    :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
    :witan/exported? true}
   [inputs params]
-  (project-asmr inputs (assoc params
-                              :variant :average-fixed
-                              :mort-scenario :principal)))
+  (project-asmr-internal inputs (assoc params
+                                       :variant :average-fixed
+                                       :mort-scenario :principal)))
 
 (defworkflowfn project-asmr-1-1-0
   "Takes a back series of age-specific mortality rates and a start and end year on which to
@@ -148,7 +204,7 @@
    :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
    :witan/exported? true}
   [inputs params]
-  (project-asmr inputs params))
+  (project-asmr-internal inputs params))
 
 (defworkflowfn project-deaths
   "Takes the current year of the projection, a dataset with population at risk from that year,
