@@ -37,7 +37,7 @@
   [task-coll]
   (mapv (fn [[k v]]
           (let [m (hash-map :witan/name k
-                            :witan/version "1.0.0"
+                            :witan/version (:witan/version (get-meta v))
                             :witan/type (:witan/type (get-meta v))
                             :witan/fn (:witan/name (get-meta v)))]
             (if (:params v)

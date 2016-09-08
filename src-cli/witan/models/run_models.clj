@@ -131,8 +131,11 @@
 (defn tasks [inputs params gss-code]
   {;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Functions
-   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-1-0-0
-                                :params {:fert-base-year (:fert-base-year params)}}
+   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-1-1-0
+                                :params {:fert-variant (:fert-variant params)
+                                         :first-proj-year (:first-proj-year params)
+                                         :last-proj-year (:last-proj-year params)
+                                         :fert-scenario (:fert-scenario params)}}
    :join-popn-latest-year        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-year}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
    :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths}
@@ -145,15 +148,17 @@
                                          :end-year-avg-domout-mig (:end-year-avg-domout-mig params)}}
    :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
    :age-on                     {:var #'witan.models.dem.ccm.core.projection-loop/age-on}
-   :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-1-0-0}
+   :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births}
    :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility/combine-into-births-by-sex
                                 :params {:proportion-male-newborns
                                          (:proportion-male-newborns params)}}
-   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-1-0-0
+   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-1-1-0
                                 :params {:start-year-avg-mort (:start-year-avg-mort params)
                                          :end-year-avg-mort (:end-year-avg-mort params)
                                          :last-proj-year (:last-proj-year params)
-                                         :first-proj-year (:first-proj-year params)}}
+                                         :first-proj-year (:first-proj-year params)
+                                         :mort-variant (:mort-variant params)
+                                         :mort-scenario (:mort-scenario params)}}
    :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
    :prepare-starting-popn      {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs}
    :calc-hist-asfr             {:var #'witan.models.dem.ccm.fert.fertility/calculate-historic-asfr
@@ -181,6 +186,9 @@
    :in-future-mort-trend          {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src (:future-mortality-trend-assumption inputs)
                                             :key :future-mortality-trend-assumption}}
+   :in-future-fert-trend          {:var #'witan.models.load-data/resource-csv-loader
+                                   :params {:src (:future-fertility-trend-assumption inputs)
+                                            :key :future-fertility-trend-assumption}}
    :in-hist-total-births          {:var #'witan.models.run-models/resource-csv-loader-filtered
                                    :params {:gss-code gss-code
                                             :src (:historic-births inputs)

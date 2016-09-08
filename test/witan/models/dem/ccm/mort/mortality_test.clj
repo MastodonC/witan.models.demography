@@ -55,7 +55,7 @@
              :first-proj-year 2015
              :last-proj-year 2017
              :mort-scenario :principal
-             :variant :average-fixed})
+             :mort-variant :average-fixed})
 
 (deftest calc-historic-asmr-test
   (testing "Death rates are calculated correctly."
@@ -87,7 +87,7 @@
     (let [projected-asmr-clj (-> hist-asmr-inputs
                                  calc-historic-asmr
                                  (project-asmr-1-1-0
-                                  (assoc params :variant :average-applynationaltrend))
+                                  (assoc params :mort-variant :average-applynationaltrend))
                                  :initial-projected-mortality-rates)
           joined-proj-asmr (wds/join proj-asmr-avg-applynationaltrend-r
                                      projected-asmr-clj
@@ -114,7 +114,7 @@
 (deftest project-deaths-test
   (let [death-rates (-> hist-asmr-inputs
                         calc-historic-asmr
-                        (project-asmr-1-1-0 (assoc params :variant :average-applynationaltrend)))
+                        (project-asmr-1-1-0 (assoc params :mort-variant :average-applynationaltrend)))
         proj-deaths-clj (-> death-rates
                             (merge proj-death-inputs)
                             project-deaths

@@ -27,20 +27,25 @@
                    :international-out-migrants
                    "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"
                    :future-mortality-trend-assumption
-                   "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"}))
+                   "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"
+                   :future-fertility-trend-assumption
+                   "./datasets/default_datasets/fertility/future_fertility_trend_assumption.csv"}))
 
 (def params {;; Core module
              :first-proj-year 2015
              :last-proj-year 2016
              ;; Fertility module
-             :fert-base-year 2014
              :proportion-male-newborns (double (/ 105 205))
+             :fert-variant :fixed
+             :fert-scenario :principal-2012
+             :fert-base-year 2014
              ;; Mortality module
              ;; (s/validate (s/pred (>= % earliest-mort-year)) :start-year-avg-mort)
              :start-year-avg-mort 2010
-             ;; (s/validate (s/pred (<= % (dec jumpoff-year-mort))) :end-year-avg-mort)
              :end-year-avg-mort 2014
-             :variant :average-fixed
+             :mort-variant :average-fixed
+             :mort-scenario :principal
+             ;; (s/validate (s/pred (<= % (dec jumpoff-year-mort))) :end-year-avg-mort)
              ;; Migration module
              ;; (s/validate (s/pred (>= % earliest-domin-mig-year)) :start-year-avg-domin-mig)
              :start-year-avg-domin-mig 2003
@@ -64,8 +69,8 @@
 (defn fertility-module [inputs params]
   (-> inputs
       (fert/calculate-historic-asfr params)
-      fert/project-asfr-1-0-0
-      fert/project-births-1-0-0
+      (fert/project-asfr-1-1-0 params)
+      fert/project-births
       (fert/combine-into-births-by-sex params)))
 
 (defn fertility-module-1 [inputs params]
@@ -75,7 +80,7 @@
 (defn mortality-module [inputs params]
   (-> inputs
       mort/calc-historic-asmr
-      (mort/project-asmr-1-0-0 params)
+      (mort/project-asmr-1-1-0 params)
       mort/project-deaths))
 
 (defn migration-module [inputs params]

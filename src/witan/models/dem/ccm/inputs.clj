@@ -44,6 +44,12 @@
    :witan/key :future-mortality-trend-assumption
    :witan/schema s/NationalTrendsSchema})
 
+(definput in-future-fert-trend-1-0-0
+  {:witan/name :ccm-core-input/in-future-fert-trend
+   :witan/version "1.0.0"
+   :witan/key :future-fertility-trend-assumption
+   :witan/schema s/NationalFertilityTrendsSchema})
+
 (definput in-hist-total-births-1-0-0
   {:witan/name :ccm-core-input/in-hist-total-births
    :witan/version "1.0.0"

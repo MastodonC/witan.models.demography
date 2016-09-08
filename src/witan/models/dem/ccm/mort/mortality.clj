@@ -55,6 +55,15 @@
        (calc-death-rates historic-deaths)
        (hash-map :historic-asmr)))
 
+;;Age specific fertility rates projection
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Note: Fertility & mortality use different project ASR functions because future trends data ;;
+;; from ONS is different. Mortality future trend has a sex column whereas fertility future    ;;
+;; trend does not. Also, the future rates dataset needs to be aged on for mortality in the    ;;
+;; calc-proportional-differences function due to the way ages are used by the ONS, to give    ;;
+;; the correct death rates. This is not the case for the future fertility rates.              ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn calc-proportional-differences-mortality
   "Takes a dataset of projected death rates and returns a dataset with the proportional
    difference in the rate between each year and the previous year. Also takes first
@@ -112,9 +121,9 @@
                  [:sex :year :age])))
 
 (defn project-asmr-internal [{:keys [historic-asmr future-mortality-trend-assumption]}
-                             {:keys [start-year-avg-mort end-year-avg-mort variant first-proj-year
+                             {:keys [start-year-avg-mort end-year-avg-mort mort-variant first-proj-year
                                      last-proj-year mort-scenario]}]
-  (case variant
+  (case mort-variant
     :average-fixed {:initial-projected-mortality-rates
                     (-> (cf/jumpoff-year-method-average historic-asmr
                                                         :death-rate
@@ -178,7 +187,7 @@
    :witan/exported? true}
   [inputs params]
   (project-asmr-internal inputs (assoc params
-                                       :variant :average-fixed
+                                       :mort-variant :average-fixed
                                        :mort-scenario :principal)))
 
 (defworkflowfn project-asmr-1-1-0
@@ -196,8 +205,8 @@
                         :future-mortality-trend-assumption NationalTrendsSchema}
    :witan/param-schema {:start-year-avg-mort s/Int
                         :end-year-avg-mort s/Int
-                        :variant (s/enum :average-fixed :trend-fixed
-                                         :average-applynationaltrend :trend-applynationaltrend)
+                        :mort-variant (s/enum :average-fixed :trend-fixed
+                                              :average-applynationaltrend :trend-applynationaltrend)
                         :first-proj-year (s/constrained s/Int m-utils/year?)
                         :last-proj-year (s/constrained s/Int m-utils/year?)
                         :mort-scenario (s/enum :low :principal :high)}
