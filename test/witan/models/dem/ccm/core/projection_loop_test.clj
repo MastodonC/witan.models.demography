@@ -64,8 +64,8 @@
 (defn fertility-module [inputs params]
   (-> inputs
       (fert/calculate-historic-asfr params)
-      fert/project-asfr-finalyearhist-fixed
-      fert/project-births-from-fixed-rates
+      fert/project-asfr-1-0-0
+      fert/project-births-1-0-0
       (fert/combine-into-births-by-sex params)))
 
 (defn fertility-module-1 [inputs params]

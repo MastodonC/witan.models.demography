@@ -34,7 +34,7 @@
                          :population PopulationSchema}
    :witan/exported? true}
   [{:keys [historic-population]} _]
-  (let [last-year (reduce max (ds/column historic-population :year))
+  (let [last-year (m-utils/get-last-year historic-population)
         _ (utils/property-holds? last-year m-utils/year? (str last-year " is not a year"))
         last-year-popn (wds/select-from-ds historic-population {:year last-year})]
     {:loop-year last-year :latest-year-popn last-year-popn
