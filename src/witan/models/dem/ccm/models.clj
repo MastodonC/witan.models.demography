@@ -56,13 +56,12 @@
     [:combine-into-net-flows :select-starting-popn]
 
     ;; --- start popn loop
-    [:select-starting-popn       :project-births]
     [:select-starting-popn       :project-deaths]
+    [:project-deaths             :project-births]
     [:project-births             :combine-into-births-by-sex]
     [:combine-into-births-by-sex :age-on]
     [:age-on                     :add-births]
     [:add-births                 :remove-deaths]
-    [:project-deaths             :remove-deaths]
     [:remove-deaths              :apply-migration]
     [:apply-migration            :join-popn-latest-year]
     [:join-popn-latest-year      [:finish-looping? :out :select-starting-popn]]
@@ -91,7 +90,7 @@
      :witan/version "1.0.0"
      :witan/type :predicate
      :witan/fn :ccm-core/ccm-loop-pred
-     :witan/params {:last-proj-year 2021}}
+     :witan/params {:last-proj-year 2018}}
     {:witan/name :in-hist-deaths-by-age-and-sex
      :witan/version "1.0.0"
      :witan/type :input
@@ -175,7 +174,7 @@
      :witan/version "1.0.0",
      :witan/type :function,
      :witan/fn :ccm-mort/project-asmr
-     :witan/params {:start-year-avg-mort 2010, :end-year-avg-mort 2014, :last-proj-year 2021 :first-proj-year 2014}}
+     :witan/params {:start-year-avg-mort 2010, :end-year-avg-mort 2014, :last-proj-year 2018 :first-proj-year 2014}}
     {:witan/name :proj-intl-in-migrants
      :witan/version "1.0.0"
      :witan/type :function
