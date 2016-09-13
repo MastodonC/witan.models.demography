@@ -30,7 +30,7 @@
                    "./datasets/test_datasets/model_inputs/mort/death_improvement.csv"}))
 
 (def params {;; Core module
-             :first-proj-year 2014
+             :first-proj-year 2015
              :last-proj-year 2016
              ;; Fertility module
              :fert-base-year 2014

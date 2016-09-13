@@ -13,9 +13,10 @@
             [witan.models.dem.ccm.core.projection-loop]
             [witan.models.dem.ccm.models :refer [cohort-component-model
                                                  model-library]]
-            [witan.models.dem.ccm.models-utils :refer [make-catalog make-contracts]]))
+            [witan.models.dem.ccm.models-utils :refer [make-catalog make-contracts]]
+            [witan.datasets :as wds]))
 
-(def gss-code "E07000155")
+(def gss-code "E06000023")
 
 (defn with-gss
   [id]
@@ -69,16 +70,28 @@
   [input]
   (assoc-in input [:witan/params :fn] (partial local-download input)))
 
+(defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
+
 (deftest workspace-test
   (let [fixed-catalog (mapv #(if (= (:witan/type %) :input) (fix-input %) %) (:catalog cohort-component-model))
         workspace     {:workflow  (:workflow cohort-component-model)
                        :catalog   fixed-catalog
                        :contracts (p/available-fns (model-library))}
         workspace'    (s/with-fn-validation (wex/build! workspace))
-        result        (wex/run!! workspace' {})]
+        result        (wex/run!! workspace' {})
+        test-value    (-> result
+                          first
+                          :population
+                          (wds/select-from-ds {:age 21})
+                          (wds/select-from-ds {:year 2015})
+                          (wds/select-from-ds {:sex "M"})
+                          :columns
+                          last
+                          (get 0))]
     (is (not-empty result))
     (is (= 1 (count (first result))))
-    (is (contains? (first result) :population))))
+    (is (contains? (first result) :population))
+    (is (fp-equals? 4645.734788600881 test-value 0.000001))))
 
 (deftest imodellibrary-test
   (let [ml (model-library)
