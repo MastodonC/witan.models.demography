@@ -229,7 +229,7 @@
                        :contracts (make-contracts tasks)}
         workspace'    (s/with-fn-validation (wex/build! workspace))
         result        (wex/run!! workspace' {})]
-    (:population (first result))))
+    (first result)))
 
 (def cli-options
   [["-i" "--input-config FILEPATH" "Filepath for the config file with inputs info"
@@ -251,6 +251,11 @@
                                                                        (.getMessage e))))))
         (map? input) input))
 
+(defn output-to-csv [data gss-code dataset key output-projections]
+  (-> (dataset data)
+      (add-district-to-dataset-per-user-input gss-code)
+      (write-data-to-csv (str/replace output-projections #".csv" (str "_" (name key) ".csv")) [:gss-code :district :sex :age :year key])))
+
 (defn -main
   "runs the ccm, adds district information for easier human
    reading and outputs to a csv"
@@ -263,17 +268,18 @@
                            (double (/ (:number-male-newborns user-parameters)
                                       (:number-all-newborns user-parameters))))
                     (catch Exception e (timbre/info (format "Caught Error: %s"
-                                                            (.getMessage e)))))]
-    (timbre/info (format "\n%d option validation errors\n%s" (count errors)
-                         (clojure.string/join "\n" errors)))
-    (timbre/info (format "\nInput used: %s\nOutput used: %s\n"
-                         (:input-config (:options (parse-opts args cli-options)))
-                         (:output-projections (:options (parse-opts args cli-options)))))
-    (timbre/info (format "\nPreparing projection for %s... " (get-district gss-code)))
-    (-> input-datasets
-        (run-workspace gss-code params)
-        (add-district-to-dataset-per-user-input gss-code)
-        (write-data-to-csv output-projections [:gss-code :district :sex :age :year :popn]))))
+                                                            (.getMessage e)))))
+        _ (timbre/info (format "\n%d option validation errors\n%s" (count errors)
+                               (clojure.string/join "\n" errors)))
+        _ (timbre/info (format "\nInput used: %s\nOutput used: %s\n"
+                               (:input-config (:options (parse-opts args cli-options)))
+                               (:output-projections (:options (parse-opts args cli-options)))))
+        _ (timbre/info (format "\nPreparing projection for %s... " (get-district gss-code)))
+        run-ccm (run-workspace input-datasets gss-code params)]
+    (output-to-csv run-ccm gss-code :population :popn output-projections)
+    (output-to-csv run-ccm gss-code :births :births output-projections)
+    (output-to-csv run-ccm gss-code :deaths :deaths output-projections)
+    (output-to-csv run-ccm gss-code :net-migration :net-migration output-projections)))
 
 (comment
   "example gss code input when running on the repl"
