@@ -76,7 +76,7 @@
     {:witan/name :age-on
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-cor/age-on}
+     :witan/fn :ccm-core/age-on}
     {:witan/name :apply-migration
      :witan/version "1.0.0"
      :witan/type :function
