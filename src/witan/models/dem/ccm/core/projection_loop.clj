@@ -144,5 +144,6 @@
   "Returns the population field"
   {:witan/name :ccm-core-out/population
    :witan/version "1.0.0"
-   :witan/input-schema {:population PopulationSchema}}
+   :witan/input-schema {:population PopulationSchema :net-migration NetMigrationSchema
+                        :births BirthsBySexSchema :deaths DeathsOutputSchema}}
   [d _] d)

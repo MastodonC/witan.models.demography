@@ -93,7 +93,7 @@
                           last
                           (get 0))]
     (is (not-empty result))
-    (is (= 1 (count (first result))))
+    (is (= 4 (count (first result))))
     (is (contains? (first result) :population))
     (is (fp-equals? 4645.734788600881 test-value 0.000001))))
 
