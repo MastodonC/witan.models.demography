@@ -70,21 +70,6 @@
                                0.0000000001)
                   (range (first (:shape joined-hist-asfr))))))))
 
-(deftest project-asfr-1-0-0-test
-  (testing "Fertility rates are projected correctly."
-    (let [proj-asfr-r (-> fert-outputs-r-fixed
-                          :projected-asfr
-                          (ds/rename-columns {:fert-rate :fert-rate-r}))
-          joined-asfr (-> fertility-inputs
-                          (calculate-historic-asfr params-fixed)
-                          (project-asfr-1-0-0 params-fixed)
-                          :initial-projected-fertility-rates
-                          (wds/join proj-asfr-r [:gss-code :sex :age]))]
-      (is (every? #(fp-equals? (wds/subset-ds joined-asfr :rows % :cols :fert-rate-r)
-                               (wds/subset-ds joined-asfr :rows % :cols :fert-rate)
-                               0.0000000001)
-                  (range (first (:shape joined-asfr))))))))
-
 (deftest project-asfr-1-1-0-test
   (testing "Fertility rates are projected correctly for fixed variant."
     (let [proj-asfr-r (-> fert-outputs-r-fixed

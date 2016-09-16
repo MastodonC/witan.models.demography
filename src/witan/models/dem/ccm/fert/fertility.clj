@@ -196,21 +196,6 @@
                                                            fert-scenario
                                                            :fert-rate)})))
 
-(defworkflowfn project-asfr-1-0-0
-  "Project ASFR finalyearhist fixed. Returns dataset with projected age specific 
-  fertility rates, calculated using the jumpoff year finalyearhist method (see docs)."
-  {:witan/name :ccm-fert/project-asfr
-   :witan/version "1.0.0"
-   :witan/input-schema {:historic-asfr HistASFRSchema
-                        :future-fertility-trend-assumption NationalFertilityTrendsSchema}
-   :witan/param-schema {:first-proj-year (s/constrained s/Int m-utils/year?)
-                        :last-proj-year (s/constrained s/Int m-utils/year?)
-                        :fert-scenario (s/enum :low :principal :high :low-2012 :principal-2012 :high-2012)}
-   :witan/output-schema {:initial-projected-fertility-rates ProjASFRSchema}
-   :witan/exported? true}
-  [inputs params]
-  (project-asfr-internal inputs (assoc params :fert-variant :fixed)))
-
 (defworkflowfn project-asfr-1-1-0
   "Takes a back series of age-specific fertility rates. For projecting fertility rates in years 
   following the first projection year up until the last projection year: the fixed method applies 

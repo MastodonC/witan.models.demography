@@ -169,27 +169,6 @@
                                                                  mort-scenario
                                                                  :death-rate)})))
 
-(defworkflowfn project-asmr-1-0-0
-  "Takes a dataset with historic mortality rates, and parameters for
-  the number of years of data to average for the calculation, and the
-  jumpoff year. Returns a dataset that now includes projected
-  mortality rates, projected with the jumpoff year average method (see
-  docs)"
-  {:witan/name :ccm-mort/project-asmr
-   :witan/version "1.0.0"
-   :witan/input-schema {:historic-asmr HistASMRSchema
-                        :future-mortality-trend-assumption NationalTrendsSchema}
-   :witan/param-schema {:start-year-avg-mort s/Int
-                        :end-year-avg-mort s/Int
-                        :last-proj-year s/Int
-                        :first-proj-year s/Int}
-   :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
-   :witan/exported? true}
-  [inputs params]
-  (project-asmr-internal inputs (assoc params
-                                       :mort-variant :average-fixed
-                                       :mort-scenario :principal)))
-
 (defworkflowfn project-asmr-1-1-0
   "Takes a back series of age-specific mortality rates and a start and end year on which to
   base calculation of the projected mortality rates in the first loop projection year from
