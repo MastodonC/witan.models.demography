@@ -127,23 +127,31 @@
                             (ds/rename-columns {:popn-migrated :popn}))]
     {:latest-year-popn popn-w-migrants}))
 
-(defworkflowfn join-popn-latest-year
+(defworkflowfn append-by-year-1-0-0
   "Takes in a dataset of population for previous years and a dataset of
    projected population for the next year of projection.
    Returns a datasets that appends the second dataset to the first one."
-  {:witan/name :ccm-core/join-years
+  {:witan/name :ccm-core/append-years
    :witan/version "1.0.0"
    :witan/input-schema {:latest-year-popn PopulationSchema
-                        :population PopulationSchema}
-   :witan/output-schema {:population PopulationSchema}
-   :witan/exported? true}
-  [{:keys [latest-year-popn population]} _]
-  {:population (ds/join-rows population latest-year-popn)})
+                        :population PopulationSchema
+                        :births BirthsBySexSchema
+                        :historic-births BirthsSchema
+                        :loop-year (s/constrained s/Int m-utils/year?)}
+   :witan/output-schema {:population PopulationSchema
+                         :historic-births BirthsSchema}}
+  [{:keys [latest-year-popn population births historic-births loop-year]} _]
+  (let [add-year-to-births (-> births
+                               (ds/add-column :year (repeat 2 loop-year))
+                               (ds/add-column :age (repeat 2 0)))]
+    {:historic-births (ds/join-rows historic-births add-year-to-births)
+     :population (ds/join-rows population latest-year-popn)}))
 
 (defworkflowoutput population-out
   "Returns the population field"
   {:witan/name :ccm-core-out/population
    :witan/version "1.0.0"
    :witan/input-schema {:population PopulationSchema :net-migration NetMigrationSchema
-                        :births BirthsBySexSchema :deaths DeathsOutputSchema}}
-  [d _] d)
+                        :historic-births BirthsSchema :deaths DeathsOutputSchema}}
+  [{:keys [historic-births population net-migration deaths]} _]
+  {:births historic-births :population population :net-migration net-migration :deaths deaths})
