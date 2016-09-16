@@ -196,7 +196,7 @@
                                                            fert-scenario
                                                            :fert-rate)})))
 
-(defworkflowfn project-asfr-1-1-0
+(defworkflowfn project-asfr-1-0-0
   "Takes a back series of age-specific fertility rates. For projecting fertility rates in years 
   following the first projection year up until the last projection year: the fixed method applies 
   the jump off year rates each year; the apply national trend method requires a national trend 
@@ -204,7 +204,7 @@
   rates for each year. Both methods use the final year of historic data for the jumpoff method.
   Outputs a dataset of projected age-specific fertility rates for each projection year. "
   {:witan/name :ccm-fert/project-asfr
-   :witan/version "1.1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:historic-asfr HistASFRSchema
                         :future-fertility-trend-assumption NationalFertilityTrendsSchema}
    :witan/param-schema {:fert-variant (s/enum :fixed :applynationaltrend)
@@ -216,13 +216,13 @@
   [inputs params]
   (project-asfr-internal inputs params))
 
-(defworkflowfn project-births-1-1-0
+(defworkflowfn project-births-1-0-0
   "Takes the current year of the projection, a dataset with population at risk from that year,
   and another dataset with birth rates for the population for all projection years. Birth
   rates are filtered for the current year. Returns a dataset with a column of births, which are
   the product of popn at risk & birth rates"
   {:witan/name :ccm-fert/project-births
-   :witan/version "1.1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjASFRSchema
                         :population-at-risk PopulationAtRiskSchema
                         :loop-year (s/constrained s/Int m-utils/year?)}

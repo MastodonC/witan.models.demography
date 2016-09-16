@@ -169,7 +169,7 @@
                                                                  mort-scenario
                                                                  :death-rate)})))
 
-(defworkflowfn project-asmr-1-1-0
+(defworkflowfn project-asmr-1-0-0
   "Takes a back series of age-specific mortality rates and a start and end year on which to
   base calculation of the projected mortality rates in the first loop projection year from
   the historic mortality rates (method dependent on average or trend jump off year method
@@ -179,7 +179,7 @@
   use as the future mortality trend assumption, and generates variable rates for each year.
   Outputs a dataset of projected age-specific mortality rates for each projection year"
   {:witan/name :ccm-mort/project-asmr
-   :witan/version "1.1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:historic-asmr HistASMRSchema
                         :future-mortality-trend-assumption NationalTrendsSchema}
    :witan/param-schema {:start-year-avg-mort s/Int
@@ -194,13 +194,13 @@
   [inputs params]
   (project-asmr-internal inputs params))
 
-(defworkflowfn project-deaths-1-1-0
+(defworkflowfn project-deaths-1-0-0
   "Takes the current year of the projection, a dataset with population at risk from that year,
   and another dataset with death rates for the population for all projection years. Death
   rates are filtered for the current year. Returns a dataset with a column of deaths, which are
   the product of popn at risk & death rates"
   {:witan/name :ccm-mort/project-deaths
-   :witan/version "1.1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjASMRSchema
                         :population-at-risk PopulationAtRiskSchema
                         :loop-year (s/constrained s/Int m-utils/year?)}

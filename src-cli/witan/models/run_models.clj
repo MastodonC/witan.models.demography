@@ -131,14 +131,14 @@
 (defn tasks [inputs params gss-code]
   {;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Functions
-   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-1-1-0
+   :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-1-0-0
                                 :params {:fert-variant (:fert-variant params)
                                          :first-proj-year (:first-proj-year params)
                                          :last-proj-year (:last-proj-year params)
                                          :fert-scenario (:fert-scenario params)}}
    :join-popn-latest-year        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-year}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
-   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths-1-1-0}
+   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths-1-0-0}
    :proj-dom-in-migrants       {:var #'witan.models.dem.ccm.mig.migration/project-domestic-in-migrants
                                 :params {:start-year-avg-domin-mig (:start-year-avg-domin-mig params)
                                          :end-year-avg-domin-mig (:end-year-avg-domin-mig params)}}
@@ -148,11 +148,11 @@
                                          :end-year-avg-domout-mig (:end-year-avg-domout-mig params)}}
    :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
    :age-on                     {:var #'witan.models.dem.ccm.core.projection-loop/age-on}
-   :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-1-1-0}
+   :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-1-0-0}
    :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility/combine-into-births-by-sex
                                 :params {:proportion-male-newborns
                                          (:proportion-male-newborns params)}}
-   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-1-1-0
+   :project-asmr               {:var #'witan.models.dem.ccm.mort.mortality/project-asmr-1-0-0
                                 :params {:start-year-avg-mort (:start-year-avg-mort params)
                                          :end-year-avg-mort (:end-year-avg-mort params)
                                          :last-proj-year (:last-proj-year params)

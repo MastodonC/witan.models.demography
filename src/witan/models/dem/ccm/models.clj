@@ -177,13 +177,13 @@
      :witan/fn :ccm-mig/proj-dom-out-mig
      :witan/params {:start-year-avg-domout-mig 2003, :end-year-avg-domout-mig 2014}}
     {:witan/name :project-asfr
-     :witan/version "1.1.0"
+     :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-fert/project-asfr
      :witan/params {:fert-variant :applynationaltrend, :first-proj-year 2015, :last-proj-year 2018,
                     :fert-scenario :principal-2012}}
     {:witan/name :project-asmr
-     :witan/version "1.1.0"
+     :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mort/project-asmr
      :witan/params {:start-year-avg-mort 2010, :end-year-avg-mort 2014,
@@ -210,11 +210,11 @@
      :witan/type :function
      :witan/fn :ccm-mig/combine-mig-flows}
     {:witan/name :project-births
-     :witan/version "1.1.0"
+     :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-fert/project-births}
     {:witan/name :project-deaths
-     :witan/version "1.1.0"
+     :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mort/project-deaths}
     {:witan/name :remove-deaths
@@ -244,15 +244,15 @@
        inputs/in-proj-births-by-age-of-mother-1-0-0
 
        ;; fertility fns
-       fert/project-asfr-1-1-0
-       fert/project-births-1-1-0
+       fert/project-asfr-1-0-0
+       fert/project-births-1-0-0
        fert/combine-into-births-by-sex
        fert/calculate-historic-asfr
 
        ;; mortality fns
-       mort/project-deaths-1-1-0
+       mort/project-deaths-1-0-0
        mort/calc-historic-asmr
-       mort/project-asmr-1-1-0
+       mort/project-asmr-1-0-0
 
        ;; migration fns
        mig/project-domestic-in-migrants
