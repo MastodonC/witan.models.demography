@@ -156,7 +156,7 @@ The last two options have default values if not specified:
 * default input configuration filepath: "default_config.edn"
 * default output projection filepath: "ccm_projections.csv"
 
-These default settings mean the "default_config.edn" file is located inside this repository and the output will be created as "ccm_projections.csv" inside this repository as well.
+These default settings mean the "default_config.edn" file is located inside this repository and the output will be created as "ccm_projections_PROJECTIONTYPE.csv" inside this repository as well.
 
 The previous command can thus been run as follows:
 
@@ -189,7 +189,7 @@ The [default config file](https://github.com/MastodonC/witan.models.demography/b
 
 #### output-projections
 
-This is the path to the file where the final projection should be saved. The projections are returned in one csv file. This file contains the historical population data used in the projection, with the projected population appended. The output path can be anywhere on your machine as long as the directories on the path exist.
+This is the path to the file where the final projections should be saved. The projections are returned in several csv files, corresponding to the population, death, birth and net migration projections. Each file is appended with the relevant projection type (i.e. "ccm_projections_births.csv"). The population file contains the historical population data used in the projection, with the projected population appended. The output path can be anywhere on your machine as long as the directories on the path exist. ### Currently the births, deaths and net migration outputs only contain the final projected year. ###
 
 ## Splitting and Uploading data
 
