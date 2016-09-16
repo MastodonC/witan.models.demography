@@ -210,11 +210,11 @@
      :witan/type :function
      :witan/fn :ccm-mig/combine-mig-flows}
     {:witan/name :project-births
-     :witan/version "1.0.0"
+     :witan/version "1.1.0"
      :witan/type :function
      :witan/fn :ccm-fert/project-births}
     {:witan/name :project-deaths
-     :witan/version "1.0.0"
+     :witan/version "1.1.0"
      :witan/type :function
      :witan/fn :ccm-mort/project-deaths}
     {:witan/name :remove-deaths
@@ -245,12 +245,12 @@
 
        ;; fertility fns
        fert/project-asfr-1-1-0
-       fert/project-births
+       fert/project-births-1-1-0
        fert/combine-into-births-by-sex
        fert/calculate-historic-asfr
 
        ;; mortality fns
-       mort/project-deaths
+       mort/project-deaths-1-1-0
        mort/calc-historic-asmr
        mort/project-asmr-1-1-0
 

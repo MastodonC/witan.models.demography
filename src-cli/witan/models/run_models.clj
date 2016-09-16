@@ -138,7 +138,7 @@
                                          :fert-scenario (:fert-scenario params)}}
    :join-popn-latest-year        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-year}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
-   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths}
+   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths-1-1-0}
    :proj-dom-in-migrants       {:var #'witan.models.dem.ccm.mig.migration/project-domestic-in-migrants
                                 :params {:start-year-avg-domin-mig (:start-year-avg-domin-mig params)
                                          :end-year-avg-domin-mig (:end-year-avg-domin-mig params)}}
@@ -148,7 +148,7 @@
                                          :end-year-avg-domout-mig (:end-year-avg-domout-mig params)}}
    :remove-deaths              {:var #'witan.models.dem.ccm.core.projection-loop/remove-deaths}
    :age-on                     {:var #'witan.models.dem.ccm.core.projection-loop/age-on}
-   :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births}
+   :project-births             {:var #'witan.models.dem.ccm.fert.fertility/project-births-1-1-0}
    :combine-into-births-by-sex {:var #'witan.models.dem.ccm.fert.fertility/combine-into-births-by-sex
                                 :params {:proportion-male-newborns
                                          (:proportion-male-newborns params)}}

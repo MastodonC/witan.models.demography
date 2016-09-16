@@ -99,7 +99,7 @@
                                0.0000000001)
                   (range (first (:shape joined-asfr))))))))
 
-(deftest project-births-test
+(deftest project-births-1-1-0-test
   (testing "Projected births match R values using fixed ASFR projection"
     (let [proj-births-r (-> fert-outputs-r-fixed
                             :births-by-age-sex-mother
@@ -108,7 +108,7 @@
                             (assoc :loop-year 2015)
                             (calculate-historic-asfr params-fixed)
                             (project-asfr-1-1-0 params-fixed)
-                            (project-births params-fixed)
+                            (project-births-1-1-0 params-fixed)
                             :births-by-age-sex-mother
                             (wds/join proj-births-r [:gss-code :sex :age :year]))]
       (is (every? #(fp-equals? (wds/subset-ds joined-births :rows % :cols :births-r)
@@ -125,7 +125,7 @@
                                    (assoc :loop-year 2015)
                                    (calculate-historic-asfr params-fixed)
                                    (project-asfr-1-1-0 params-fixed)
-                                   (project-births params-fixed)
+                                   (project-births-1-1-0 params-fixed)
                                    (combine-into-births-by-sex params-fixed)
                                    :births
                                    (wds/join births-by-sex-r [:gss-code :sex]))]

@@ -216,13 +216,13 @@
   [inputs params]
   (project-asfr-internal inputs params))
 
-(defworkflowfn project-births
+(defworkflowfn project-births-1-1-0
   "Takes the current year of the projection, a dataset with population at risk from that year,
   and another dataset with birth rates for the population for all projection years. Birth
   rates are filtered for the current year. Returns a dataset with a column of births, which are
   the product of popn at risk & birth rates"
   {:witan/name :ccm-fert/project-births
-   :witan/version "1.0.0"
+   :witan/version "1.1.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjASFRSchema
                         :population-at-risk PopulationAtRiskSchema
                         :loop-year (s/constrained s/Int m-utils/year?)}

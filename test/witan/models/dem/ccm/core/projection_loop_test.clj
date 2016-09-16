@@ -70,7 +70,7 @@
   (-> inputs
       (fert/calculate-historic-asfr params)
       (fert/project-asfr-1-1-0 params)
-      fert/project-births
+      fert/project-births-1-1-0
       (fert/combine-into-births-by-sex params)))
 
 (defn fertility-module-1 [inputs params]
@@ -81,7 +81,7 @@
   (-> inputs
       mort/calc-historic-asmr
       (mort/project-asmr-1-1-0 params)
-      mort/project-deaths))
+      mort/project-deaths-1-1-0))
 
 (defn migration-module [inputs params]
   (-> inputs
