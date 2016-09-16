@@ -32,17 +32,23 @@
                 :international-out-migrants
                 "./datasets/default_datasets/migration/historic_migration_flows_international_out.csv"
                 :future-mortality-trend-assumption
-                "./datasets/default_datasets/mortality/future_mortality_trend_assumption.csv"})
+                "./datasets/default_datasets/mortality/future_mortality_trend_assumption.csv"
+                :future-fertility-trend-assumption
+                "./datasets/default_datasets/fertility/future_fertility_trend_assumption.csv"})
 
 (def gss-bristol "E06000023")
 
 (def params-2015 {;; Core module
-                  :first-proj-year 2014
+                  :first-proj-year 2015
                   :last-proj-year 2015
                   ;; Fertility module
+                  :fert-variant :fixed
                   :fert-base-year 2014
                   :proportion-male-newborns (double (/ 105 205))
+                  :fert-scenario :principal-2012
                   ;; Mortality module
+                  :mort-variant :average-fixed
+                  :mort-scenario :principal
                   :start-year-avg-mort 2010
                   :end-year-avg-mort 2014
                   ;; Migration module

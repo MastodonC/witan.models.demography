@@ -55,6 +55,15 @@
        (calc-death-rates historic-deaths)
        (hash-map :historic-asmr)))
 
+;;Age specific fertility rates projection
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Note: Fertility & mortality use different project ASR functions because future trends data ;;
+;; from ONS is different. Mortality future trend has a sex column whereas fertility future    ;;
+;; trend does not. Also, the future rates dataset needs to be aged on for mortality in the    ;;
+;; calc-proportional-differences function due to the way ages are used by the ONS, to give    ;;
+;; the correct death rates. This is not the case for the future fertility rates.              ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn calc-proportional-differences-mortality
   "Takes a dataset of projected death rates and returns a dataset with the proportional
    difference in the rate between each year and the previous year. Also takes first
@@ -112,9 +121,9 @@
                  [:sex :year :age])))
 
 (defn project-asmr-internal [{:keys [historic-asmr future-mortality-trend-assumption]}
-                             {:keys [start-year-avg-mort end-year-avg-mort variant first-proj-year
+                             {:keys [start-year-avg-mort end-year-avg-mort mort-variant first-proj-year
                                      last-proj-year mort-scenario]}]
-  (case variant
+  (case mort-variant
     :average-fixed {:initial-projected-mortality-rates
                     (-> (cf/jumpoff-year-method-average historic-asmr
                                                         :death-rate
@@ -161,27 +170,6 @@
                                                                  :death-rate)})))
 
 (defworkflowfn project-asmr-1-0-0
-  "Takes a dataset with historic mortality rates, and parameters for
-  the number of years of data to average for the calculation, and the
-  jumpoff year. Returns a dataset that now includes projected
-  mortality rates, projected with the jumpoff year average method (see
-  docs)"
-  {:witan/name :ccm-mort/project-asmr
-   :witan/version "1.0.0"
-   :witan/input-schema {:historic-asmr HistASMRSchema
-                        :future-mortality-trend-assumption NationalTrendsSchema}
-   :witan/param-schema {:start-year-avg-mort s/Int
-                        :end-year-avg-mort s/Int
-                        :last-proj-year s/Int
-                        :first-proj-year s/Int}
-   :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
-   :witan/exported? true}
-  [inputs params]
-  (project-asmr-internal inputs (assoc params
-                                       :variant :average-fixed
-                                       :mort-scenario :principal)))
-
-(defworkflowfn project-asmr-1-1-0
   "Takes a back series of age-specific mortality rates and a start and end year on which to
   base calculation of the projected mortality rates in the first loop projection year from
   the historic mortality rates (method dependent on average or trend jump off year method
@@ -191,13 +179,13 @@
   use as the future mortality trend assumption, and generates variable rates for each year.
   Outputs a dataset of projected age-specific mortality rates for each projection year"
   {:witan/name :ccm-mort/project-asmr
-   :witan/version "1.1.0"
+   :witan/version "1.0.0"
    :witan/input-schema {:historic-asmr HistASMRSchema
                         :future-mortality-trend-assumption NationalTrendsSchema}
    :witan/param-schema {:start-year-avg-mort s/Int
                         :end-year-avg-mort s/Int
-                        :variant (s/enum :average-fixed :trend-fixed
-                                         :average-applynationaltrend :trend-applynationaltrend)
+                        :mort-variant (s/enum :average-fixed :trend-fixed
+                                              :average-applynationaltrend :trend-applynationaltrend)
                         :first-proj-year (s/constrained s/Int m-utils/year?)
                         :last-proj-year (s/constrained s/Int m-utils/year?)
                         :mort-scenario (s/enum :low :principal :high)}
@@ -206,7 +194,7 @@
   [inputs params]
   (project-asmr-internal inputs params))
 
-(defworkflowfn project-deaths
+(defworkflowfn project-deaths-1-0-0
   "Takes the current year of the projection, a dataset with population at risk from that year,
   and another dataset with death rates for the population for all projection years. Death
   rates are filtered for the current year. Returns a dataset with a column of deaths, which are

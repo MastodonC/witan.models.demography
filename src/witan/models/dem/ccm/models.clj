@@ -31,6 +31,7 @@
 
     ;; asfr/asmr projections
     [:calc-hist-asfr :project-asfr]
+    [:in-future-fert-trend :project-asfr]
     [:calc-hist-asmr :project-asmr]
     [:in-future-mort-trend :project-asmr]
 
@@ -72,7 +73,10 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-core/add-births}
-    {:witan/name :age-on, :witan/version "1.0.0", :witan/type :function, :witan/fn :ccm-cor/age-on}
+    {:witan/name :age-on
+     :witan/version "1.0.0"
+     :witan/type :function
+     :witan/fn :ccm-core/age-on}
     {:witan/name :apply-migration
      :witan/version "1.0.0"
      :witan/type :function
@@ -132,6 +136,12 @@
      :witan/fn :ccm-core-input/in-future-mort-trend
      :witan/params
      {:src "witan.models.demography/mortality/future_mortality_trend_assumption.csv.gz"}}
+    {:witan/name :in-future-fert-trend
+     :witan/version "1.0.0"
+     :witan/type :input
+     :witan/fn :ccm-core-input/in-future-fert-trend
+     :witan/params
+     {:src "witan.models.demography/fertility/future_fertility_trend_assumption.csv.gz"}}
     {:witan/name :in-hist-total-births
      :witan/version "1.0.0"
      :witan/type :input
@@ -169,12 +179,16 @@
     {:witan/name :project-asfr
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-fert/project-asfr}
-    {:witan/name :project-asmr,
-     :witan/version "1.0.0",
-     :witan/type :function,
+     :witan/fn :ccm-fert/project-asfr
+     :witan/params {:fert-variant :applynationaltrend, :first-proj-year 2015, :last-proj-year 2018,
+                    :fert-scenario :principal-2012}}
+    {:witan/name :project-asmr
+     :witan/version "1.0.0"
+     :witan/type :function
      :witan/fn :ccm-mort/project-asmr
-     :witan/params {:start-year-avg-mort 2010, :end-year-avg-mort 2014, :last-proj-year 2018 :first-proj-year 2014}}
+     :witan/params {:start-year-avg-mort 2010, :end-year-avg-mort 2014,
+                    :mort-variant :average-applynationaltrend, :first-proj-year 2015,
+                    :last-proj-year 2018, :mort-scenario :principal}}
     {:witan/name :proj-intl-in-migrants
      :witan/version "1.0.0"
      :witan/type :function
@@ -225,6 +239,7 @@
        inputs/in-hist-intl-out-migrants-1-0-0
        inputs/in-hist-popn-1-0-0
        inputs/in-future-mort-trend-1-0-0
+       inputs/in-future-fert-trend-1-0-0
        inputs/in-hist-total-births-1-0-0
        inputs/in-proj-births-by-age-of-mother-1-0-0
 
@@ -235,7 +250,7 @@
        fert/calculate-historic-asfr
 
        ;; mortality fns
-       mort/project-deaths
+       mort/project-deaths-1-0-0
        mort/calc-historic-asmr
        mort/project-asmr-1-0-0
 

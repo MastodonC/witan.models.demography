@@ -132,10 +132,13 @@
   {;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Functions
    :project-asfr               {:var #'witan.models.dem.ccm.fert.fertility/project-asfr-1-0-0
-                                :params {:fert-base-year (:fert-base-year params)}}
+                                :params {:fert-variant (:fert-variant params)
+                                         :first-proj-year (:first-proj-year params)
+                                         :last-proj-year (:last-proj-year params)
+                                         :fert-scenario (:fert-scenario params)}}
    :join-popn-latest-year        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-year}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
-   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths}
+   :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths-1-0-0}
    :proj-dom-in-migrants       {:var #'witan.models.dem.ccm.mig.migration/project-domestic-in-migrants
                                 :params {:start-year-avg-domin-mig (:start-year-avg-domin-mig params)
                                          :end-year-avg-domin-mig (:end-year-avg-domin-mig params)}}
@@ -153,7 +156,9 @@
                                 :params {:start-year-avg-mort (:start-year-avg-mort params)
                                          :end-year-avg-mort (:end-year-avg-mort params)
                                          :last-proj-year (:last-proj-year params)
-                                         :first-proj-year (:first-proj-year params)}}
+                                         :first-proj-year (:first-proj-year params)
+                                         :mort-variant (:mort-variant params)
+                                         :mort-scenario (:mort-scenario params)}}
    :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
    :prepare-starting-popn      {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs}
    :calc-hist-asfr             {:var #'witan.models.dem.ccm.fert.fertility/calculate-historic-asfr
@@ -181,6 +186,9 @@
    :in-future-mort-trend          {:var #'witan.models.load-data/resource-csv-loader
                                    :params {:src (:future-mortality-trend-assumption inputs)
                                             :key :future-mortality-trend-assumption}}
+   :in-future-fert-trend          {:var #'witan.models.load-data/resource-csv-loader
+                                   :params {:src (:future-fertility-trend-assumption inputs)
+                                            :key :future-fertility-trend-assumption}}
    :in-hist-total-births          {:var #'witan.models.run-models/resource-csv-loader-filtered
                                    :params {:gss-code gss-code
                                             :src (:historic-births inputs)

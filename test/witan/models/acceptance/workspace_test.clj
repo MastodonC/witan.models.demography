@@ -35,6 +35,10 @@
    [:future-mortality-trend-assumption
     "./datasets/default_datasets/mortality/future_mortality_trend_assumption.csv"]
 
+   :ccm-core-input/in-future-fert-trend
+   [:future-fertility-trend-assumption
+    "./datasets/default_datasets/fertility/future_fertility_trend_assumption.csv"]
+
    :ccm-core-input/in-proj-births-by-age-of-mother
    [:historic-births-by-age-mother
     (with-gss "./datasets/default_datasets/fertility/historic_births_by_age_of_mother")]
