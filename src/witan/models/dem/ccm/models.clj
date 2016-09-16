@@ -180,14 +180,14 @@
      :witan/version "1.1.0"
      :witan/type :function
      :witan/fn :ccm-fert/project-asfr
-     :witan/params {:fert-variant :fixed, :first-proj-year 2015, :last-proj-year 2018,
+     :witan/params {:fert-variant :applynationaltrend, :first-proj-year 2015, :last-proj-year 2018,
                     :fert-scenario :principal-2012}}
     {:witan/name :project-asmr
      :witan/version "1.1.0"
      :witan/type :function
      :witan/fn :ccm-mort/project-asmr
      :witan/params {:start-year-avg-mort 2010, :end-year-avg-mort 2014,
-                    :mort-variant :average-fixed, :first-proj-year 2015,
+                    :mort-variant :average-applynationaltrend, :first-proj-year 2015,
                     :last-proj-year 2018, :mort-scenario :principal}}
     {:witan/name :proj-intl-in-migrants
      :witan/version "1.0.0"
