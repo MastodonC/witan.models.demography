@@ -161,7 +161,7 @@
     {:witan/name :out
      :witan/version "1.0.0"
      :witan/type :output
-     :witan/fn :ccm-core-out/population}
+     :witan/fn :ccm-core-out/ccm-out}
     {:witan/name :prepare-starting-popn
      :witan/version "1.0.0"
      :witan/type :function
@@ -274,6 +274,6 @@
        core/finished-looping?
 
        ;; core outputs
-       core/population-out))
+       core/ccm-out))
     (available-models [_]
       (map-model-meta cohort-component-model))))

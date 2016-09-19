@@ -171,7 +171,7 @@
                                 :params {:start-year-avg-intout-mig (:start-year-avg-intout-mig params)
                                          :end-year-avg-intout-mig (:end-year-avg-intout-mig params)}}
 
-   :combine-into-net-flows {:var #'witan.models.dem.ccm.mig.migration/combine-into-net-flows}
+   :combine-into-net-flows     {:var #'witan.models.dem.ccm.mig.migration/combine-into-net-flows}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Predicates
    :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?
@@ -219,7 +219,7 @@
                                             :key :international-out-migrants}}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Outputs
-   :out {:var #'witan.models.dem.ccm.core.projection-loop/population-out}})
+   :out {:var #'witan.models.dem.ccm.core.projection-loop/ccm-out}})
 
 (defn run-workspace
   [inputs gss-code params]

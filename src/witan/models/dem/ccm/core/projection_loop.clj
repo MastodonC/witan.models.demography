@@ -147,9 +147,9 @@
     {:historic-births (ds/join-rows historic-births add-year-to-births)
      :population (ds/join-rows population latest-year-popn)}))
 
-(defworkflowoutput population-out
+(defworkflowoutput ccm-out
   "Returns the population field"
-  {:witan/name :ccm-core-out/population
+  {:witan/name :ccm-core-out/ccm-out
    :witan/version "1.0.0"
    :witan/input-schema {:population PopulationSchema :net-migration NetMigrationSchema
                         :historic-births BirthsSchema :deaths DeathsOutputSchema}}
