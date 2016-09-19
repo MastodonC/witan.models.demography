@@ -64,8 +64,8 @@
     [:age-on                     :add-births]
     [:add-births                 :remove-deaths]
     [:remove-deaths              :apply-migration]
-    [:apply-migration            :join-popn-latest-year]
-    [:join-popn-latest-year      [:finish-looping? :out :select-starting-popn]]
+    [:apply-migration            :append-by-year]
+    [:append-by-year [:finish-looping? :out :select-starting-popn]]
     ;; --- end loop
     ]
    :catalog
@@ -154,10 +154,10 @@
      :witan/fn :ccm-core-input/in-proj-births-by-age-of-mother
      :witan/params
      {:src (with-gss "witan.models.demography/fertility/historic_births_by_age_of_mother")}}
-    {:witan/name :join-popn-latest-year
+    {:witan/name :append-by-year
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-core/join-years}
+     :witan/fn :ccm-core/append-years}
     {:witan/name :out
      :witan/version "1.0.0"
      :witan/type :output
@@ -262,7 +262,7 @@
        mig/combine-into-net-flows
 
        ;; core fns
-       core/join-popn-latest-year
+       core/append-by-year-1-0-0
        core/add-births
        core/remove-deaths
        core/age-on

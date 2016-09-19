@@ -136,7 +136,7 @@
                                          :first-proj-year (:first-proj-year params)
                                          :last-proj-year (:last-proj-year params)
                                          :fert-scenario (:fert-scenario params)}}
-   :join-popn-latest-year        {:var #'witan.models.dem.ccm.core.projection-loop/join-popn-latest-year}
+   :append-by-year             {:var #'witan.models.dem.ccm.core.projection-loop/append-by-year-1-0-0}
    :add-births                 {:var #'witan.models.dem.ccm.core.projection-loop/add-births}
    :project-deaths             {:var #'witan.models.dem.ccm.mort.mortality/project-deaths-1-0-0}
    :proj-dom-in-migrants       {:var #'witan.models.dem.ccm.mig.migration/project-domestic-in-migrants
