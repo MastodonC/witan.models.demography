@@ -8,47 +8,54 @@
 ;;;;; Requires witan.phyrexian to be installed locally with `lein install`
 
 (def datasets  {:historic-births-by-age-mother
-                "./datasets/test_datasets/model_inputs/fert/bristol_ons_proj_births_age_mother.csv"
+                "./datasets/default_datasets/fertility/historic_births_by_age_of_mother.csv"
                 :historic-births
-                "./datasets/test_datasets/model_inputs/fert/bristol_hist_births_mye.csv"
+                "./datasets/default_datasets/fertility/historic_births.csv"
                 :historic-population
-                "./datasets/test_datasets/model_inputs/core/bristol_hist_popn_est.csv"
+                "./datasets/default_datasets/core/historic_population.csv"
                 :historic-deaths
-                "./datasets/test_datasets/model_inputs/mort/bristol_hist_deaths_mye.csv"
+                "./datasets/default_datasets/mortality/historic_deaths.csv"
                 :domestic-in-migrants
-                "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_inmigrants.csv"
+                "./datasets/default_datasets/migration/historic_migration_flows_domestic_in.csv"
                 :domestic-out-migrants
-                "./datasets/test_datasets/model_inputs/mig/bristol_hist_domestic_outmigrants.csv"
+                "./datasets/default_datasets/migration/historic_migration_flows_domestic_out.csv"
                 :international-in-migrants
-                "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_inmigrants.csv"
+                "./datasets/default_datasets/migration/historic_migration_flows_international_in.csv"
                 :international-out-migrants
-                "./datasets/test_datasets/model_inputs/mig/bristol_hist_international_outmigrants.csv"
+                "./datasets/default_datasets/migration/historic_migration_flows_international_out.csv"
                 :future-mortality-trend-assumption
-                "./datasets/test_datasets/model_inputs/mort/future_mortality_trend_assumption.csv"})
+                "./datasets/default_datasets/mortality/future_mortality_trend_assumption.csv"
+                :future-fertility-trend-assumption
+                "./datasets/default_datasets/fertility/future_fertility_trend_assumption.csv"})
 
 (def gss-bristol "E06000023")
 
-(def params-2015 {;; Core module
-                  :first-proj-year 2015
-                  :last-proj-year 2016
-                  ;; Fertility module
-                  :fert-base-year 2014
-                  :proportion-male-newborns (double (/ 105 205))
-                  ;; Mortality module
-                  :start-year-avg-mort 2010
-                  :end-year-avg-mort 2014
-                  ;; Migration module
-                  :start-year-avg-domin-mig 2003
-                  :end-year-avg-domin-mig 2014
-                  :start-year-avg-domout-mig 2003
-                  :end-year-avg-domout-mig 2014
-                  :start-year-avg-intin-mig 2003
-                  :end-year-avg-intin-mig 2014
-                  :start-year-avg-intout-mig 2003
-                  :end-year-avg-intout-mig 2014})
+(def params { ;; Core module
+             :first-proj-year 2015
+             :last-proj-year 2016
+             ;; Fertility module
+             :fert-variant :fixed
+             :fert-base-year 2014
+             :proportion-male-newborns (double (/ 105 205))
+             :fert-scenario :principal-2012
+             ;; Mortality module
+             :mort-variant :average-fixed
+             :mort-scenario :principal
+             :start-year-avg-mort 2010
+             :end-year-avg-mort 2014
+             ;; Migration module
+             :start-year-avg-domin-mig 2003
+             :end-year-avg-domin-mig 2014
+             :start-year-avg-domout-mig 2003
+             :end-year-avg-domout-mig 2014
+             :start-year-avg-intin-mig 2003
+             :end-year-avg-intin-mig 2014
+             :start-year-avg-intout-mig 2003
+             :end-year-avg-intout-mig 2014})
 
 (defn ons-ccm-comparison []
-  (let [proj-bristol (run-workspace datasets gss-bristol params-2015)
+  (let [proj-bristol (:population (run-workspace datasets gss-bristol params))
+        final-year (if (<= (:last-proj-year params) 2039) (:last-proj-year params) 2039)
         proj-bristol-2015 (wds/select-from-ds proj-bristol {:year 2015})
         ages (sort (distinct (i/$ :age proj-bristol-2015)))
         years (sort (distinct (i/$ :year proj-bristol)))
@@ -70,8 +77,11 @@
                                                                                                                         {:year {:eq year}})
                                                                                                        (i/query-dataset {:age age}))))]))
                                                                       ages))) years))
+        
         ons-bristol (-> (in/process-ons-data "datasets/test_datasets/bristol_2014_snpp_population_persons.csv" in/onsSchema)
-                        ds/dataset)
+                            (as-> data (sort-by (juxt :gss-code :year :age) data))
+                            (ds/dataset)
+                            (wds/select-from-ds {:year {:gte (:first-proj-year params) :lte final-year}}))
         ons-bristol-2015 (wds/select-from-ds ons-bristol {:year 2015})
         comparison (map #(- %1 %2) (nth (:columns ons-bristol-2015) 3) (nth (:columns combine-sex-proj-bristol-2015) 3))
         comparison-mean (/ (reduce + comparison) (count comparison))
@@ -80,3 +90,4 @@
     (hash-map :variance variance
               :std-dev (i/sqrt variance)
               :max-difference (apply max (map i/abs comparison)))))
+
