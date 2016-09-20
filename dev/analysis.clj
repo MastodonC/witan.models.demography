@@ -32,7 +32,7 @@
 
 (def params-fixed { ;; Core module
                    :first-proj-year 2015
-                   :last-proj-year 2039 ;;final ons year is 2039
+                   :last-proj-year 2016 ;;final ons year is 2039
                    ;; Fertility module
                    :fert-variant :fixed
                    :fert-base-year 2014
@@ -66,7 +66,7 @@
               :std-dev (i/sqrt variance)
               :max-difference (apply max (map i/abs comparison)))))
 
-(defn ons-ccm-comparison [params]
+(defn ons-ccm-comparison-yearly-stats [params]
   (let [proj-bristol (:population (run-workspace datasets gss-bristol params))
         final-year (if (<= (:last-proj-year params) 2039) (:last-proj-year params) 2039)
         ages (sort (distinct (i/$ :age proj-bristol)))
@@ -92,9 +92,45 @@
                                 comparison (compare-projections ons-current-year proj-current-year)]
                             (conj accumulator (assoc comparison :year current-year)))) [] (into [] years-to-compare)))))
 
-(defn make-comparison []
-  (let [fixed (ons-ccm-comparison params-fixed)
-        national-trend (ons-ccm-comparison params-national-trend)
-        _ (write-data-to-csv fixed "fixed_comparison.csv" [:year :mean-popn-difference :max-difference :variance :std-dev])
-        _ (write-data-to-csv national-trend "applynationaltrend_comparison.csv" [:year :mean-popn-difference :max-difference :variance :std-dev])]))
+(defn ons-ccm-comparison-side-by-side-all-years [params]
+  (let [final-year (if (<= (:last-proj-year params) 2039) (:last-proj-year params) 2039)
+        proj-bristol (-> (run-workspace datasets gss-bristol params)
+                         :population
+                         (ds/rename-columns {:popn :popn-witan})
+                         (wds/select-from-ds {:year {:gte (:first-proj-year params) :lte final-year}}))
+        ages (sort (distinct (i/$ :age proj-bristol)))
+        years (sort (distinct (i/$ :year proj-bristol)))
+        years-to-compare (filter (fn [y] (and (>= y (:first-proj-year params)) (<= y final-year))) years)
+        combine-sex-proj-bristol (ds/dataset [:gss-code :age :year :popn-witan]
+                                             (into [] (mapcat (fn [year]
+                                                                (mapv (fn [age]
+                                                                        (vec [gss-bristol
+                                                                              age
+                                                                              year
+                                                                              (reduce + (i/$ :popn-witan (-> (i/query-dataset proj-bristol
+                                                                                                                              {:year {:eq year}})
+                                                                                                             (i/query-dataset {:age age}))))]))
+                                                                      ages))) years))]
+    (-> (in/process-ons-data "datasets/test_datasets/bristol_2014_snpp_population_persons.csv" in/onsSchema)
+        (as-> data (sort-by (juxt :gss-code :year :age) data))
+        (ds/dataset)
+        (ds/rename-columns {:popn :popn-ons :gss.code :gss-code})
+        (wds/select-from-ds {:year {:gte (:first-proj-year params) :lte final-year}})
+        (wds/join combine-sex-proj-bristol [:gss-code :age :year])
+        (wds/add-derived-column :diff [:popn-ons :popn-witan] (fn [o b] (- o b))))))
 
+(defn make-comparison-by-year []
+  (let [fixed (ons-ccm-comparison-yearly-stats params-fixed)
+        national-trend (ons-ccm-comparison-yearly-stats params-national-trend)
+        _ (write-data-to-csv fixed "dev/fixed_comparison_by_year.csv" [:year :mean-popn-difference :max-difference :variance :std-dev])
+        _ (write-data-to-csv national-trend "dev/applynationaltrend_comparison_by_year.csv" [:year :mean-popn-difference :max-difference :variance :std-dev])]))
+
+(defn make-comparison-side-by-side []
+  (let [fixed (ons-ccm-comparison-side-by-side-all-years params-fixed)
+        national-trend (ons-ccm-comparison-side-by-side-all-years params-national-trend)
+        _ (write-data-to-csv fixed "dev/fixed_comparison_side_by_side.csv")
+        _ (write-data-to-csv national-trend "dev/applynationaltrend_comparison_side_by_side.csv")]))
+
+(defn make-all-comparisons []
+  (make-comparison-by-year)
+  (make-comparison-side-by-side))
