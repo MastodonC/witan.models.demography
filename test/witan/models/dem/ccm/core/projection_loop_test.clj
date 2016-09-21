@@ -91,7 +91,8 @@
        (mig/project-domestic-in-migrants params)
        (mig/project-domestic-out-migrants params)
        (mig/project-international-in-migrants params)
-       (mig/project-international-out-migrants params))
+       (mig/project-international-out-migrants params)
+       (select-starting-popn prepared-inputs))
       (mig/combine-into-net-flows)))
 
 ;; Useful fns:

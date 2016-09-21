@@ -130,7 +130,7 @@
    :witan/output-schema {:current-year-popn PopulationSchema}}
   [{:keys [current-year-popn net-migration]} _]
   (let [popn-w-migrants (-> current-year-popn
-                            (wds/join net-migration [:gss-code :sex :age])
+                            (wds/join net-migration [:gss-code :sex :age :year])
                             (wds/add-derived-column :popn-migrated [:popn :net-mig] +)
                             (ds/select-columns [:gss-code :sex :age :year :popn-migrated])
                             (ds/rename-columns {:popn-migrated :popn}))]
