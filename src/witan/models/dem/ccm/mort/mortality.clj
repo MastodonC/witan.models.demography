@@ -202,12 +202,12 @@
   {:witan/name :ccm-mort/project-deaths
    :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjASMRSchema
-                        :population-at-risk PopulationAtRiskSchema
-                        :loop-year (s/constrained s/Int m-utils/year?)}
+                        :population-at-risk PopulationAtRiskSchema}
    :witan/output-schema  {:deaths DeathsOutputSchema}
    :witan/exported? true}
-  [{:keys [initial-projected-mortality-rates population-at-risk loop-year]} _]
-  (let [max-year (m-utils/get-last-year initial-projected-mortality-rates)
+  [{:keys [initial-projected-mortality-rates population-at-risk]} _]
+  (let [loop-year (first (ds/column population-at-risk :year))
+        max-year (m-utils/get-last-year initial-projected-mortality-rates)
         _ (utils/property-holds? max-year #(<= loop-year %) #(str % " is less than loop year"))]
     {:deaths (cf/project-component population-at-risk
                                    initial-projected-mortality-rates

@@ -157,7 +157,7 @@
                                                            (wds/select-from-ds {:year current-year})
                                                            (wds/join last-calculated [:age])
                                                            (wds/add-derived-column :prop-diff
-                                                                                   [:prop-diff]                   
+                                                                                   [:prop-diff]
                                                                                    (fn [pd] (or pd 0.0)))
                                                            (wds/add-derived-column assumption-col
                                                                                    [assumption-col :prop-diff]
@@ -173,7 +173,7 @@
 
 (defn project-asfr-internal
   "Given historic fertility rates, project asfr using specified variant of the projection method.
-   Currently there is only 1 year of data so the jumpoff year method is set to finalyearhist. 
+   Currently there is only 1 year of data so the jumpoff year method is set to finalyearhist.
    Returns dataset with projected fertility rate in :fert-rate column for all years of projection."
   [{:keys [historic-asfr future-fertility-trend-assumption]}
    {:keys [fert-variant first-proj-year last-proj-year fert-scenario]}]
@@ -183,7 +183,7 @@
                 (cf/add-years-to-fixed-methods first-proj-year
                                                last-proj-year)
                 (ds/select-columns [:gss-code :sex :age :year :fert-rate]))}
-    
+
     :applynationaltrend (let [projected-rates-jumpoff-year (wds/add-derived-column historic-asfr
                                                                                    :year
                                                                                    [:year]
@@ -197,10 +197,10 @@
                                                            :fert-rate)})))
 
 (defworkflowfn project-asfr-1-0-0
-  "Takes a back series of age-specific fertility rates. For projecting fertility rates in years 
-  following the first projection year up until the last projection year: the fixed method applies 
-  the jump off year rates each year; the apply national trend method requires a national trend 
-  dataset and a scenario to use as the future mortality trend assumption, and generates variable 
+  "Takes a back series of age-specific fertility rates. For projecting fertility rates in years
+  following the first projection year up until the last projection year: the fixed method applies
+  the jump off year rates each year; the apply national trend method requires a national trend
+  dataset and a scenario to use as the future mortality trend assumption, and generates variable
   rates for each year. Both methods use the final year of historic data for the jumpoff method.
   Outputs a dataset of projected age-specific fertility rates for each projection year. "
   {:witan/name :ccm-fert/project-asfr
@@ -224,12 +224,12 @@
   {:witan/name :ccm-fert/project-births
    :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjASFRSchema
-                        :population-at-risk PopulationAtRiskSchema
-                        :loop-year (s/constrained s/Int m-utils/year?)}
+                        :population-at-risk PopulationAtRiskSchema}
    :witan/output-schema  {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
    :witan/exported? true}
-  [{:keys [initial-projected-fertility-rates population-at-risk loop-year]} _]
-  (let [max-year (m-utils/get-last-year initial-projected-fertility-rates)
+  [{:keys [initial-projected-fertility-rates population-at-risk]} _]
+  (let [loop-year (first (ds/column population-at-risk :year))
+        max-year (m-utils/get-last-year initial-projected-fertility-rates)
         _ (utils/property-holds? max-year #(<= loop-year %) #(str % " is less than loop year"))]
     {:births-by-age-sex-mother (cf/project-component population-at-risk
                                                      initial-projected-fertility-rates
@@ -264,7 +264,8 @@
    :witan/output-schema {:births BirthsBySexSchema}
    :witan/exported? true}
   [{:keys [births-by-age-sex-mother]} {:keys [proportion-male-newborns]}]
-  (let [births-by-sex (-> births-by-age-sex-mother
+  (let [loop-year (first (ds/column births-by-age-sex-mother :year))
+        births-by-sex (-> births-by-age-sex-mother
                           (wds/rollup :sum :births [:gss-code])
                           (wds/add-derived-column :m [:births]
                                                   (fn [b] (double (* proportion-male-newborns b))))
@@ -272,5 +273,8 @@
                                                   (fn [b] (double
                                                            (* (- 1 proportion-male-newborns) b))))
                           (ds/select-columns [:gss-code :m :f])
-                          gather-births-by-sex)]
+                          gather-births-by-sex
+                          (ds/add-column :year (repeat 2 loop-year))
+                          (ds/add-column :age  (repeat 2 0))
+                          (ds/select-columns [:gss-code :sex :age :year :births]))]
     {:births births-by-sex}))

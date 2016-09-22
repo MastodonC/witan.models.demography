@@ -3,7 +3,8 @@
             [witan.models.load-data :as ld]
             [clojure.test :refer :all]
             [clojure.core.matrix.dataset :as ds]
-            [witan.datasets :as wds]))
+            [witan.datasets :as wds]
+            [witan.workspace-api :refer [merge->]]))
 
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
@@ -33,12 +34,12 @@
 (deftest combine-into-net-flows-test
   (testing "The net migration flows are calculated correctly."
     (let [net-mig-r (ds/rename-columns net-migration-r {:net-mig :net-mig-r})
-          joined-mig (-> migration-data
-                         (project-domestic-in-migrants params)
-                         (project-domestic-out-migrants params)
-                         (project-international-in-migrants params)
-                         (project-international-out-migrants params)
-                         combine-into-net-flows
+          joined-mig (-> (merge-> migration-data
+                                  (project-domestic-in-migrants params)
+                                  (project-domestic-out-migrants params)
+                                  (project-international-in-migrants params)
+                                  (project-international-out-migrants params))
+                         (combine-into-net-flows)
                          :net-migration
                          (wds/join net-mig-r [:gss-code :sex :age]))]
       (is (every? #(fp-equals? (wds/subset-ds joined-mig :rows % :cols :net-mig-r)

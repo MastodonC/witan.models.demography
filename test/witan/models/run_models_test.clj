@@ -61,16 +61,16 @@
                   :start-year-avg-intout-mig 2003
                   :end-year-avg-intout-mig 2014})
 
-(deftest get-dataset-test
-  (testing "The data is filtered on local authority."
-    (let [dataset (:historic-births-by-age-mother
-                   (get-dataset
-                    :historic-births-by-age-mother
-                    "./datasets/default_datasets/fertility/historic_births_by_age_of_mother.csv"
-                    "E06000023"))
-          gss-dataset (i/$ :gss-code dataset)]
-      (is (true?
-           (every? #(= % "E06000023") gss-dataset))))))
+#_(deftest get-dataset-test
+    (testing "The data is filtered on local authority."
+      (let [dataset (:historic-births-by-age-mother
+                     (get-dataset
+                      :historic-births-by-age-mother
+                      "./datasets/default_datasets/fertility/historic_births_by_age_of_mother.csv"
+                      "E06000023"))
+            gss-dataset (i/$ :gss-code dataset)]
+        (is (true?
+             (every? #(= % "E06000023") gss-dataset))))))
 
 (def r-output-2015 (ld/load-datasets
                     {:end-population
@@ -80,29 +80,29 @@
                     {:end-population
                      "./datasets/test_datasets/r_outputs_for_testing/core/bristol_end_population_2040.csv"}))
 
-(deftest run-workspace-test
-  (testing "The historical and projection data is returned"
-    (let [proj-bristol-2015 (-> (run-workspace datasets gss-bristol params-2015)
-                                :population
-                                (wds/select-from-ds {:year 2015}))
-          r-proj-bristol-2015 (ds/rename-columns (:end-population r-output-2015)
-                                                 {:popn :popn-r})
-          joined-ds-2015 (wds/join proj-bristol-2015 r-proj-bristol-2015 [:gss-code :sex :age :year])
-          proj-bristol-2040 (-> (run-workspace datasets gss-bristol (assoc params-2015 :last-proj-year 2040))
-                                :population
-                                (wds/select-from-ds {:year 2040}))
-          r-proj-bristol-2040 (ds/rename-columns (:end-population r-output-2040)
-                                                 {:popn :popn-r})
-          joined-ds-2040 (wds/join proj-bristol-2040 r-proj-bristol-2040 [:gss-code :sex :age :year])]
-      (is proj-bristol-2015)
-      (is (= (:shape proj-bristol-2015) (:shape r-proj-bristol-2015)))
-      (is (every? #(fp-equals? (wds/subset-ds joined-ds-2015 :rows % :cols :popn)
-                               (wds/subset-ds joined-ds-2015 :rows % :cols :popn-r) 0.0000000001)
-                  (range (first (:shape joined-ds-2015)))))
-      (is (= (:shape proj-bristol-2040) (:shape r-proj-bristol-2040)))
-      (is (every? #(fp-equals? (wds/subset-ds joined-ds-2040 :rows % :cols :popn)
-                               (wds/subset-ds joined-ds-2040 :rows % :cols :popn-r) 0.0000000001)
-                  (range (first (:shape joined-ds-2040))))))))
+#_(deftest run-workspace-test
+    (testing "The historical and projection data is returned"
+      (let [proj-bristol-2015 (-> (run-workspace datasets gss-bristol params-2015)
+                                  :population
+                                  (wds/select-from-ds {:year 2015}))
+            r-proj-bristol-2015 (ds/rename-columns (:end-population r-output-2015)
+                                                   {:popn :popn-r})
+            joined-ds-2015 (wds/join proj-bristol-2015 r-proj-bristol-2015 [:gss-code :sex :age :year])
+            proj-bristol-2040 (-> (run-workspace datasets gss-bristol (assoc params-2015 :last-proj-year 2040))
+                                  :population
+                                  (wds/select-from-ds {:year 2040}))
+            r-proj-bristol-2040 (ds/rename-columns (:end-population r-output-2040)
+                                                   {:popn :popn-r})
+            joined-ds-2040 (wds/join proj-bristol-2040 r-proj-bristol-2040 [:gss-code :sex :age :year])]
+        (is proj-bristol-2015)
+        (is (= (:shape proj-bristol-2015) (:shape r-proj-bristol-2015)))
+        (is (every? #(fp-equals? (wds/subset-ds joined-ds-2015 :rows % :cols :popn)
+                                 (wds/subset-ds joined-ds-2015 :rows % :cols :popn-r) 0.0000000001)
+                    (range (first (:shape joined-ds-2015)))))
+        (is (= (:shape proj-bristol-2040) (:shape r-proj-bristol-2040)))
+        (is (every? #(fp-equals? (wds/subset-ds joined-ds-2040 :rows % :cols :popn)
+                                 (wds/subset-ds joined-ds-2040 :rows % :cols :popn-r) 0.0000000001)
+                    (range (first (:shape joined-ds-2040))))))))
 
 (deftest get-district-test
   (testing "fn recovers correct district name"

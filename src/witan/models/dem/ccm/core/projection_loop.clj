@@ -12,48 +12,67 @@
             [witan.models.dem.ccm.models-utils :as m-utils]
             [taoensso.timbre :as timbre]))
 
+(defn create-empty-ds
+  [schema]
+  (ds/dataset (map (comp :v :schema) (:column-names schema)) []))
+
 (defworkflowpred finished-looping?
   {:witan/name :ccm-core/ccm-loop-pred
    :witan/version "1.0.0"
-   :witan/input-schema {:population PopulationSchema :loop-year (s/constrained s/Int m-utils/year?)}
-   :witan/param-schema {:last-proj-year (s/constrained s/Int m-utils/year?)}
+   :witan/input-schema {:population PopulationSchema}
+   :witan/param-schema {:last-proj-year YearSchema}
    :witan/exported? true}
-  [{:keys [loop-year]} {:keys [last-proj-year]}]
-  (>= loop-year last-proj-year))
+  [{:keys [population]} {:keys [last-proj-year]}]
+  (let [loop-year (m-utils/get-last-year population)]
+    (>= loop-year last-proj-year)))
 
-(defworkflowfn prepare-inputs
+(defworkflowfn prepare-inputs-1-0-0
   "Step happening before the projection loop.
    Takes in the historic population and outputs the latest year and
    the population for that year which will be updated within the
    projection loop. Also outputs the the population that will ultimately
    contain the historic population and the population projections."
-  {:witan/name :ccm-core/prepare-starting-popn
+  {:witan/name :ccm-core/prepare-inputs
    :witan/version "1.0.0"
+   :witan/param-schema {:first-proj-year YearSchema}
    :witan/input-schema {:historic-population PopulationSchema}
-   :witan/output-schema {:loop-year s/Int :latest-year-popn PopulationSchema
-                         :population PopulationSchema}
+   :witan/output-schema {:population PopulationSchema
+                         :aggregated-net-migration NetMigrationSchema
+                         :aggregated-births BirthsSchema
+                         :aggregated-deaths DeathsOutputSchema}
    :witan/exported? true}
-  [{:keys [historic-population]} _]
-  (let [last-year (m-utils/get-last-year historic-population)
-        _ (utils/property-holds? last-year m-utils/year? (str last-year " is not a year"))
-        last-year-popn (wds/select-from-ds historic-population {:year last-year})]
-    {:loop-year last-year :latest-year-popn last-year-popn
-     :population historic-population}))
+  [{:keys [historic-population]} {:keys [first-proj-year]}]
+  {:population (wds/select-from-ds historic-population {:year (dec first-proj-year)})
+   :aggregated-births (create-empty-ds BirthsSchema)
+   :aggregated-deaths (create-empty-ds DeathsOutputSchema)
+   :aggregated-net-migration (create-empty-ds NetMigrationSchema)})
 
 (defworkflowfn select-starting-popn
   "Takes in a dataset of popn estimates.
    Returns a dataset of the starting population for the next year's projection."
   {:witan/name :ccm-core/select-starting-popn
    :witan/version "1.0.0"
-   :witan/input-schema {:latest-year-popn PopulationSchema
-                        :loop-year s/Int}
-   :witan/output-schema {:latest-year-popn PopulationSchema :loop-year (s/constrained s/Int m-utils/year?)
+   :witan/input-schema {:population PopulationSchema
+                        :aggregated-net-migration NetMigrationSchema
+                        :aggregated-births BirthsSchema
+                        :aggregated-deaths DeathsOutputSchema}
+   :witan/output-schema {:latest-year-popn PopulationSchema
+                         :population PopulationSchema
+                         :aggregated-net-migration NetMigrationSchema
+                         :aggregated-births BirthsSchema
+                         :aggregated-deaths DeathsOutputSchema
                          :population-at-risk PopulationAtRiskSchema}
    :witan/exported? true}
-  [{:keys [latest-year-popn loop-year]} _]
-  (let [update-year (ds/emap-column latest-year-popn :year inc)]
-    {:latest-year-popn update-year :loop-year (inc loop-year)
-     :population-at-risk (ds/rename-columns update-year {:popn :popn-at-risk})}))
+  [{:keys [population aggregated-births aggregated-deaths aggregated-net-migration]} _]
+  (let [last-year (m-utils/get-last-year population)
+        latest-year-popn (wds/select-from-ds population {:year last-year})
+        updated-year (ds/emap-column latest-year-popn :year inc)]
+    {:latest-year-popn updated-year
+     :population-at-risk (ds/rename-columns updated-year {:popn :popn-at-risk})
+     :population population
+     :aggregated-net-migration aggregated-net-migration
+     :aggregated-births aggregated-births
+     :aggregated-deaths aggregated-deaths}))
 
 (defworkflowfn age-on
   "Takes in a dataset with the starting-population.
@@ -77,15 +96,12 @@
    appended to the aged-on population, adding age groups 0."
   {:witan/name :ccm-core/add-births
    :witan/version "1.0.0"
-   :witan/input-schema {:latest-year-popn PopulationSchema :births BirthsBySexSchema
-                        :loop-year (s/constrained s/Int m-utils/year?)}
+   :witan/input-schema {:latest-year-popn PopulationSchema :births BirthsBySexSchema}
    :witan/output-schema {:latest-year-popn PopulationSchema}
    :witan/exported? true}
-  [{:keys [latest-year-popn births loop-year]} _]
+  [{:keys [latest-year-popn births]} _]
   (let [births-n (wds/row-count births)
         aged-on-popn-with-births (-> births
-                                     (ds/add-column :age (repeat births-n 0))
-                                     (ds/add-column :year (repeat births-n loop-year))
                                      (ds/rename-columns {:births :popn})
                                      (ds/join-rows latest-year-popn)
                                      (ds/select-columns [:gss-code :sex :age :year :popn]))]
@@ -127,31 +143,52 @@
                             (ds/rename-columns {:popn-migrated :popn}))]
     {:latest-year-popn popn-w-migrants}))
 
+(defworkflowfn finalise-popn-1-0-0
+  "Performs finalisation of the population data"
+  {:witan/name :ccm-core/finalise-popn
+   :witan/version "1.0.0"
+   :witan/input-schema {:latest-year-popn PopulationSchema}
+   :witan/output-schema {:final-popn PopulationSchema}}
+  [{:keys [latest-year-popn]} _]
+  {:final-popn latest-year-popn})
+
 (defworkflowfn append-by-year-1-0-0
   "Takes in a dataset of population for previous years and a dataset of
    projected population for the next year of projection.
    Returns a datasets that appends the second dataset to the first one."
   {:witan/name :ccm-core/append-years
    :witan/version "1.0.0"
-   :witan/input-schema {:latest-year-popn PopulationSchema
+   :witan/input-schema {:final-popn PopulationSchema
                         :population PopulationSchema
                         :births BirthsBySexSchema
-                        :historic-births BirthsSchema
-                        :loop-year (s/constrained s/Int m-utils/year?)}
+                        :aggregated-births BirthsBySexSchema
+                        :net-migration NetMigrationSchema
+                        :aggregated-net-migration NetMigrationSchema
+                        :deaths DeathsOutputSchema
+                        :aggregated-deaths DeathsOutputSchema}
    :witan/output-schema {:population PopulationSchema
-                         :historic-births BirthsSchema}}
-  [{:keys [latest-year-popn population births historic-births loop-year]} _]
-  (let [add-year-to-births (-> births
-                               (ds/add-column :year (repeat 2 loop-year))
-                               (ds/add-column :age (repeat 2 0)))]
-    {:historic-births (ds/join-rows historic-births add-year-to-births)
-     :population (ds/join-rows population latest-year-popn)}))
+                         :aggregated-births BirthsSchema
+                         :aggregated-deaths DeathsOutputSchema
+                         :aggregated-net-migration NetMigrationSchema}}
+  [{:keys [final-popn population
+           births aggregated-births
+           deaths aggregated-deaths
+           net-migration aggregated-net-migration]} _]
+  {:population (ds/join-rows population final-popn)
+   :aggregated-births (ds/join-rows aggregated-births births)
+   :aggregated-deaths (ds/join-rows aggregated-deaths deaths)
+   :aggregated-net-migration (ds/join-rows aggregated-net-migration net-migration)})
 
 (defworkflowoutput ccm-out
   "Returns the population field"
   {:witan/name :ccm-core-out/ccm-out
    :witan/version "1.0.0"
-   :witan/input-schema {:population PopulationSchema :net-migration NetMigrationSchema
-                        :historic-births BirthsSchema :deaths DeathsOutputSchema}}
-  [{:keys [historic-births population net-migration deaths]} _]
-  {:births historic-births :population population :net-migration net-migration :deaths deaths})
+   :witan/input-schema {:population PopulationSchema
+                        :aggregated-births BirthsSchema
+                        :aggregated-deaths DeathsOutputSchema
+                        :aggregated-net-migration NetMigrationSchema}}
+  [{:keys [population aggregated-net-migration aggregated-deaths aggregated-births]} _]
+  {:births aggregated-births
+   :population population
+   :net-migration aggregated-net-migration
+   :deaths aggregated-deaths})

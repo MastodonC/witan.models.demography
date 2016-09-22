@@ -6,7 +6,8 @@
             [witan.datasets :as wds]
             [witan.models.dem.ccm.fert.fertility :as fert]
             [witan.models.dem.ccm.mort.mortality :as mort]
-            [witan.models.dem.ccm.mig.migration :as mig]))
+            [witan.models.dem.ccm.mig.migration :as mig]
+            [witan.workspace-api :refer [merge->]]))
 
 ;; Load testing data
 (def data-inputs (ld/load-datasets
@@ -64,32 +65,34 @@
              ;; (s/validate (s/pred (<= % (dec jumpoff-year-mig))) :end-year-avg-intout-mig)
              :end-year-avg-intout-mig 2014})
 
-(def prepared-inputs (prepare-inputs data-inputs))
+(def prepared-inputs (prepare-inputs-1-0-0 data-inputs params))
 
 (defn fertility-module [inputs params]
-  (-> inputs
-      (fert/calculate-historic-asfr params)
-      (fert/project-asfr-1-0-0 params)
-      fert/project-births-1-0-0
-      (fert/combine-into-births-by-sex params)))
+  (as-> inputs x
+    (fert/calculate-historic-asfr    (merge x inputs data-inputs) params)
+    (fert/project-asfr-1-0-0         (merge x inputs data-inputs) params)
+    (fert/project-births-1-0-0       (merge x inputs data-inputs))
+    (fert/combine-into-births-by-sex (merge x inputs data-inputs) params)))
 
 (defn fertility-module-1 [inputs params]
   (-> inputs
       (fert/calculate-historic-asfr params)))
 
 (defn mortality-module [inputs params]
-  (-> inputs
-      mort/calc-historic-asmr
-      (mort/project-asmr-1-0-0 params)
-      mort/project-deaths-1-0-0))
+  (as-> inputs x
+    (mort/calc-historic-asmr (merge x inputs data-inputs))
+    (mort/project-asmr-1-0-0 (merge x inputs data-inputs) params)
+    (mort/project-deaths-1-0-0 (merge x inputs data-inputs))))
 
 (defn migration-module [inputs params]
   (-> inputs
-      (mig/project-domestic-in-migrants params)
-      (mig/project-domestic-out-migrants params)
-      (mig/project-international-in-migrants params)
-      (mig/project-international-out-migrants params)
-      mig/combine-into-net-flows))
+      (merge data-inputs)
+      (merge->
+       (mig/project-domestic-in-migrants params)
+       (mig/project-domestic-out-migrants params)
+       (mig/project-international-in-migrants params)
+       (mig/project-international-out-migrants params))
+      (mig/combine-into-net-flows)))
 
 ;; Useful fns:
 (defn- same-coll? [coll1 coll2]
@@ -136,42 +139,60 @@
 
 (deftest add-births-test
   (testing "Newborns are correctly added to projection year popn."
-    (let [births-added (-> prepared-inputs
-                           select-starting-popn
-                           (fertility-module params)
-                           age-on
-                           add-births)
+    (let [start-popn       (select-starting-popn prepared-inputs)
+          fertility        (-> start-popn
+                               (merge prepared-inputs)
+                               (fertility-module params))
+          aged-on          (-> start-popn
+                               (merge prepared-inputs)
+                               age-on)
+          births-added     (-> aged-on
+                               (merge fertility)
+                               add-births)
           popn-with-births (:latest-year-popn births-added)
-          latest-year (:loop-year births-added)
-          latest-newborns (wds/select-from-ds popn-with-births {:year latest-year :age 0})]
+          latest-year      (first (ds/column popn-with-births :year))
+          latest-newborns  (wds/select-from-ds popn-with-births {:year latest-year :age 0})]
       (is (= 2 (first (:shape latest-newborns))))
       (is (fp-equals? (+ 3189.57438270303 3349.0531018318)
                       (#(apply + (ds/column % :popn)) latest-newborns) 0.0001)))))
 
 (deftest remove-deaths-test
   (testing "The deaths are removed from the popn."
-    (let [aged-on-popn (-> prepared-inputs
-                           select-starting-popn
-                           (fertility-module params)
-                           (mortality-module params)
-                           age-on)
-          popn-with-births (add-births aged-on-popn)
-          popn-wo-deaths (remove-deaths popn-with-births)]
+    (let [start-popn       (select-starting-popn prepared-inputs)
+          fertility        (-> start-popn
+                               (merge prepared-inputs)
+                               (fertility-module params))
+          mortality        (-> start-popn
+                               (merge prepared-inputs)
+                               (mortality-module params))
+          aged-on          (-> start-popn
+                               (merge prepared-inputs)
+                               age-on)
+          popn-with-births (add-births (merge fertility aged-on))
+          popn-wo-deaths (remove-deaths (merge mortality popn-with-births))]
       (is (= (apply - (concat (get-popn (:latest-year-popn popn-with-births) :popn 2015 0 "F")
-                              (get-popn (:deaths popn-with-births) :deaths 0 "F")))
+                              (get-popn (:deaths mortality) :deaths 0 "F")))
              (nth (get-popn (:latest-year-popn popn-wo-deaths) :popn 2015 0 "F") 0))))))
 
 (deftest apply-migration-test
   (testing "The migrants are added to the popn."
-    (let [popn-with-births (-> prepared-inputs
-                               select-starting-popn
-                               (fertility-module params)
-                               (mortality-module params)
-                               (migration-module params)
-                               age-on
-                               add-births)
-          popn-wo-deaths (remove-deaths popn-with-births)
-          popn-with-mig (apply-migration popn-wo-deaths)]
+    (let [
+          start-popn       (select-starting-popn prepared-inputs)
+          fertility        (-> start-popn
+                               (merge prepared-inputs)
+                               (fertility-module params))
+          mortality        (-> start-popn
+                               (merge prepared-inputs)
+                               (mortality-module params))
+          migration        (-> start-popn
+                               (merge prepared-inputs)
+                               (migration-module params))
+          aged-on          (-> start-popn
+                               (merge prepared-inputs)
+                               age-on)
+          popn-with-births (add-births (merge fertility aged-on))
+          popn-wo-deaths (remove-deaths (merge mortality popn-with-births))
+          popn-with-mig (apply-migration (merge migration popn-wo-deaths))]
       (is (= (apply + (concat  (get-popn (:latest-year-popn popn-wo-deaths) :popn 2015 0 "F")
-                               (get-popn (:net-migration popn-wo-deaths) :net-mig 0 "F")))
+                               (get-popn (:net-migration migration) :net-mig 0 "F")))
              (nth (get-popn (:latest-year-popn popn-with-mig) :popn 2015 0 "F") 0))))))

@@ -82,20 +82,20 @@
                        :catalog   fixed-catalog
                        :contracts (p/available-fns (model-library))}
         workspace'    (s/with-fn-validation (wex/build! workspace))
-        result        (wex/run!! workspace' {})
-        test-value    (-> result
-                          first
-                          :population
-                          (wds/select-from-ds {:age 21})
-                          (wds/select-from-ds {:year 2015})
-                          (wds/select-from-ds {:sex "M"})
-                          :columns
-                          last
-                          (get 0))]
+        result        (wex/run!! workspace' {})]
     (is (not-empty result))
     (is (= 4 (count (first result))))
     (is (contains? (first result) :population))
-    (is (fp-equals? 4645.734788600881 test-value 0.000001))))
+    (let [test-value (-> result
+                         first
+                         :population
+                         (wds/select-from-ds {:age 21})
+                         (wds/select-from-ds {:year 2015})
+                         (wds/select-from-ds {:sex "M"})
+                         :columns
+                         last
+                         (get 0))]
+      (is (fp-equals? 4645.734788600881 test-value 0.000001)))))
 
 (deftest imodellibrary-test
   (let [ml (model-library)

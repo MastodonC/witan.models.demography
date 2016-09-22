@@ -77,7 +77,9 @@
                           (ds/rename-columns {:fert-rate :fert-rate-r})
                           (ds/select-columns [:gss-code :sex :age :year :fert-rate-r]))
           joined-asfr (-> fertility-inputs
-                          (calculate-historic-asfr params-fixed)
+                          (calculate-historic-asfr params-fixed))
+          joined-asfr (-> joined-asfr
+                          (merge fertility-inputs)
                           (project-asfr-1-0-0 params-fixed)
                           :initial-projected-fertility-rates
                           (wds/join proj-asfr-r [:gss-code :sex :age :year]))]
@@ -90,7 +92,9 @@
                           (ds/rename-columns {:fert-rate :fert-rate-r})
                           (ds/select-columns [:gss-code :sex :age :year :fert-rate-r]))
           joined-asfr (-> fertility-inputs
-                          (calculate-historic-asfr params-applynationaltrend)
+                          (calculate-historic-asfr params-applynationaltrend))
+          joined-asfr (-> joined-asfr
+                          (merge fertility-inputs)
                           (project-asfr-1-0-0 params-applynationaltrend)
                           :initial-projected-fertility-rates
                           (wds/join proj-asfr-r [:gss-code :sex :age :year]))]
@@ -106,8 +110,12 @@
                             (ds/rename-columns {:births :births-r}))
           joined-births (-> fertility-inputs
                             (assoc :loop-year 2015)
-                            (calculate-historic-asfr params-fixed)
-                            (project-asfr-1-0-0 params-fixed)
+                            (calculate-historic-asfr params-fixed))
+          joined-births (-> joined-births
+                            (merge fertility-inputs)
+                            (project-asfr-1-0-0 params-fixed))
+          joined-births (-> joined-births
+                            (merge fertility-inputs)
                             (project-births-1-0-0 params-fixed)
                             :births-by-age-sex-mother
                             (wds/join proj-births-r [:gss-code :sex :age :year]))]
@@ -121,10 +129,15 @@
     (let [births-by-sex-r (-> fert-outputs-r-fixed
                               :births
                               (ds/rename-columns {:births :births-r}))
+
+          fertility-inputs     (assoc fertility-inputs :loop-year 2015)
           joined-births-by-sex (-> fertility-inputs
-                                   (assoc :loop-year 2015)
-                                   (calculate-historic-asfr params-fixed)
-                                   (project-asfr-1-0-0 params-fixed)
+                                   (calculate-historic-asfr params-fixed))
+          joined-births-by-sex (-> joined-births-by-sex
+                                   (merge fertility-inputs)
+                                   (project-asfr-1-0-0 params-fixed))
+          joined-births-by-sex (-> joined-births-by-sex
+                                   (merge fertility-inputs)
                                    (project-births-1-0-0 params-fixed)
                                    (combine-into-births-by-sex params-fixed)
                                    :births
