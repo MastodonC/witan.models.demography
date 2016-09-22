@@ -1,5 +1,6 @@
 (ns witan.models.dem.ccm.schemas
-  (:require [schema.core :as s]))
+  (:require [schema.core :as s]
+            [witan.models.dem.ccm.models-utils :as m-utils]))
 
 ;; Generate schemas
 (defn make-ordered-ds-schema [col-vec]
@@ -48,7 +49,8 @@
 
 ;;For core CCM projection loop using fert/mort/mig inputs from files
 (def BirthsBySexSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:births java.lang.Double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:births java.lang.Double] ]))
 
 (def DeathsOutputSchema
   (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:year s/Int]
@@ -129,3 +131,6 @@
   (make-ordered-ds-schema [[:age s/Int] [:year s/Int] [:principal java.lang.Double]
                            [:low java.lang.Double] [:high java.lang.Double] [:principal-2012 java.lang.Double]
                            [:low-2012 java.lang.Double] [:high-2012 java.lang.Double]]))
+
+(def YearSchema
+  (s/constrained s/Int m-utils/year?))

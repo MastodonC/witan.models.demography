@@ -160,7 +160,7 @@
                                          :mort-variant (:mort-variant params)
                                          :mort-scenario (:mort-scenario params)}}
    :select-starting-popn       {:var #'witan.models.dem.ccm.core.projection-loop/select-starting-popn}
-   :prepare-starting-popn      {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs}
+   :prepare-inputs             {:var #'witan.models.dem.ccm.core.projection-loop/prepare-inputs-1-0-0}
    :calc-hist-asfr             {:var #'witan.models.dem.ccm.fert.fertility/calculate-historic-asfr
                                 :params {:fert-base-year (:fert-base-year params)}}
    :apply-migration            {:var #'witan.models.dem.ccm.core.projection-loop/apply-migration}
@@ -172,6 +172,7 @@
                                          :end-year-avg-intout-mig (:end-year-avg-intout-mig params)}}
 
    :combine-into-net-flows     {:var #'witan.models.dem.ccm.mig.migration/combine-into-net-flows}
+   :finalise-popn              {:var #'witan.models.dem.ccm.core.projection-loop/finalise-popn-1-0-0}
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Predicates
    :finish-looping?            {:var #'witan.models.dem.ccm.core.projection-loop/finished-looping?

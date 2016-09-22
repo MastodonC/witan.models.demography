@@ -30,9 +30,9 @@
     [:in-hist-deaths-by-age-and-sex :calc-hist-asmr]
 
     ;; asfr/asmr projections
-    [:calc-hist-asfr :project-asfr]
+    [:calc-hist-asfr       :project-asfr]
     [:in-future-fert-trend :project-asfr]
-    [:calc-hist-asmr :project-asmr]
+    [:calc-hist-asmr       :project-asmr]
     [:in-future-mort-trend :project-asmr]
 
     ;; inputs for mig
@@ -48,23 +48,33 @@
     [:proj-intl-out-migrants :combine-into-net-flows]
 
     ;; inputs for loop
-    [:in-hist-popn           :prepare-starting-popn]
+    [:in-hist-popn           :prepare-inputs]
 
     ;; pre-loop merge
-    [:prepare-starting-popn  :select-starting-popn]
-    [:project-asfr           :select-starting-popn]
-    [:project-asmr           :select-starting-popn]
-    [:combine-into-net-flows :select-starting-popn]
+    [:prepare-inputs         :select-starting-popn]
+    [:project-asmr           :project-deaths]
+    [:project-asfr           :project-births]
+    [:in-hist-total-births   :append-by-year] ;; TODO historic births should come from `prepare-starting-popn'
 
     ;; --- start popn loop
+    [:select-starting-popn       :project-births]
     [:select-starting-popn       :project-deaths]
-    [:project-deaths             :project-births]
+    [:select-starting-popn       :age-on]
+    [:select-starting-popn       :append-by-year]
+
     [:project-births             :combine-into-births-by-sex]
-    [:combine-into-births-by-sex :age-on]
+    [:combine-into-births-by-sex :add-births]
     [:age-on                     :add-births]
     [:add-births                 :remove-deaths]
+    [:project-deaths             :remove-deaths]
     [:remove-deaths              :apply-migration]
-    [:apply-migration            :append-by-year]
+    [:combine-into-net-flows     :apply-migration]
+    [:apply-migration            :finalise-popn]
+    [:project-deaths             :append-by-year]
+    [:finalise-popn              :append-by-year]
+    [:combine-into-births-by-sex :append-by-year]
+    [:combine-into-net-flows     :append-by-year]
+
     [:append-by-year [:finish-looping? :out :select-starting-popn]]
     ;; --- end loop
     ]
@@ -162,10 +172,11 @@
      :witan/version "1.0.0"
      :witan/type :output
      :witan/fn :ccm-core-out/ccm-out}
-    {:witan/name :prepare-starting-popn
+    {:witan/name :prepare-inputs
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-core/prepare-starting-popn}
+     :witan/fn :ccm-core/prepare-inputs
+     :witan/params {:first-proj-year 2015}}
     {:witan/name :proj-dom-in-migrants
      :witan/version "1.0.0"
      :witan/type :function
@@ -224,7 +235,11 @@
     {:witan/name :select-starting-popn
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-core/select-starting-popn}]})
+     :witan/fn :ccm-core/select-starting-popn}
+    {:witan/name :finalise-popn
+     :witan/version "1.0.0"
+     :witan/type :function
+     :witan/fn :ccm-core/finalise-popn}]})
 
 (defn model-library
   []
@@ -263,11 +278,12 @@
 
        ;; core fns
        core/append-by-year-1-0-0
+       core/finalise-popn-1-0-0
        core/add-births
        core/remove-deaths
        core/age-on
        core/select-starting-popn
-       core/prepare-inputs
+       core/prepare-inputs-1-0-0
        core/apply-migration
 
        ;; core preds

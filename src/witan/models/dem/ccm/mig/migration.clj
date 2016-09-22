@@ -14,8 +14,7 @@
    :witan/input-schema {:domestic-in-migrants DomesticInmigrants}
    :witan/param-schema {:start-year-avg-domin-mig (s/constrained s/Int m-utils/year?)
                         :end-year-avg-domin-mig (s/constrained s/Int m-utils/year?)}
-   :witan/output-schema {:projected-domestic-in-migrants ProjDomInSchema}
-   :witan/exported? true}
+   :witan/output-schema {:projected-domestic-in-migrants ProjDomInSchema}}
   [{:keys [domestic-in-migrants]} {:keys [start-year-avg-domin-mig end-year-avg-domin-mig]}]
   {:projected-domestic-in-migrants
    (cf/jumpoff-year-method-average domestic-in-migrants :domin
@@ -27,8 +26,7 @@
    :witan/input-schema {:domestic-out-migrants DomesticOutmigrants}
    :witan/param-schema {:start-year-avg-domout-mig (s/constrained s/Int m-utils/year?)
                         :end-year-avg-domout-mig (s/constrained s/Int m-utils/year?)}
-   :witan/output-schema {:projected-domestic-out-migrants ProjDomOutSchema}
-   :witan/exported? true}
+   :witan/output-schema {:projected-domestic-out-migrants ProjDomOutSchema}}
   [{:keys [domestic-out-migrants]} {:keys [start-year-avg-domout-mig end-year-avg-domout-mig]}]
   {:projected-domestic-out-migrants
    (cf/jumpoff-year-method-average domestic-out-migrants :domout
@@ -40,8 +38,7 @@
    :witan/input-schema {:international-in-migrants InternationalInmigrants}
    :witan/param-schema {:start-year-avg-intin-mig (s/constrained s/Int m-utils/year?)
                         :end-year-avg-intin-mig (s/constrained s/Int m-utils/year?)}
-   :witan/output-schema {:projected-international-in-migrants ProjInterInSchema}
-   :witan/exported? true}
+   :witan/output-schema {:projected-international-in-migrants ProjInterInSchema}}
   [{:keys [international-in-migrants]} {:keys [start-year-avg-intin-mig end-year-avg-intin-mig]}]
   {:projected-international-in-migrants
    (cf/jumpoff-year-method-average international-in-migrants :intin
@@ -53,8 +50,7 @@
    :witan/input-schema {:international-out-migrants InternationalOutmigrants}
    :witan/param-schema {:start-year-avg-intout-mig (s/constrained s/Int m-utils/year?)
                         :end-year-avg-intout-mig (s/constrained s/Int m-utils/year?)}
-   :witan/output-schema {:projected-international-out-migrants ProjInterOutSchema}
-   :witan/exported? true}
+   :witan/output-schema {:projected-international-out-migrants ProjInterOutSchema}}
   [{:keys [international-out-migrants]} {:keys [start-year-avg-intout-mig end-year-avg-intout-mig]}]
   {:projected-international-out-migrants
    (cf/jumpoff-year-method-average international-out-migrants :intout
@@ -67,8 +63,7 @@
                         :projected-domestic-out-migrants ProjDomOutSchema
                         :projected-international-in-migrants ProjInterInSchema
                         :projected-international-out-migrants ProjInterOutSchema}
-   :witan/output-schema {:net-migration NetMigrationSchema}
-   :witan/exported? true}
+   :witan/output-schema {:net-migration NetMigrationSchema}}
   [{:keys [projected-domestic-in-migrants projected-domestic-out-migrants
            projected-international-in-migrants projected-international-out-migrants]} _]
   (let [net-migrants (-> (reduce #(wds/join %1 %2 [:gss-code :sex :age])
