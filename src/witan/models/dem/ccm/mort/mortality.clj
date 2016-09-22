@@ -48,8 +48,7 @@
    :witan/input-schema {:historic-deaths DeathsSchema
                         :historic-births BirthsSchema
                         :historic-population PopulationSchema}
-   :witan/output-schema {:historic-asmr HistASMRSchema}
-   :witan/exported? true}
+   :witan/output-schema {:historic-asmr HistASMRSchema}}
   [{:keys [historic-deaths historic-births historic-population]} _]
   (->> (create-popn-at-risk-death historic-population historic-deaths historic-births)
        (calc-death-rates historic-deaths)
@@ -189,8 +188,7 @@
                         :first-proj-year (s/constrained s/Int m-utils/year?)
                         :last-proj-year (s/constrained s/Int m-utils/year?)
                         :mort-scenario (s/enum :low :principal :high)}
-   :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}
-   :witan/exported? true}
+   :witan/output-schema {:initial-projected-mortality-rates ProjASMRSchema}}
   [inputs params]
   (project-asmr-internal inputs params))
 
@@ -203,8 +201,7 @@
    :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-mortality-rates ProjASMRSchema
                         :population-at-risk PopulationAtRiskSchema}
-   :witan/output-schema  {:deaths DeathsOutputSchema}
-   :witan/exported? true}
+   :witan/output-schema  {:deaths DeathsOutputSchema}}
   [{:keys [initial-projected-mortality-rates population-at-risk]} _]
   (let [loop-year (first (ds/column population-at-risk :year))
         max-year (m-utils/get-last-year initial-projected-mortality-rates)

@@ -20,8 +20,7 @@
   {:witan/name :ccm-core/ccm-loop-pred
    :witan/version "1.0.0"
    :witan/input-schema {:population PopulationSchema}
-   :witan/param-schema {:last-proj-year YearSchema}
-   :witan/exported? true}
+   :witan/param-schema {:last-proj-year YearSchema}}
   [{:keys [population]} {:keys [last-proj-year]}]
   (let [loop-year (m-utils/get-last-year population)]
     (>= loop-year last-proj-year)))
@@ -39,8 +38,7 @@
    :witan/output-schema {:population PopulationSchema
                          :aggregated-net-migration NetMigrationSchema
                          :aggregated-births BirthsSchema
-                         :aggregated-deaths DeathsOutputSchema}
-   :witan/exported? true}
+                         :aggregated-deaths DeathsOutputSchema}}
   [{:keys [historic-population]} {:keys [first-proj-year]}]
   {:population (wds/select-from-ds historic-population {:year (dec first-proj-year)})
    :aggregated-births (create-empty-ds BirthsSchema)
@@ -61,8 +59,7 @@
                          :aggregated-net-migration NetMigrationSchema
                          :aggregated-births BirthsSchema
                          :aggregated-deaths DeathsOutputSchema
-                         :population-at-risk PopulationAtRiskSchema}
-   :witan/exported? true}
+                         :population-at-risk PopulationAtRiskSchema}}
   [{:keys [population aggregated-births aggregated-deaths aggregated-net-migration]} _]
   (let [last-year (m-utils/get-last-year population)
         latest-year-popn (wds/select-from-ds population {:year last-year})
@@ -82,8 +79,7 @@
   {:witan/name :ccm-core/age-on
    :witan/version "1.0.0"
    :witan/input-schema {:latest-year-popn PopulationSchema}
-   :witan/output-schema {:latest-year-popn PopulationSchema}
-   :witan/exported? true}
+   :witan/output-schema {:latest-year-popn PopulationSchema}}
   [{:keys [latest-year-popn]} _]
   (let [aged-on (-> latest-year-popn
                     (ds/emap-column :age (fn [v] (if (< v 90) (inc v) v)))
@@ -97,8 +93,7 @@
   {:witan/name :ccm-core/add-births
    :witan/version "1.0.0"
    :witan/input-schema {:latest-year-popn PopulationSchema :births BirthsBySexSchema}
-   :witan/output-schema {:latest-year-popn PopulationSchema}
-   :witan/exported? true}
+   :witan/output-schema {:latest-year-popn PopulationSchema}}
   [{:keys [latest-year-popn births]} _]
   (let [births-n (wds/row-count births)
         aged-on-popn-with-births (-> births
@@ -115,8 +110,7 @@
   {:witan/name :ccm-core/remove-deaths
    :witan/version "1.0.0"
    :witan/input-schema {:latest-year-popn PopulationSchema :deaths DeathsOutputSchema}
-   :witan/output-schema {:latest-year-popn PopulationSchema}
-   :witan/exported? true}
+   :witan/output-schema {:latest-year-popn PopulationSchema}}
   [{:keys [latest-year-popn deaths]} _]
   (let [survived-popn (-> deaths
                           (ds/select-columns [:gss-code :sex :age :deaths])
@@ -133,8 +127,7 @@
   {:witan/name :ccm-core/apply-migration
    :witan/version "1.0.0"
    :witan/input-schema {:latest-year-popn PopulationSchema :net-migration NetMigrationSchema}
-   :witan/output-schema {:latest-year-popn PopulationSchema}
-   :witan/exported? true}
+   :witan/output-schema {:latest-year-popn PopulationSchema}}
   [{:keys [latest-year-popn net-migration]} _]
   (let [popn-w-migrants (-> latest-year-popn
                             (wds/join net-migration [:gss-code :sex :age])

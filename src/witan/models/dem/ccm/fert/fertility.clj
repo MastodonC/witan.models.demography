@@ -82,8 +82,7 @@
                         :historic-population PopulationSchema
                         :historic-births BirthsSchema}
    :witan/param-schema {:fert-base-year (s/constrained s/Int m-utils/year?)}
-   :witan/output-schema {:historic-asfr HistASFRSchema}
-   :witan/exported? true}
+   :witan/output-schema {:historic-asfr HistASFRSchema}}
   [{:keys [base-asfr historic-births-by-age-mother historic-population historic-births]}
    {:keys [fert-base-year]}]
   (let [birth-data-year (m-utils/get-last-year historic-births-by-age-mother)
@@ -211,8 +210,7 @@
                         :first-proj-year (s/constrained s/Int m-utils/year?)
                         :last-proj-year (s/constrained s/Int m-utils/year?)
                         :fert-scenario (s/enum :low :principal :high :low-2012 :principal-2012 :high-2012)}
-   :witan/output-schema {:initial-projected-fertility-rates ProjASFRSchema}
-   :witan/exported? true}
+   :witan/output-schema {:initial-projected-fertility-rates ProjASFRSchema}}
   [inputs params]
   (project-asfr-internal inputs params))
 
@@ -225,8 +223,7 @@
    :witan/version "1.0.0"
    :witan/input-schema {:initial-projected-fertility-rates ProjASFRSchema
                         :population-at-risk PopulationAtRiskSchema}
-   :witan/output-schema  {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
-   :witan/exported? true}
+   :witan/output-schema  {:births-by-age-sex-mother BirthsAgeSexMotherSchema}}
   [{:keys [initial-projected-fertility-rates population-at-risk]} _]
   (let [loop-year (first (ds/column population-at-risk :year))
         max-year (m-utils/get-last-year initial-projected-fertility-rates)
@@ -261,8 +258,7 @@
    :witan/version "1.0.0"
    :witan/input-schema {:births-by-age-sex-mother BirthsAgeSexMotherSchema}
    :witan/param-schema {:proportion-male-newborns double}
-   :witan/output-schema {:births BirthsBySexSchema}
-   :witan/exported? true}
+   :witan/output-schema {:births BirthsBySexSchema}}
   [{:keys [births-by-age-sex-mother]} {:keys [proportion-male-newborns]}]
   (let [loop-year (first (ds/column births-by-age-sex-mother :year))
         births-by-sex (-> births-by-age-sex-mother
