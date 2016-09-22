@@ -116,20 +116,20 @@
   (testing "The starting popn is returned"
     (let [get-start-popn (select-starting-popn prepared-inputs)]
       (is (same-coll? [:gss-code :sex :age :year :popn]
-                      (ds/column-names (:latest-year-popn get-start-popn))))
-      (is (true? (every? #(= % 2015) (ds/column (:latest-year-popn get-start-popn) :year))))
+                      (ds/column-names (:current-year-popn get-start-popn))))
+      (is (true? (every? #(= % 2015) (ds/column (:current-year-popn get-start-popn) :year))))
       ;; Total number of 15 years old in 2015:
-      (is (= 4386.0 (apply + (ds/column (wds/select-from-ds (:latest-year-popn get-start-popn)
+      (is (= 4386.0 (apply + (ds/column (wds/select-from-ds (:current-year-popn get-start-popn)
                                                             {:year 2015 :age 15}) :popn))))
       ;; Total number of women aged between 40 and 43 in 2015:
-      (is (= 5394.0 (apply + (ds/column (wds/select-from-ds (:latest-year-popn get-start-popn)
+      (is (= 5394.0 (apply + (ds/column (wds/select-from-ds (:current-year-popn get-start-popn)
                                                             {:sex "F" :age {:$gt 40 :lt 43}
                                                              :year 2015}) :popn)))))))
 
 (deftest age-on-test
   (testing "Popn is aged on correctly, 90 grouping is handled correctly."
-    (let [starting-popn (:latest-year-popn (select-starting-popn prepared-inputs))
-          aged-popn (:latest-year-popn (age-on (select-starting-popn prepared-inputs)
+    (let [starting-popn (:current-year-popn (select-starting-popn prepared-inputs))
+          aged-popn (:current-year-popn (age-on (select-starting-popn prepared-inputs)
                                                params))]
       (is (= (sum-popn starting-popn 2015 15)
              (sum-popn aged-popn 2015 16)))
@@ -149,7 +149,7 @@
           births-added     (-> aged-on
                                (merge fertility)
                                add-births)
-          popn-with-births (:latest-year-popn births-added)
+          popn-with-births (:current-year-popn births-added)
           latest-year      (first (ds/column popn-with-births :year))
           latest-newborns  (wds/select-from-ds popn-with-births {:year latest-year :age 0})]
       (is (= 2 (first (:shape latest-newborns))))
@@ -170,9 +170,9 @@
                                age-on)
           popn-with-births (add-births (merge fertility aged-on))
           popn-wo-deaths (remove-deaths (merge mortality popn-with-births))]
-      (is (= (apply - (concat (get-popn (:latest-year-popn popn-with-births) :popn 2015 0 "F")
+      (is (= (apply - (concat (get-popn (:current-year-popn popn-with-births) :popn 2015 0 "F")
                               (get-popn (:deaths mortality) :deaths 0 "F")))
-             (nth (get-popn (:latest-year-popn popn-wo-deaths) :popn 2015 0 "F") 0))))))
+             (nth (get-popn (:current-year-popn popn-wo-deaths) :popn 2015 0 "F") 0))))))
 
 (deftest apply-migration-test
   (testing "The migrants are added to the popn."
@@ -193,6 +193,6 @@
           popn-with-births (add-births (merge fertility aged-on))
           popn-wo-deaths (remove-deaths (merge mortality popn-with-births))
           popn-with-mig (apply-migration (merge migration popn-wo-deaths))]
-      (is (= (apply + (concat  (get-popn (:latest-year-popn popn-wo-deaths) :popn 2015 0 "F")
+      (is (= (apply + (concat  (get-popn (:current-year-popn popn-wo-deaths) :popn 2015 0 "F")
                                (get-popn (:net-migration migration) :net-mig 0 "F")))
-             (nth (get-popn (:latest-year-popn popn-with-mig) :popn 2015 0 "F") 0))))))
+             (nth (get-popn (:current-year-popn popn-with-mig) :popn 2015 0 "F") 0))))))
