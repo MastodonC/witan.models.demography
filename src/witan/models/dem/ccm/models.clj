@@ -40,14 +40,12 @@
     [:in-hist-dom-out-migrants  :proj-dom-out-migrants]
     [:in-hist-intl-in-migrants  :proj-intl-in-migrants]
     [:in-hist-intl-out-migrants :proj-intl-out-migrants]
-    [:select-starting-popn   :combine-into-net-flows]
 
     ;; mig projections
     [:proj-dom-in-migrants   :combine-into-net-flows]
     [:proj-dom-out-migrants  :combine-into-net-flows]
     [:proj-intl-in-migrants  :combine-into-net-flows]
     [:proj-intl-out-migrants :combine-into-net-flows]
-    [:select-starting-popn   :combine-into-net-flows]
 
     ;; inputs for loop
     [:in-hist-popn           :prepare-inputs]
