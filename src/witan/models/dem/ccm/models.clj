@@ -61,6 +61,7 @@
     [:select-starting-popn       :project-deaths]
     [:select-starting-popn       :age-on]
     [:select-starting-popn       :append-by-year]
+    [:select-starting-popn       :combine-into-net-flows]
 
     [:project-births             :combine-into-births-by-sex]
     [:combine-into-births-by-sex :add-births]

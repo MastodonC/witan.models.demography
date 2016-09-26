@@ -62,11 +62,15 @@
    :witan/input-schema {:projected-domestic-in-migrants ProjDomInSchema
                         :projected-domestic-out-migrants ProjDomOutSchema
                         :projected-international-in-migrants ProjInterInSchema
-                        :projected-international-out-migrants ProjInterOutSchema}
+                        :projected-international-out-migrants ProjInterOutSchema
+                        :population-at-risk PopulationAtRiskSchema}
    :witan/output-schema {:net-migration NetMigrationSchema}}
   [{:keys [projected-domestic-in-migrants projected-domestic-out-migrants
-           projected-international-in-migrants projected-international-out-migrants]} _]
-  (let [net-migrants (-> (reduce #(wds/join %1 %2 [:gss-code :sex :age])
+           projected-international-in-migrants projected-international-out-migrants
+           population-at-risk]} _]
+  (let [n-net-migrants (wds/row-count projected-domestic-in-migrants)
+        current-year (first (ds/column population-at-risk :year))
+        net-migrants (-> (reduce #(wds/join %1 %2 [:gss-code :sex :age])
                                  [projected-domestic-in-migrants
                                   projected-domestic-out-migrants
                                   projected-international-in-migrants
@@ -75,5 +79,6 @@
                           :net-mig
                           [:domestic-in :domestic-out :international-in :international-out]
                           (fn [di do ii io] (+ (- di do) (- ii io))))
-                         (ds/select-columns [:gss-code :sex :age :net-mig]))]
+                         (ds/add-column :year (repeat n-net-migrants current-year))
+                         (ds/select-columns [:gss-code :sex :age :year :net-mig]))]
     {:net-migration net-migrants}))

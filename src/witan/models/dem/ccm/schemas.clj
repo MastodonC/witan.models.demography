@@ -57,7 +57,8 @@
                            [:deaths java.lang.Double]]))
 
 (def NetMigrationSchema
-  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int] [:net-mig java.lang.Double]]))
+  (make-ordered-ds-schema [[:gss-code s/Str] [:sex s/Str] [:age s/Int]
+                           [:year s/Int] [:net-mig java.lang.Double]]))
 
 ;;For load-data test
 (def BirthsDataSchema
