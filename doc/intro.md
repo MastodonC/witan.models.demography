@@ -1,27 +1,18 @@
 # Introduction to witan.models.demography
 
 
-`witan.models.demography` is a Clojure library to run demographic models, which may include:
+`witan.models.demography` is a Clojure library to run demographic models, which includes:
 
 * Population projections
-* Small area projections
 
-
-The aim of `witan.models.demography` is to offer "generic" models in the sense that our models will be adaptable to different methodologies and data inputs.
-
-Current status:
-* Population projections: First release of a minimal version coming soon!
-* Small area projections: Not started. Waiting to finish the population projections.
-
-Note: The small area projections take as an input population projections.
-
+The aim of `witan.models.demography` is to offer "generic" models in the sense that our models will be adaptable to different methodologies and data inputs. To learn more about the methodology, see the [modelling](#trend-based-cohort-component-model) section. To learn more about the data inputs currently being used, jump to the [data inputs](#data-inputs) section.
 
 ## Glossary
 Let's define a few terms and acronyms we use throughout the library:
 
 * CCM: Cohort Component Model/Method
 
-* jumpoff year: the first year of projection
+* first projection year: the first year to be projected
 
 * base year: the last year of historical data used
 
@@ -37,12 +28,6 @@ Let's define a few terms and acronyms we use throughout the library:
 	* Migration component module
 
     * Core projection module
-
-  - [Housing-led Cohort Component Model](#housing-led-cohort-component-model)
-  - [Employment-led Cohort Component Model](#employment-led-cohort-component-model)
-
-
-* [Small area projections](#small-area-projections)
 
 
 ## Population projections
@@ -75,9 +60,45 @@ where:
 
 This method involves projecting births, deaths and migrations by age and sex.
 
-See below the minimal cohort component method we aim to provide:
+See below the cohort component method we aim to provide:
 
-![minimal CCM](images/MVP_generic_CCM_flowchart.png)
+![CCM](images/MVP_generic_CCM_flowchart.png)
+
+## User-defined parameters for the model
+
+Some parameters in the model can be specified by the user. The parameters, with defaults in parentheses, are:
+
+* First year of projection (2015)
+* Last year of projection (2018)
+* Start & end years of year range to average over when projecting deaths (2010-2014)
+* Start & end years of year range to average over when projecting domestic in-migrants; migration into an area (2003-2014)
+* Start & end years of year range to average over when projecting domestic out-migrants; migration out of an area (2003-2014)
+* Start & end years of year range to average over when projecting international in-migrants; migration into an area (2003-2014)
+* Start & end years of year range to average over when projecting international out-migrants; migration out of area (2003-2014)
+* Proportion of male newborns, represented as a number of male newborns (105) and a number of all newborns (205). **IMPORTANT**: This proportion is set to 105/205 for the UK, and should only be changed for other countries. 
+
+## User-defined parameters for the geography
+
+The geographical area for the projection must be specified. This is done with the 9-digit GSS code (Government Statistical Service code), or name, of one of the following:
+
+  * an English unitary authority (starts with "E06")
+  * an English non-metropolitan district (starts with "E07")
+  * an English metropolitan borough (starts with "E08")
+  * a London borough (starts with "E09")
+  
+
+## Data inputs
+
+The historical data required for the projection comes from the UK's Office of National Statistics. The datasets used are:
+
+* Historic population
+* Projections of births by age of mother
+* Historic births
+* Historic deaths
+* Domestic in-migrants
+* Domestic out-migrants
+* International in-migrants
+* International out-migrants
 
 Note:
 
@@ -86,9 +107,9 @@ See below:
 
 ![CCM - projection alternatives](images/Component_projection_alternatives.png)
 
-For estimating the value or rate for the first year of projection (jump-off year or base year), we will provide three alternatives. See below:
+For estimating the value or rate for the first year of projection (first projection year or base year), we will provide three alternatives. See below:
 
-![CCM - base year alternatives](images/Jump_off_year_calculation_alternatives.png)
+![CCM - base year alternatives](images/First_projection_year_projection_alternatives.png)
 
 
 
@@ -107,20 +128,8 @@ to the female population and splitting the estimated births into male and female
 3) Migration
 
 
-### Housing-led Cohort Component Model
-
-
-### Employment-led Cohort Component Model
 
 <br>
-
-## Small area projections
-
-
-### Area proportional distribution
-
-
-### Small area projection model
 
 ___
 1. S. Pennec, 2009, [APPSIM - Cohort Component Population Projections to Validate and Align the Dynamic Microsimulation Model APPSIM](http://www.natsem.canberra.edu.au/publications/?publication=appsim-cohort-component-population-projections-to-validate-and-align-the-dynamic-microsimulation-model-appsim)
