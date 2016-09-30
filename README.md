@@ -105,7 +105,9 @@ Turn it off with:
 ## Use `witan.models.demography`
 
 You can currently run a `witan.models.demography` cohort-component model on your terminal.
-To test/use it, follow the instructions below.
+To test/use it, follow the instructions below. 
+
+!!! Please note this feature is no longer being updated/maintained !!!
 
 ### Requirements
 
