@@ -40,7 +40,7 @@
                          :aggregated-births BirthsSchema
                          :aggregated-deaths DeathsOutputSchema}}
   [{:keys [historic-population]} {:keys [first-proj-year]}]
-  {:aggregated-population (wds/select-from-ds historic-population {:year (dec first-proj-year)})
+  {:aggregated-population (wds/select-from-ds historic-population {:year {:lt first-proj-year}})
    :aggregated-births (create-empty-ds BirthsSchema)
    :aggregated-deaths (create-empty-ds DeathsOutputSchema)
    :aggregated-net-migration (create-empty-ds NetMigrationSchema)})
