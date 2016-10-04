@@ -131,23 +131,23 @@
       (ds/select-columns [:age :year :prop-diff])))
 
 (defn apply-national-trend-fertility
-  "Takes a dataset of projected rates or values for the jumpoff year, and a dataset of
+  "Takes a dataset of projected rates or values for the first projection year, and a dataset of
    projected national rates for the following years of the projection (currently
    this is ONS data). Takes parameters for first & last projection years, the
    scenario to be used from the future rates dataset (e.g. :low, :principal, or
-   :high), and the name of the column with rates or value in the jumpoff year dataset
+   :high), and the name of the column with rates or value in the first projection year dataset
    (e.g. :fert-rate or :births). Returns a dataset with projected rates or values
    for each age, sex, and projection year, calculated by applying the trend from
-   the projected national rates to the data from the jumpoff year dataset."
-  [jumpoff-year-projection future-assumption
+   the projected national rates to the data from the first projection year dataset."
+  [first-year-projection future-assumption
    first-proj-year last-proj-year scenario assumption-col]
   (let [proportional-differences (calc-proportional-differences-fertility future-assumption
                                                                           first-proj-year
                                                                           last-proj-year
                                                                           scenario)
-        jumpoff-year-projection-n (wds/row-count jumpoff-year-projection)
-        projection-first-proj-year (-> jumpoff-year-projection
-                                       (ds/add-column :year (repeat jumpoff-year-projection-n
+        first-year-projection-n (wds/row-count first-year-projection)
+        projection-first-proj-year (-> first-year-projection
+                                       (ds/add-column :year (repeat first-year-projection-n
                                                                     first-proj-year))
                                        (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
     (cf/order-ds (:accumulator
@@ -172,23 +172,23 @@
 
 (defn project-asfr-internal
   "Given historic fertility rates, project asfr using specified variant of the projection method.
-   Currently there is only 1 year of data so the jumpoff year method is set to finalyearhist.
+   Currently there is only 1 year of data so the first projection year method is set to finalyearhist.
    Returns dataset with projected fertility rate in :fert-rate column for all years of projection."
   [{:keys [historic-asfr future-fertility-trend-assumption]}
    {:keys [fert-variant first-proj-year last-proj-year fert-scenario]}]
   (case fert-variant
     :fixed {:initial-projected-fertility-rates
-            (-> (cf/jumpoff-year-method-final-year-hist historic-asfr :fert-rate)
+            (-> (cf/first-projection-year-method-final-year-hist historic-asfr :fert-rate)
                 (cf/add-years-to-fixed-methods first-proj-year
                                                last-proj-year)
                 (ds/select-columns [:gss-code :sex :age :year :fert-rate]))}
 
-    :applynationaltrend (let [projected-rates-jumpoff-year (wds/add-derived-column historic-asfr
-                                                                                   :year
-                                                                                   [:year]
-                                                                                   (fn [_] first-proj-year))]
+    :applynationaltrend (let [projected-rates-first-year (wds/add-derived-column historic-asfr
+                                                                                 :year
+                                                                                 [:year]
+                                                                                 (fn [_] first-proj-year))]
                           {:initial-projected-fertility-rates
-                           (apply-national-trend-fertility projected-rates-jumpoff-year
+                           (apply-national-trend-fertility projected-rates-first-year
                                                            future-fertility-trend-assumption
                                                            first-proj-year
                                                            last-proj-year
@@ -198,9 +198,9 @@
 (defworkflowfn project-asfr-1-0-0
   "Takes a back series of age-specific fertility rates. For projecting fertility rates in years
   following the first projection year up until the last projection year: the fixed method applies
-  the jump off year rates each year; the apply national trend method requires a national trend
+  the first projection year rates each year; the apply national trend method requires a national trend
   dataset and a scenario to use as the future mortality trend assumption, and generates variable
-  rates for each year. Both methods use the final year of historic data for the jumpoff method.
+  rates for each year. Both methods use the final year of historic data for the first projection year method.
   Outputs a dataset of projected age-specific fertility rates for each projection year. "
   {:witan/name :ccm-fert/project-asfr
    :witan/version "1.0.0"
@@ -252,7 +252,7 @@
 (defworkflowfn combine-into-births-by-sex
   "Takes dataset of historic age specific fertility rates, and parameter
    for the base year of fertility data. Returns dataset with projected
-   age specific fertility rates, calculated using the jumpoff year average
+   age specific fertility rates, calculated using the first projection year average
    method (see docs)."
   {:witan/name :ccm-fert/combine-into-births-by-sex
    :witan/version "1.0.0"

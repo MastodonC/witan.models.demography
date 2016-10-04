@@ -6,13 +6,13 @@
             [witan.workspace-api.utils :as utils]
             [witan.models.dem.ccm.models-utils :as m-utils]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Calculate jumpoff year rate/value for alternative ways to project components of change: ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Calculate first projection year rate/value for alternative ways to project components of change
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;Method 1: Get the value or rate from the final year of histrical data & use this as
-;;          the value or rate for the jumpoff year.
-(defn jumpoff-year-method-final-year-hist
+;;          the value or rate for the first projection year.
+(defn first-projection-year-method-final-year-hist
   "Takes in a dataset with historical values or rates. Returns a dataset that only
    contains the values or rates for the final year of historical data."
   [historical-data col]
@@ -22,8 +22,8 @@
         (ds/select-columns [:gss-code :sex :age col]))))
 
 ;; Method 2: Calculate average value or rate from range of historical data & use this value for
-;;           jumpoff year
-(defn jumpoff-year-method-average
+;;           first projection year
+(defn first-projection-year-method-average
   "Takes in a dataset with historical data, a column name to be averaged,
   a name for the average column, and years to start and end averaging for.
   Returns a dataset where the column to be averaged contains the averages
@@ -47,9 +47,9 @@
         (ds/rename-columns {col-to-avg avg-name})
         (wds/rollup :mean avg-name [:gss-code :sex :age]))))
 
-;;Method 3: Calculate trend (perform linear regression) over range of histrical data &
-;;          using this trend get the value or rate to use for the jumpoff year.
-(defn jumpoff-year-method-trend
+;;Method 3: Calculate trend (perform linear regression) over range of historical data &
+;;          using this trend get the value or rate to use for the first projection year.
+(defn first-projection-year-method-trend
   "Takes in a dataset with historical data, a column name for a trend to be
   calculated for, a name for the trend col and years to start and end to
   calculate the trend for. Returns a dataset with a new col for the calculated trend"
@@ -90,7 +90,7 @@
         (ds/select-columns [:gss-code :sex :age trend-out]))))
 
 (defn add-years-to-fixed-methods
-  "Plots fixed rates across all projected years"
+  "Duplicates dataset by adding year col"
   [fixed-projection first-proj-year last-proj-year]
   (let [n (wds/row-count fixed-projection)]
     (->> (range first-proj-year (inc last-proj-year))
@@ -122,7 +122,7 @@
                                ds/dataset)))
 
 (defn lag
-  "Data must be ordered chronologically in order to work correctly"
+  "Data must be kept chronologically ordered in order to work correctly"
   [dataset col-key]
   (-> dataset
       (ds/to-map)
