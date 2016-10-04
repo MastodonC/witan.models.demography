@@ -13,3 +13,4 @@ pom.xml.asc
 .hgignore
 .hg/
 /datasets/default_datasets/*/*_E0*.csv
+.DS_Store
