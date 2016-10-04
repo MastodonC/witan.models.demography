@@ -17,8 +17,8 @@
    :witan/output-schema {:projected-domestic-in-migrants ProjDomInSchema}}
   [{:keys [domestic-in-migrants]} {:keys [start-year-avg-domin-mig end-year-avg-domin-mig]}]
   {:projected-domestic-in-migrants
-   (cf/jumpoff-year-method-average domestic-in-migrants :domin
-                                   :domestic-in start-year-avg-domin-mig end-year-avg-domin-mig)})
+   (cf/first-projection-year-method-average domestic-in-migrants :domin
+                                            :domestic-in start-year-avg-domin-mig end-year-avg-domin-mig)})
 
 (defworkflowfn project-domestic-out-migrants
   {:witan/name :ccm-mig/proj-dom-out-mig
@@ -29,8 +29,8 @@
    :witan/output-schema {:projected-domestic-out-migrants ProjDomOutSchema}}
   [{:keys [domestic-out-migrants]} {:keys [start-year-avg-domout-mig end-year-avg-domout-mig]}]
   {:projected-domestic-out-migrants
-   (cf/jumpoff-year-method-average domestic-out-migrants :domout
-                                   :domestic-out start-year-avg-domout-mig end-year-avg-domout-mig)})
+   (cf/first-projection-year-method-average domestic-out-migrants :domout
+                                            :domestic-out start-year-avg-domout-mig end-year-avg-domout-mig)})
 
 (defworkflowfn project-international-in-migrants
   {:witan/name :ccm-mig/proj-inter-in-mig
@@ -41,8 +41,8 @@
    :witan/output-schema {:projected-international-in-migrants ProjInterInSchema}}
   [{:keys [international-in-migrants]} {:keys [start-year-avg-intin-mig end-year-avg-intin-mig]}]
   {:projected-international-in-migrants
-   (cf/jumpoff-year-method-average international-in-migrants :intin
-                                   :international-in start-year-avg-intin-mig end-year-avg-intin-mig)})
+   (cf/first-projection-year-method-average international-in-migrants :intin
+                                            :international-in start-year-avg-intin-mig end-year-avg-intin-mig)})
 
 (defworkflowfn project-international-out-migrants
   {:witan/name :ccm-mig/proj-inter-out-mig
@@ -53,8 +53,8 @@
    :witan/output-schema {:projected-international-out-migrants ProjInterOutSchema}}
   [{:keys [international-out-migrants]} {:keys [start-year-avg-intout-mig end-year-avg-intout-mig]}]
   {:projected-international-out-migrants
-   (cf/jumpoff-year-method-average international-out-migrants :intout
-                                   :international-out start-year-avg-intout-mig end-year-avg-intout-mig)})
+   (cf/first-projection-year-method-average international-out-migrants :intout
+                                            :international-out start-year-avg-intout-mig end-year-avg-intout-mig)})
 
 (defworkflowfn combine-into-net-flows
   {:witan/name :ccm-mig/combine-mig-flows

@@ -46,23 +46,23 @@
              :end-year-avg-mort 2014
              :mort-variant :average-fixed
              :mort-scenario :principal
-             ;; (s/validate (s/pred (<= % (dec jumpoff-year-mort))) :end-year-avg-mort)
+             ;; (s/validate (s/pred (<= % (dec first-projection-year-mort))) :end-year-avg-mort)
              ;; Migration module
              ;; (s/validate (s/pred (>= % earliest-domin-mig-year)) :start-year-avg-domin-mig)
              :start-year-avg-domin-mig 2003
-             ;; (s/validate (s/pred (<= % (dec jumpoff-year-mig))) :end-year-avg-domin-mig)
+             ;; (s/validate (s/pred (<= % (dec first-projection-year-mig))) :end-year-avg-domin-mig)
              :end-year-avg-domin-mig 2014
              ;; (s/validate (s/pred (>= % earliest-domout-mig-year)) :start-year-avg-domout-mig)
              :start-year-avg-domout-mig 2003
-             ;; (s/validate (s/pred (<= % (dec jumpoff-year-mig))) :end-year-avg-domout-mig)
+             ;; (s/validate (s/pred (<= % (dec first-projection-year-mig))) :end-year-avg-domout-mig)
              :end-year-avg-domout-mig 2014
              ;; (s/validate (s/pred (>= % earliest-intin-mig-year)) :start-year-avg-intin-mig)
              :start-year-avg-intin-mig 2003
-             ;; (s/validate (s/pred (<= % (dec jumpoff-year-mig))) :end-year-avg-intin-mig)
+             ;; (s/validate (s/pred (<= % (dec first-projection-year-mig))) :end-year-avg-intin-mig)
              :end-year-avg-intin-mig 2014
              ;; (s/validate (s/pred (>= % earliest-intout-mig-year)) :start-year-avg-intout-mig)
              :start-year-avg-intout-mig 2003
-             ;; (s/validate (s/pred (<= % (dec jumpoff-year-mig))) :end-year-avg-intout-mig)
+             ;; (s/validate (s/pred (<= % (dec first-projection-year-mig))) :end-year-avg-intout-mig)
              :end-year-avg-intout-mig 2014})
 
 (def prepared-inputs (prepare-inputs-1-0-0 data-inputs params))

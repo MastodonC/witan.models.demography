@@ -13,7 +13,7 @@
   Takes datasets with population, deaths, and births. Returns a new dataset with
   population at risk in the :popn column. The population at risk is the births data
   (age 0) joined with the aged on population dataset (age 1 to 90) for years less than
-  or equal to the latest year of deaths data.."
+  or equal to the latest year of deaths data."
   [popn-ds deaths-ds births-ds]
   (let [max-year-deaths (m-utils/get-last-year deaths-ds)
         _ (utils/property-holds? max-year-deaths m-utils/year? (str max-year-deaths " is not a year"))
@@ -83,23 +83,23 @@
       (ds/select-columns [:sex :age :year :prop-diff])))
 
 (defn apply-national-trend-mortality
-  "Takes a dataset of projected rates or values for the jumpoff year, and a dataset of
+  "Takes a dataset of projected rates or values for the first projection year, and a dataset of
    projected national rates for the following years of the projection (currently
    this is ONS data). Takes parameters for first & last projection years, the
    scenario to be used from the future rates dataset (e.g. :low, :principal, or
-   :high), and the name of the column with rates or value in the jumpoff year dataset
+   :high), and the name of the column with rates or value in the first projection year dataset
    (e.g. :death-rate or :deaths). Returns a dataset with projected rates or values
    for each age, sex, and projection year, calculated by applying the trend from
-   the projected national rates to the data from the jumpoff year dataset."
-  [jumpoff-year-projection future-assumption
+   the projected national rates to the data from the first projection year dataset."
+  [first-year-projection future-assumption
    first-proj-year last-proj-year scenario assumption-col]
   (let [proportional-differences (calc-proportional-differences-mortality future-assumption
                                                                           first-proj-year
                                                                           last-proj-year
                                                                           scenario)
-        jumpoff-year-projection-n (wds/row-count jumpoff-year-projection)
-        projection-first-proj-year (-> jumpoff-year-projection
-                                       (ds/add-column :year (repeat jumpoff-year-projection-n
+        first-year-projection-n (wds/row-count first-year-projection)
+        projection-first-proj-year (-> first-year-projection
+                                       (ds/add-column :year (repeat first-year-projection-n
                                                                     first-proj-year))
                                        (ds/select-columns [:gss-code :sex :age :year assumption-col]))]
     (cf/order-ds (:accumulator
@@ -124,44 +124,44 @@
                                      last-proj-year mort-scenario]}]
   (case mort-variant
     :average-fixed {:initial-projected-mortality-rates
-                    (-> (cf/jumpoff-year-method-average historic-asmr
-                                                        :death-rate
-                                                        :death-rate
-                                                        start-year-avg-mort
-                                                        end-year-avg-mort)
+                    (-> (cf/first-projection-year-method-average historic-asmr
+                                                                 :death-rate
+                                                                 :death-rate
+                                                                 start-year-avg-mort
+                                                                 end-year-avg-mort)
                         (cf/add-years-to-fixed-methods first-proj-year
                                                        last-proj-year)
                         (ds/select-columns [:gss-code :sex :age :year :death-rate]))}
     :trend-fixed {:initial-projected-mortality-rates
-                  (-> (cf/jumpoff-year-method-trend historic-asmr
-                                                    :death-rate
-                                                    :death-rate
-                                                    start-year-avg-mort
-                                                    end-year-avg-mort)
+                  (-> (cf/first-projection-year-method-trend historic-asmr
+                                                             :death-rate
+                                                             :death-rate
+                                                             start-year-avg-mort
+                                                             end-year-avg-mort)
                       (cf/add-years-to-fixed-methods first-proj-year
                                                      last-proj-year)
                       (ds/select-columns [:gss-code :sex :age :year :death-rate]))}
-    :average-applynationaltrend (let [projected-rates-jumpoff-year
-                                      (cf/jumpoff-year-method-average historic-asmr
-                                                                      :death-rate
-                                                                      :death-rate
-                                                                      start-year-avg-mort
-                                                                      end-year-avg-mort)]
+    :average-applynationaltrend (let [projected-rates-first-year
+                                      (cf/first-projection-year-method-average historic-asmr
+                                                                               :death-rate
+                                                                               :death-rate
+                                                                               start-year-avg-mort
+                                                                               end-year-avg-mort)]
                                   {:initial-projected-mortality-rates
-                                   (apply-national-trend-mortality projected-rates-jumpoff-year
+                                   (apply-national-trend-mortality projected-rates-first-year
                                                                    future-mortality-trend-assumption
                                                                    first-proj-year
                                                                    last-proj-year
                                                                    mort-scenario
                                                                    :death-rate)})
-    :trend-applynationaltrend (let [projected-rates-jumpoff-year
-                                    (cf/jumpoff-year-method-trend historic-asmr
-                                                                  :death-rate
-                                                                  :death-rate
-                                                                  start-year-avg-mort
-                                                                  end-year-avg-mort)]
+    :trend-applynationaltrend (let [projected-rates-first-year
+                                    (cf/first-projection-year-method-trend historic-asmr
+                                                                           :death-rate
+                                                                           :death-rate
+                                                                           start-year-avg-mort
+                                                                           end-year-avg-mort)]
                                 {:initial-projected-mortality-rates
-                                 (apply-national-trend-mortality projected-rates-jumpoff-year
+                                 (apply-national-trend-mortality projected-rates-first-year
                                                                  future-mortality-trend-assumption
                                                                  first-proj-year
                                                                  last-proj-year

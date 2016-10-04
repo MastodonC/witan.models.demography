@@ -54,7 +54,7 @@
     [:prepare-inputs         :select-starting-popn]
     [:project-asmr           :project-deaths]
     [:project-asfr           :project-births]
-    [:in-hist-total-births   :append-by-year] ;; TODO historic births should come from `prepare-starting-popn'
+    [:in-hist-total-births   :append-by-year]
 
     ;; --- start popn loop
     [:select-starting-popn       :project-births]
@@ -205,8 +205,7 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-inter-in-mig
-     :witan/params {:start-year-avg-intin-mig 2003,
-                    :end-year-avg-intin-mig 2014}}
+     :witan/params {:start-year-avg-intin-mig 2003,:end-year-avg-intin-mig 2014}}
     {:witan/name :proj-intl-out-migrants
      :witan/version "1.0.0"
      :witan/type :function
