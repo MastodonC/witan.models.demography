@@ -14,7 +14,8 @@
             [witan.models.dem.ccm.models :refer [cohort-component-model
                                                  model-library]]
             [witan.models.dem.ccm.models-utils :refer [make-catalog make-contracts]]
-            [witan.datasets :as wds]))
+            [witan.datasets :as wds]
+            [clojure.core.matrix.dataset :as ds]))
 
 (def gss-code "E06000023")
 
@@ -63,6 +64,14 @@
    [:international-out-migrants
     (with-gss "./datasets/default_datasets/migration/historic_migration_flows_international_out")]})
 
+(def r-output-2015 (ld/load-datasets
+                    {:end-population
+                     "./datasets/test_datasets/r_outputs_for_testing/core/bristol_end_population_2015.csv"}))
+
+(def r-output-2040 (ld/load-datasets
+                    {:end-population
+                     "./datasets/test_datasets/r_outputs_for_testing/core/bristol_end_population_2040.csv"}))
+
 (defn local-download
   [input _ schema]
   (let [[key src] (get local-inputs (or (:witan/fn input)
@@ -77,15 +86,35 @@
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
 
 (deftest workspace-test
-  (let [fixed-catalog (mapv #(if (= (:witan/type %) :input) (fix-input %) %) (:catalog cohort-component-model))
+  (let [fixed-catalog (mapv #(if (= (:witan/type %) :input)
+                               (fix-input %)
+                               (if (get-in % [:witan/params :last-proj-year])
+                                 (assoc-in % [:witan/params :last-proj-year] 2040)
+                                 %))
+                            (:catalog cohort-component-model))
         workspace     {:workflow  (:workflow cohort-component-model)
                        :catalog   fixed-catalog
                        :contracts (p/available-fns (model-library))}
         workspace'    (s/with-fn-validation (wex/build! workspace))
-        result        (wex/run!! workspace' {})]
+        result        (wex/run!! workspace' {})
+        popn-data     (:population (first result))
+        popn-data-2015 (wds/select-from-ds popn-data {:year 2015})
+        joined-data-2015 (wds/join (ds/rename-columns (:end-population r-output-2015) {:popn :popn-r})
+                                   popn-data-2015
+                                   [:gss-code :sex :age :year])
+        popn-data-2040 (wds/select-from-ds popn-data {:year 2040})
+        joined-data-2040 (wds/join (ds/rename-columns (:end-population r-output-2040) {:popn :popn-r})
+                                   popn-data-2040
+                                   [:gss-code :sex :age :year])]
     (is (not-empty result))
     (is (= 4 (count (first result))))
     (is (contains? (first result) :population))
+    (is (every? #(fp-equals? (wds/subset-ds joined-data-2015 :rows % :cols :popn)
+                             (wds/subset-ds joined-data-2015 :rows % :cols :popn-r) 0.0000000001)
+                (range (first (:shape joined-data-2015)))))
+    (is (every? #(fp-equals? (wds/subset-ds joined-data-2040 :rows % :cols :popn)
+                             (wds/subset-ds joined-data-2040 :rows % :cols :popn-r) 0.001)
+                (range (first (:shape joined-data-2040)))))
     (let [test-value (-> result
                          first
                          :population
