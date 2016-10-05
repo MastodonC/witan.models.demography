@@ -64,42 +64,6 @@ See below the cohort component method we aim to provide:
 
 ![CCM](images/MVP_generic_CCM_flowchart.png)
 
-## User-defined parameters for the model
-
-Some parameters in the model can be specified by the user. The parameters, with defaults in parentheses, are:
-
-* First year of projection (2015)
-* Last year of projection (2018)
-* Start & end years of year range to average over when projecting deaths (2010-2014)
-* Start & end years of year range to average over when projecting domestic in-migrants; migration into an area (2003-2014)
-* Start & end years of year range to average over when projecting domestic out-migrants; migration out of an area (2003-2014)
-* Start & end years of year range to average over when projecting international in-migrants; migration into an area (2003-2014)
-* Start & end years of year range to average over when projecting international out-migrants; migration out of area (2003-2014)
-* Proportion of male newborns, represented as a number of male newborns (105) and a number of all newborns (205). **IMPORTANT**: This proportion is set to 105/205 for the UK, and should only be changed for other countries. 
-
-## User-defined parameters for the geography
-
-The geographical area for the projection must be specified. This is done with the 9-digit GSS code (Government Statistical Service code), or name, of one of the following:
-
-  * an English unitary authority (starts with "E06")
-  * an English non-metropolitan district (starts with "E07")
-  * an English metropolitan borough (starts with "E08")
-  * a London borough (starts with "E09")
-  
-
-## Data inputs
-
-The historical data required for the projection comes from the UK's Office of National Statistics. The datasets used are:
-
-* Historic population
-* Projections of births by age of mother
-* Historic births
-* Historic deaths
-* Domestic in-migrants
-* Domestic out-migrants
-* International in-migrants
-* International out-migrants
-
 Note:
 
 We will ultimately provide four alternatives for projecting the components of change (i.e. fertiliy, mortality and migration): projected values or rates can either be fixed, or determined by applying a national trend.
@@ -127,6 +91,43 @@ to the female population and splitting the estimated births into male and female
 
 3) Migration
 
+## User-defined parameters for the model
+
+Some parameters in the model can be specified by the user. The parameters, with defaults in parentheses, are:
+
+* First year of projection (2015)
+* Last year of projection (2018)
+* Start & end years of year range to average over when projecting deaths (2010-2014)
+* Start & end years of year range to average over when projecting domestic in-migrants; migration into an area (2003-2014)
+* Start & end years of year range to average over when projecting domestic out-migrants; migration out of an area (2003-2014)
+* Start & end years of year range to average over when projecting international in-migrants; migration into an area (2003-2014)
+* Start & end years of year range to average over when projecting international out-migrants; migration out of area (2003-2014)
+* Proportion of male newborns, represented as a number of male newborns (105) and a number of all newborns (205). **IMPORTANT**: This proportion is set to 105/205 for the UK, and should only be changed for other countries.
+
+## User-defined parameters for the geography
+
+The geographical area for the projection must be specified. This is done with the 9-digit GSS code (Government Statistical Service code), or name, of one of the following:
+
+  * an English unitary authority (starts with "E06")
+  * an English non-metropolitan district (starts with "E07")
+  * an English metropolitan borough (starts with "E08")
+  * a London borough (starts with "E09")
+
+
+## Data inputs
+
+The historical data required for the projection comes from the UK's Office of National Statistics. The datasets used are:
+
+* Historic population
+* Projections of births by age of mother
+* Historic births
+* Historic deaths
+* Domestic in-migrants
+* Domestic out-migrants
+* International in-migrants
+* International out-migrants
+
+Further information regarding these data inputs can be found [here](https://github.com/MastodonC/witan.models.demography/blob/feature/add-data-input-info/doc/Data_sources.csv)
 
 
 <br>
