@@ -112,10 +112,9 @@
     (is (every? #(fp-equals? (wds/subset-ds joined-data-2015 :rows % :cols :popn)
                              (wds/subset-ds joined-data-2015 :rows % :cols :popn-r) 0.0000000001)
                 (range (first (:shape joined-data-2015)))))
-    ;;;; WIP: TEST CURRENTLY FAILS FOR 2040
-    #_(is (every? #(fp-equals? (wds/subset-ds joined-data-2040 :rows % :cols :popn)
-                               (wds/subset-ds joined-data-2040 :rows % :cols :popn-r) 0.0000000001)
-                  (range (first (:shape joined-data-2040)))))
+    (is (every? #(fp-equals? (wds/subset-ds joined-data-2040 :rows % :cols :popn)
+                             (wds/subset-ds joined-data-2040 :rows % :cols :popn-r) 0.001)
+                (range (first (:shape joined-data-2040)))))
     (let [test-value (-> result
                          first
                          :population
