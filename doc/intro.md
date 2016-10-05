@@ -75,7 +75,7 @@ Some parameters in the model can be specified by the user. The parameters, with 
 * Start & end years of year range to average over when projecting domestic out-migrants; migration out of an area (2003-2014)
 * Start & end years of year range to average over when projecting international in-migrants; migration into an area (2003-2014)
 * Start & end years of year range to average over when projecting international out-migrants; migration out of area (2003-2014)
-* Proportion of male newborns, represented as a number of male newborns (105) and a number of all newborns (205). **IMPORTANT**: This proportion is set to 105/205 for the UK, and should only be changed for other countries. 
+* Proportion of male newborns, represented as a number of male newborns (105) and a number of all newborns (205). **IMPORTANT**: This proportion is set to 105/205 for the UK, and should only be changed for other countries.
 
 ## User-defined parameters for the geography
 
@@ -85,7 +85,7 @@ The geographical area for the projection must be specified. This is done with th
   * an English non-metropolitan district (starts with "E07")
   * an English metropolitan borough (starts with "E08")
   * a London borough (starts with "E09")
-  
+
 
 ## Data inputs
 
@@ -109,7 +109,7 @@ See below:
 
 For estimating the value or rate for the first year of projection (first projection year or base year), we will provide three alternatives. See below:
 
-![CCM - base year alternatives](images/First_projection_year_projection_alternatives.png)
+![CCM - first year projection alternatives](images/First_projection_year_projection_alternatives.png)
 
 
 
