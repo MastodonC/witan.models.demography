@@ -64,6 +64,33 @@ See below the cohort component method we aim to provide:
 
 ![CCM](images/MVP_generic_CCM_flowchart.png)
 
+Note:
+
+We will ultimately provide four alternatives for projecting the components of change (i.e. fertiliy, mortality and migration): projected values or rates can either be fixed, or determined by applying a national trend.
+See below:
+
+![CCM - projection alternatives](images/Component_projection_alternatives.png)
+
+For estimating the value or rate for the first year of projection (first projection year or base year), we will provide three alternatives. See below:
+
+![CCM - base year alternatives](images/First_projection_year_projection_alternatives.png)
+
+
+
+1) Fertility
+
+The standard methodology for birth projections relies on applying age-specific fertility rates (ASFR)
+to the female population and splitting the estimated births into male and female using a standard ratio.
+
+
+
+2) Mortality
+
+
+
+
+3) Migration
+
 ## User-defined parameters for the model
 
 Some parameters in the model can be specified by the user. The parameters, with defaults in parentheses, are:
@@ -100,33 +127,7 @@ The historical data required for the projection comes from the UK's Office of Na
 * International in-migrants
 * International out-migrants
 
-Note:
-
-We will ultimately provide four alternatives for projecting the components of change (i.e. fertiliy, mortality and migration): projected values or rates can either be fixed, or determined by applying a national trend.
-See below:
-
-![CCM - projection alternatives](images/Component_projection_alternatives.png)
-
-For estimating the value or rate for the first year of projection (first projection year or base year), we will provide three alternatives. See below:
-
-![CCM - base year alternatives](images/First_projection_year_projection_alternatives.png)
-
-
-
-1) Fertility
-
-The standard methodology for birth projections relies on applying age-specific fertility rates (ASFR)
-to the female population and splitting the estimated births into male and female using a standard ratio.
-
-
-
-2) Mortality
-
-
-
-
-3) Migration
-
+Further information regarding these data inputs can be found [here](https://github.com/MastodonC/witan.models.demography/blob/feature/add-data-input-info/doc/Data_sources.csv)
 
 
 <br>
