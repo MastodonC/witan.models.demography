@@ -1,7 +1,7 @@
 # Introduction to witan.models.demography
 
 
-`witan.models.demography` is a Clojure library to run demographic models, which includes:
+`witan.models.demography` is a Clojure library to run demographic models, which currently only includes:
 
 * Population projections
 
@@ -16,18 +16,20 @@ Let's define a few terms and acronyms we use throughout the library:
 
 * base year: the last year of historical data used
 
+* Component of change: one of three calculations (mortality, fertility and migration), used to project the overall population projection.
+
 
 ## Content of the library
 * [Population projections](#population-projections)
-  - [Trend-based Cohort Component Model](#trend-based-cohort-component-model)
+  - [Cohort Component Model](#cohort-component-model)
 
-	* Fertility component module
+	* [Fertility component module](#fertility)
 
-	* Mortality component module
+	* [Mortality component module](#mortality)
 
-	* Migration component module
+	* [Migration component module](#migration)
 
-    * Core projection module
+    * [Core projection module](#core)
 
 
 ## Population projections
@@ -56,40 +58,49 @@ where:
 </pre>
 
 
-### Trend-based Cohort Component Model
+### Cohort Component Model
 
-This method involves projecting births, deaths and migrations by age and sex.
-
-See below the cohort component method we aim to provide:
+This flowchart shows the steps of the Cohort Component Model that occur within the core module and draw on the fertility, mortality and migration modules':
 
 ![CCM](images/MVP_generic_CCM_flowchart.png)
 
-Note:
 
-We will ultimately provide four alternatives for projecting the components of change (i.e. fertiliy, mortality and migration): projected values or rates can either be fixed, or determined by applying a national trend.
-See below:
+
+### Fertility
+
+The standard methodology for birth projections relies on applying age-specific fertility rates (ASFR) to the female population and splitting the estimated births into male and female using a standard ratio.
+
+### Mortality
+
+Death projections are calculated by applying a set of age and sex specific mortality rates (ASMR) to the population' (note 'A single rate for deaths per sex and age group is applied across all years' is used when the fixed projection method is used)
+
+### Migration
+
+The net migration projections are calculated based on historic movement of both domestic and international migrants. Migrants are further characterised as either in- or out-migrants, combining this information to project the 
+net-migration.
+
+### Core
+The core module takes historic population data as well as projections from each of the components of change (above) to calculate the  population for each projected year.
+
+## Methodologies for projecting components of change
+
+Births, deaths and migrant projections are calculated by
+1. projection of historic values
+2. projection of historic rates which are then multiplied by a population at risk within the model.
+
+There are 3 methods associated with calculating projections the first projection year:
+
+![CCM - firsr projection year alternatives](images/First_projection_year_projection_alternatives.png)
+
+...and 4 methods associated with calculating projections in further projection years:
 
 ![CCM - projection alternatives](images/Component_projection_alternatives.png)
 
-For estimating the value or rate for the first year of projection (first projection year or base year), we will provide three alternatives. See below:
+Note:
 
-![CCM - base year alternatives](images/First_projection_year_projection_alternatives.png)
+Displayed below are the current options available for each component of change in regard to specific methodologies.
 
-
-
-1) Fertility
-
-The standard methodology for birth projections relies on applying age-specific fertility rates (ASFR)
-to the female population and splitting the estimated births into male and female using a standard ratio.
-
-
-
-2) Mortality
-
-
-
-
-3) Migration
+![Alternatives for Components of Change](images/alternatives_for_Coc.png)
 
 ## User-defined parameters for the model
 
