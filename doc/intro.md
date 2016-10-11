@@ -62,8 +62,8 @@ where:
 
 This flowchart shows the steps of the Cohort Component Model that occur within the core module and draw on the fertility, mortality and migration modules':
 
-![CCM](images/MVP_generic_CCM_flowchart.png)
-
+![CCM](images/CCM_flowchart.png)
+(Please download the image for a more detailed overview of the model)
 
 
 ### Fertility
@@ -76,7 +76,7 @@ Death projections are calculated by applying a set of age and sex specific morta
 
 ### Migration
 
-The net migration projections are calculated based on historic movement of both domestic and international migrants. Migrants are further characterised as either in- or out-migrants, combining this information to project the 
+The net migration projections are calculated based on historic movement of both domestic and international migrants. Migrants are further characterised as either in- or out-migrants, combining this information to project the
 net-migration.
 
 ### Core

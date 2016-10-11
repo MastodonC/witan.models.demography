@@ -23,17 +23,17 @@
                         :future-fertility-trend-assumption
                         "./datasets/default_datasets/fertility/future_fertility_trend_assumption.csv"}))
 
-(def params-fixed {:fert-variant :fixed
+(def params-fixed {:proj-asfr-variant :fixed
                    :first-proj-year 2015
                    :last-proj-year 2016
-                   :fert-scenario :principal-2012
+                   :future-fert-scenario :principal-2012
                    :fert-base-year 2014
                    :proportion-male-newborns (double (/ 105 205))})
 
-(def params-applynationaltrend {:fert-variant :applynationaltrend
+(def params-applynationaltrend {:proj-asfr-variant :applynationaltrend
                                 :first-proj-year 2015
                                 :last-proj-year 2018
-                                :fert-scenario :principal-2012
+                                :future-fert-scenario :principal-2012
                                 :fert-base-year 2014
                                 :proportion-male-newborns (double (/ 105 205))})
 

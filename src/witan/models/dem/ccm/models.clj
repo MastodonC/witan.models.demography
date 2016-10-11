@@ -100,7 +100,7 @@
     {:witan/name :calc-hist-asmr
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-mort/calc-historic-asmr}
+     :witan/fn :ccm-mort/calc-hist-asmr}
     {:witan/name :finish-looping?
      :witan/version "1.0.0"
      :witan/type :predicate
@@ -192,14 +192,14 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-fert/project-asfr
-     :witan/params {:fert-variant :applynationaltrend, :first-proj-year 2015, :last-proj-year 2018,
-                    :fert-scenario :principal-2012}}
+     :witan/params {:proj-asfr-variant :applynationaltrend, :first-proj-year 2015, :last-proj-year 2018,
+                    :future-fert-scenario :principal-2012}}
     {:witan/name :project-asmr
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mort/project-asmr
      :witan/params {:start-year-avg-mort 2010, :end-year-avg-mort 2014,
-                    :mort-variant :average-applynationaltrend, :first-proj-year 2015,
+                    :proj-asmr-variant :average-applynationaltrend, :first-proj-year 2015,
                     :last-proj-year 2018, :mort-scenario :principal}}
     {:witan/name :proj-intl-in-migrants
      :witan/version "1.0.0"

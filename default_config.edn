@@ -30,16 +30,16 @@
   :last-proj-year 2040
 
   ;; Fertility module
-  :fert-variant :applynationaltrend
+  :proj-asfr-variant :applynationaltrend
   :fert-base-year 2014
   ;; proportion of male newborns in the UK -> 105/205
   :number-male-newborns 105 ;; <- keep that value for a population projection for the UK
   :number-all-newborns 205 ;; <- keep that value for a population projection for the UK
-  :fert-scenario :principal-2012
+  :future-fert-scenario :principal-2012
   ;; Mortality module
   :start-year-avg-mort 2010 ;; 2002 to 2014
   :end-year-avg-mort 2014 ;; 2002 to 2014
-  :mort-variant :average-applynationaltrend
+  :proj-asmr-variant :average-applynationaltrend
   :mort-scenario :principal
   ;; Migration module
   :start-year-avg-domin-mig 2003 ;; 2002 to 2014

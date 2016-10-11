@@ -37,14 +37,14 @@
              :last-proj-year 2016
              ;; Fertility module
              :proportion-male-newborns (double (/ 105 205))
-             :fert-variant :fixed
-             :fert-scenario :principal-2012
+             :proj-asfr-variant :fixed
+             :future-fert-scenario :principal-2012
              :fert-base-year 2014
              ;; Mortality module
              ;; (s/validate (s/pred (>= % earliest-mort-year)) :start-year-avg-mort)
              :start-year-avg-mort 2010
              :end-year-avg-mort 2014
-             :mort-variant :average-fixed
+             :proj-asmr-variant :average-fixed
              :mort-scenario :principal
              ;; (s/validate (s/pred (<= % (dec first-projection-year-mort))) :end-year-avg-mort)
              ;; Migration module
