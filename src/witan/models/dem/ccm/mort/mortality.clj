@@ -43,7 +43,7 @@
   "Takes datasets with historic births, deaths, and
   population. Returns a dataset with a column for historic mortality
   rates calculated from the inputs."
-  {:witan/name :ccm-mort/calc-historic-asmr
+  {:witan/name :ccm-mort/calc-hist-asmr
    :witan/version "1.0.0"
    :witan/input-schema {:historic-deaths DeathsSchema
                         :historic-births BirthsSchema
@@ -120,9 +120,9 @@
                  [:sex :year :age])))
 
 (defn project-asmr-internal [{:keys [historic-asmr future-mortality-trend-assumption]}
-                             {:keys [start-year-avg-mort end-year-avg-mort mort-variant first-proj-year
+                             {:keys [start-year-avg-mort end-year-avg-mort proj-asmr-variant first-proj-year
                                      last-proj-year mort-scenario]}]
-  (case mort-variant
+  (case proj-asmr-variant
     :average-fixed {:initial-projected-mortality-rates
                     (-> (cf/first-projection-year-method-average historic-asmr
                                                                  :death-rate
@@ -183,8 +183,8 @@
                         :future-mortality-trend-assumption NationalTrendsSchema}
    :witan/param-schema {:start-year-avg-mort s/Int
                         :end-year-avg-mort s/Int
-                        :mort-variant (s/enum :average-fixed :trend-fixed
-                                              :average-applynationaltrend :trend-applynationaltrend)
+                        :proj-asmr-variant (s/enum :average-fixed :trend-fixed
+                                                   :average-applynationaltrend :trend-applynationaltrend)
                         :first-proj-year (s/constrained s/Int m-utils/year?)
                         :last-proj-year (s/constrained s/Int m-utils/year?)
                         :mort-scenario (s/enum :low :principal :high)}

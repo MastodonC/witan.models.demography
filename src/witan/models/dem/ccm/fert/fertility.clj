@@ -175,8 +175,8 @@
    Currently there is only 1 year of data so the first projection year method is set to finalyearhist.
    Returns dataset with projected fertility rate in :fert-rate column for all years of projection."
   [{:keys [historic-asfr future-fertility-trend-assumption]}
-   {:keys [fert-variant first-proj-year last-proj-year fert-scenario]}]
-  (case fert-variant
+   {:keys [proj-asfr-variant first-proj-year last-proj-year future-fert-scenario]}]
+  (case proj-asfr-variant
     :fixed {:initial-projected-fertility-rates
             (-> (cf/first-projection-year-method-final-year-hist historic-asfr :fert-rate)
                 (cf/add-years-to-fixed-methods first-proj-year
@@ -192,7 +192,7 @@
                                                            future-fertility-trend-assumption
                                                            first-proj-year
                                                            last-proj-year
-                                                           fert-scenario
+                                                           future-fert-scenario
                                                            :fert-rate)})))
 
 (defworkflowfn project-asfr-1-0-0
@@ -206,10 +206,10 @@
    :witan/version "1.0.0"
    :witan/input-schema {:historic-asfr HistASFRSchema
                         :future-fertility-trend-assumption NationalFertilityTrendsSchema}
-   :witan/param-schema {:fert-variant (s/enum :fixed :applynationaltrend)
+   :witan/param-schema {:proj-asfr-variant (s/enum :fixed :applynationaltrend)
                         :first-proj-year (s/constrained s/Int m-utils/year?)
                         :last-proj-year (s/constrained s/Int m-utils/year?)
-                        :fert-scenario (s/enum :low :principal :high :low-2012 :principal-2012 :high-2012)}
+                        :future-fert-scenario (s/enum :low :principal :high :low-2012 :principal-2012 :high-2012)}
    :witan/output-schema {:initial-projected-fertility-rates ProjASFRSchema}}
   [inputs params]
   (project-asfr-internal inputs params))
