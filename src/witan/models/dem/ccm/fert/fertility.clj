@@ -76,7 +76,7 @@
   "Takes in three datasets: the historic total births, the historic
    population, the base age-specific fertility rate and the base year.
    Returns a dataset containing the historic age specific fertility rates."
-  {:witan/name :ccm-fert/calc-hist-asfr
+  {:witan/name :ccm-fert/calculate-historic-asfr
    :witan/version "1.0.0"
    :witan/input-schema {:historic-births-by-age-mother BirthsAgeSexMotherSchema
                         :historic-population PopulationSchema

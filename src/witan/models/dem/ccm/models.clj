@@ -20,41 +20,41 @@
    :witan/version "1.0.0"}
   {:workflow
    [;; inputs for asfr
-    [:in-hist-popn                    :calc-hist-asfr]
-    [:in-hist-total-births            :calc-hist-asfr]
-    [:in-proj-births-by-age-of-mother :calc-hist-asfr]
+    [:historic-population           :calculate-historic-asfr]
+    [:historic-births               :calculate-historic-asfr]
+    [:historic-births-by-age-mother :calculate-historic-asfr]
 
     ;; inputs for asmr
-    [:in-hist-popn                  :calc-hist-asmr]
-    [:in-hist-total-births          :calc-hist-asmr]
-    [:in-hist-deaths-by-age-and-sex :calc-hist-asmr]
+    [:historic-population  :calculate-historic-asmr]
+    [:historic-births      :calculate-historic-asmr]
+    [:historic-deaths      :calculate-historic-asmr]
 
     ;; asfr/asmr projections
-    [:calc-hist-asfr       :project-asfr]
-    [:in-future-fert-trend :project-asfr]
-    [:calc-hist-asmr       :project-asmr]
-    [:in-future-mort-trend :project-asmr]
+    [:calculate-historic-asfr            :project-asfr]
+    [:future-fertility-trend-assumption  :project-asfr]
+    [:calculate-historic-asmr            :project-asmr]
+    [:future-mortality-trend-assumption  :project-asmr]
 
     ;; inputs for mig
-    [:in-hist-dom-in-migrants   :proj-dom-in-migrants]
-    [:in-hist-dom-out-migrants  :proj-dom-out-migrants]
-    [:in-hist-intl-in-migrants  :proj-intl-in-migrants]
-    [:in-hist-intl-out-migrants :proj-intl-out-migrants]
+    [:domestic-in-migrants       :projected-domestic-in-migrants]
+    [:domestic-out-migrants      :projected-domestic-out-migrants]
+    [:international-in-migrants  :projected-international-in-migrants]
+    [:international-out-migrants :projected-international-out-migrants]
 
     ;; mig projections
-    [:proj-dom-in-migrants   :combine-into-net-flows]
-    [:proj-dom-out-migrants  :combine-into-net-flows]
-    [:proj-intl-in-migrants  :combine-into-net-flows]
-    [:proj-intl-out-migrants :combine-into-net-flows]
+    [:projected-domestic-in-migrants       :combine-into-net-flows]
+    [:projected-domestic-out-migrants      :combine-into-net-flows]
+    [:projected-international-in-migrants  :combine-into-net-flows]
+    [:projected-international-out-migrants :combine-into-net-flows]
 
     ;; inputs for loop
-    [:in-hist-popn           :prepare-inputs]
+    [:historic-population    :prepare-inputs]
 
     ;; pre-loop merge
     [:prepare-inputs         :select-starting-popn]
     [:project-asmr           :project-deaths]
     [:project-asfr           :project-births]
-    [:in-hist-total-births   :append-by-year]
+    [:historic-births        :append-by-year]
 
     ;; --- start popn loop
     [:select-starting-popn       :project-births]
@@ -76,7 +76,7 @@
     [:combine-into-births-by-sex :append-by-year]
     [:combine-into-net-flows     :append-by-year]
 
-    [:append-by-year [:finish-looping? :out :select-starting-popn]]
+    [:append-by-year [:finish-looping? :ccm-out :select-starting-popn]]
     ;; --- end loop
     ]
    :catalog
@@ -92,84 +92,84 @@
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-core/apply-migration}
-    {:witan/name :calc-hist-asfr
+    {:witan/name :calculate-historic-asfr
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-fert/calc-hist-asfr
+     :witan/fn :ccm-fert/calculate-historic-asfr
      :witan/params {:fert-base-year 2014}}
-    {:witan/name :calc-hist-asmr
+    {:witan/name :calculate-historic-asmr
      :witan/version "1.0.0"
      :witan/type :function
-     :witan/fn :ccm-mort/calc-hist-asmr}
+     :witan/fn :ccm-mort/calculate-historic-asmr}
     {:witan/name :finish-looping?
      :witan/version "1.0.0"
      :witan/type :predicate
      :witan/fn :ccm-core/ccm-loop-pred
      :witan/params {:last-proj-year 2018}}
-    {:witan/name :in-hist-deaths-by-age-and-sex
+    {:witan/name :historic-deaths
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-hist-deaths-by-age-and-sex
+     :witan/fn :ccm-core-input/historic-deaths
      :witan/params {:src (with-gss "witan.models.demography/mortality/historic_deaths")}}
-    {:witan/name :in-hist-dom-in-migrants
+    {:witan/name :domestic-in-migrants
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-hist-dom-in-migrants
+     :witan/fn :ccm-core-input/domestic-in-migrants
      :witan/params
      {:src (with-gss "witan.models.demography/migration/historic_migration_flows_domestic_in")}}
-    {:witan/name :in-hist-dom-out-migrants
+    {:witan/name :domestic-out-migrants
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-hist-dom-out-migrants
+     :witan/fn :ccm-core-input/domestic-out-migrants
      :witan/params
      {:src (with-gss "witan.models.demography/migration/historic_migration_flows_domestic_out")}}
-    {:witan/name :in-hist-intl-in-migrants
+    {:witan/name :international-in-migrants
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-hist-intl-in-migrants
+     :witan/fn :ccm-core-input/international-in-migrants
      :witan/params
      {:src (with-gss "witan.models.demography/migration/historic_migration_flows_international_in")}}
-    {:witan/name :in-hist-intl-out-migrants
+    {:witan/name :international-out-migrants
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-hist-intl-out-migrants
+     :witan/fn :ccm-core-input/international-out-migrants
      :witan/params
      {:src (with-gss "witan.models.demography/migration/historic_migration_flows_international_out")}}
-    {:witan/name :in-hist-popn
+    {:witan/name :historic-population
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-hist-popn
+     :witan/fn :ccm-core-input/historic-population
      :witan/params
      {:src (with-gss "witan.models.demography/core/historic_population")}}
-    {:witan/name :in-future-mort-trend
+    {:witan/name :future-mortality-trend-assumption
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-future-mort-trend
+     :witan/fn :ccm-core-input/future-mortality-trend-assumption
      :witan/params
      {:src "witan.models.demography/mortality/future_mortality_trend_assumption.csv.gz"}}
-    {:witan/name :in-future-fert-trend
+    {:witan/name :future-fertility-trend-assumption
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-future-fert-trend
+     :witan/fn :ccm-core-input/future-fertility-trend-assumption
      :witan/params
      {:src "witan.models.demography/fertility/future_fertility_trend_assumption.csv.gz"}}
-    {:witan/name :in-hist-total-births
+    {:witan/name :historic-births
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-hist-total-births
+     :witan/fn :ccm-core-input/historic-births
      :witan/params
      {:src (with-gss "witan.models.demography/fertility/historic_births")}}
-    {:witan/name :in-proj-births-by-age-of-mother
+    {:witan/name :historic-births-by-age-mother
      :witan/version "1.0.0"
      :witan/type :input
-     :witan/fn :ccm-core-input/in-proj-births-by-age-of-mother
+     :witan/fn :ccm-core-input/historic-births-by-age-mother
      :witan/params
      {:src (with-gss "witan.models.demography/fertility/historic_births_by_age_of_mother")}}
     {:witan/name :append-by-year
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-core/append-years}
-    {:witan/name :out
+    {:witan/name :ccm-out
      :witan/version "1.0.0"
      :witan/type :output
      :witan/fn :ccm-core-out/ccm-out}
@@ -178,12 +178,12 @@
      :witan/type :function
      :witan/fn :ccm-core/prepare-inputs
      :witan/params {:first-proj-year 2015}}
-    {:witan/name :proj-dom-in-migrants
+    {:witan/name :projected-domestic-in-migrants
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-dom-in-mig
      :witan/params {:start-year-avg-domin-mig 2003, :end-year-avg-domin-mig 2014}}
-    {:witan/name :proj-dom-out-migrants
+    {:witan/name :projected-domestic-out-migrants
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-dom-out-mig
@@ -201,12 +201,12 @@
      :witan/params {:start-year-avg-mort 2010, :end-year-avg-mort 2014,
                     :proj-asmr-variant :average-applynationaltrend, :first-proj-year 2015,
                     :last-proj-year 2018, :mort-scenario :principal}}
-    {:witan/name :proj-intl-in-migrants
+    {:witan/name :projected-international-in-migrants
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-inter-in-mig
      :witan/params {:start-year-avg-intin-mig 2003,:end-year-avg-intin-mig 2014}}
-    {:witan/name :proj-intl-out-migrants
+    {:witan/name :projected-international-out-migrants
      :witan/version "1.0.0"
      :witan/type :function
      :witan/fn :ccm-mig/proj-inter-out-mig
@@ -247,16 +247,16 @@
     (available-fns [_]
       (map-fn-meta
        ;; inputs
-       inputs/in-hist-deaths-by-age-and-sex-1-0-0
-       inputs/in-hist-dom-in-migrants-1-0-0
-       inputs/in-hist-dom-out-migrants-1-0-0
-       inputs/in-hist-intl-in-migrants-1-0-0
-       inputs/in-hist-intl-out-migrants-1-0-0
-       inputs/in-hist-popn-1-0-0
-       inputs/in-future-mort-trend-1-0-0
-       inputs/in-future-fert-trend-1-0-0
-       inputs/in-hist-total-births-1-0-0
-       inputs/in-proj-births-by-age-of-mother-1-0-0
+       inputs/historic-deaths-1-0-0
+       inputs/domestic-in-migrants-1-0-0
+       inputs/domestic-out-migrants-1-0-0
+       inputs/international-in-migrants-1-0-0
+       inputs/international-out-migrants-1-0-0
+       inputs/historic-population-1-0-0
+       inputs/future-mortality-trend-assumption-1-0-0
+       inputs/future-fertility-trend-assumption-1-0-0
+       inputs/historic-births-1-0-0
+       inputs/historic-births-by-age-mother-1-0-0
 
        ;; fertility fns
        fert/project-asfr-1-0-0
@@ -266,14 +266,14 @@
 
        ;; mortality fns
        mort/project-deaths-1-0-0
-       mort/calc-historic-asmr
+       mort/calculate-historic-asmr
        mort/project-asmr-1-0-0
 
        ;; migration fns
-       mig/project-domestic-in-migrants
-       mig/project-domestic-out-migrants
-       mig/project-international-in-migrants
-       mig/project-international-out-migrants
+       mig/projected-domestic-in-migrants
+       mig/projected-domestic-out-migrants
+       mig/projected-international-in-migrants
+       mig/projected-international-out-migrants
        mig/combine-into-net-flows
 
        ;; core fns

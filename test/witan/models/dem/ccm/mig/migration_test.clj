@@ -60,10 +60,10 @@
   (testing "The net migration flows are calculated correctly."
     (let [net-mig-r (ds/rename-columns net-migration-r {:net-mig :net-mig-r})
           joined-mig (-> (merge-> data-inputs
-                                  (project-domestic-in-migrants params)
-                                  (project-domestic-out-migrants params)
-                                  (project-international-in-migrants params)
-                                  (project-international-out-migrants params)
+                                  (projected-domestic-in-migrants params)
+                                  (projected-domestic-out-migrants params)
+                                  (projected-international-in-migrants params)
+                                  (projected-international-out-migrants params)
                                   (:population-at-risk (loop/select-starting-popn prepared-inputs)))
                          (combine-into-net-flows)
                          :net-migration
