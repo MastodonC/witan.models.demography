@@ -8,7 +8,7 @@
             [clojure.core.matrix.dataset :as ds]
             [schema.core :as s]))
 
-(defworkflowfn project-domestic-in-migrants
+(defworkflowfn projected-domestic-in-migrants
   {:witan/name :ccm-mig/proj-dom-in-mig
    :witan/version "1.0.0"
    :witan/input-schema {:domestic-in-migrants DomesticInmigrants}
@@ -20,7 +20,7 @@
    (cf/first-projection-year-method-average domestic-in-migrants :domin
                                             :domestic-in start-year-avg-domin-mig end-year-avg-domin-mig)})
 
-(defworkflowfn project-domestic-out-migrants
+(defworkflowfn projected-domestic-out-migrants
   {:witan/name :ccm-mig/proj-dom-out-mig
    :witan/version "1.0.0"
    :witan/input-schema {:domestic-out-migrants DomesticOutmigrants}
@@ -32,7 +32,7 @@
    (cf/first-projection-year-method-average domestic-out-migrants :domout
                                             :domestic-out start-year-avg-domout-mig end-year-avg-domout-mig)})
 
-(defworkflowfn project-international-in-migrants
+(defworkflowfn projected-international-in-migrants
   {:witan/name :ccm-mig/proj-inter-in-mig
    :witan/version "1.0.0"
    :witan/input-schema {:international-in-migrants InternationalInmigrants}
@@ -44,7 +44,7 @@
    (cf/first-projection-year-method-average international-in-migrants :intin
                                             :international-in start-year-avg-intin-mig end-year-avg-intin-mig)})
 
-(defworkflowfn project-international-out-migrants
+(defworkflowfn projected-international-out-migrants
   {:witan/name :ccm-mig/proj-inter-out-mig
    :witan/version "1.0.0"
    :witan/input-schema {:international-out-migrants InternationalOutmigrants}

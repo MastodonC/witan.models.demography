@@ -80,7 +80,7 @@
 
 (defn mortality-module [inputs params]
   (as-> inputs x
-    (mort/calc-historic-asmr (merge x inputs data-inputs))
+    (mort/calculate-historic-asmr (merge x inputs data-inputs))
     (mort/project-asmr-1-0-0 (merge x inputs data-inputs) params)
     (mort/project-deaths-1-0-0 (merge x inputs data-inputs))))
 
@@ -88,10 +88,10 @@
   (-> inputs
       (merge data-inputs)
       (merge->
-       (mig/project-domestic-in-migrants params)
-       (mig/project-domestic-out-migrants params)
-       (mig/project-international-in-migrants params)
-       (mig/project-international-out-migrants params)
+       (mig/projected-domestic-in-migrants params)
+       (mig/projected-domestic-out-migrants params)
+       (mig/projected-international-in-migrants params)
+       (mig/projected-international-out-migrants params)
        (select-starting-popn prepared-inputs))
       (mig/combine-into-net-flows)))
 

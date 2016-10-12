@@ -24,43 +24,43 @@
   (str id "_" gss-code ".csv"))
 
 (def local-inputs
-  {:ccm-core-input/in-hist-popn
+  {:ccm-core-input/historic-population
    [:historic-population
     (with-gss "./datasets/default_datasets/core/historic_population")]
 
-   :ccm-core-input/in-hist-total-births
+   :ccm-core-input/historic-births
    [:historic-births
     (with-gss "./datasets/default_datasets/fertility/historic_births")]
 
-   :ccm-core-input/in-future-mort-trend
+   :ccm-core-input/future-mortality-trend-assumption
    [:future-mortality-trend-assumption
     "./datasets/default_datasets/mortality/future_mortality_trend_assumption.csv"]
 
-   :ccm-core-input/in-future-fert-trend
+   :ccm-core-input/future-fertility-trend-assumption
    [:future-fertility-trend-assumption
     "./datasets/default_datasets/fertility/future_fertility_trend_assumption.csv"]
 
-   :ccm-core-input/in-proj-births-by-age-of-mother
+   :ccm-core-input/historic-births-by-age-mother
    [:historic-births-by-age-mother
     (with-gss "./datasets/default_datasets/fertility/historic_births_by_age_of_mother")]
 
-   :ccm-core-input/in-hist-deaths-by-age-and-sex
+   :ccm-core-input/historic-deaths
    [:historic-deaths
     (with-gss "./datasets/default_datasets/mortality/historic_deaths")]
 
-   :ccm-core-input/in-hist-dom-in-migrants
+   :ccm-core-input/domestic-in-migrants
    [:domestic-in-migrants
     (with-gss "./datasets/default_datasets/migration/historic_migration_flows_domestic_in")]
 
-   :ccm-core-input/in-hist-dom-out-migrants
+   :ccm-core-input/domestic-out-migrants
    [:domestic-out-migrants
     (with-gss "./datasets/default_datasets/migration/historic_migration_flows_domestic_out")]
 
-   :ccm-core-input/in-hist-intl-in-migrants
+   :ccm-core-input/international-in-migrants
    [:international-in-migrants
     (with-gss "./datasets/default_datasets/migration/historic_migration_flows_international_in")]
 
-   :ccm-core-input/in-hist-intl-out-migrants
+   :ccm-core-input/international-out-migrants
    [:international-out-migrants
     (with-gss "./datasets/default_datasets/migration/historic_migration_flows_international_out")]})
 

@@ -39,11 +39,11 @@
                               (fn [d p] (wds/safe-divide [d p])))
       (ds/select-columns [:gss-code :sex :age :year :death-rate])))
 
-(defworkflowfn calc-historic-asmr
+(defworkflowfn calculate-historic-asmr
   "Takes datasets with historic births, deaths, and
   population. Returns a dataset with a column for historic mortality
   rates calculated from the inputs."
-  {:witan/name :ccm-mort/calc-hist-asmr
+  {:witan/name :ccm-mort/calculate-historic-asmr
    :witan/version "1.0.0"
    :witan/input-schema {:historic-deaths DeathsSchema
                         :historic-births BirthsSchema

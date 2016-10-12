@@ -2,62 +2,62 @@
   (:require [witan.workspace-api :refer [definput]]
             [witan.models.dem.ccm.schemas :as s]))
 
-(definput in-hist-deaths-by-age-and-sex-1-0-0
-  {:witan/name :ccm-core-input/in-hist-deaths-by-age-and-sex
+(definput historic-deaths-1-0-0
+  {:witan/name :ccm-core-input/historic-deaths
    :witan/version "1.0.0"
    :witan/key :historic-deaths
    :witan/schema s/DeathsSchema})
 
-(definput in-hist-dom-in-migrants-1-0-0
-  {:witan/name :ccm-core-input/in-hist-dom-in-migrants
+(definput domestic-in-migrants-1-0-0
+  {:witan/name :ccm-core-input/domestic-in-migrants
    :witan/version "1.0.0"
    :witan/key :domestic-in-migrants
    :witan/schema s/DomesticInmigrants})
 
-(definput in-hist-dom-out-migrants-1-0-0
-  {:witan/name :ccm-core-input/in-hist-dom-out-migrants
+(definput domestic-out-migrants-1-0-0
+  {:witan/name :ccm-core-input/domestic-out-migrants
    :witan/version "1.0.0"
    :witan/key :domestic-out-migrants
    :witan/schema s/DomesticOutmigrants})
 
-(definput in-hist-intl-in-migrants-1-0-0
-  {:witan/name :ccm-core-input/in-hist-intl-in-migrants
+(definput international-in-migrants-1-0-0
+  {:witan/name :ccm-core-input/international-in-migrants
    :witan/version "1.0.0"
    :witan/key :international-in-migrants
    :witan/schema s/InternationalInmigrants})
 
-(definput in-hist-intl-out-migrants-1-0-0
-  {:witan/name :ccm-core-input/in-hist-intl-out-migrants
+(definput international-out-migrants-1-0-0
+  {:witan/name :ccm-core-input/international-out-migrants
    :witan/version "1.0.0"
    :witan/key :international-out-migrants
    :witan/schema s/InternationalOutmigrants})
 
-(definput in-hist-popn-1-0-0
-  {:witan/name :ccm-core-input/in-hist-popn
+(definput historic-population-1-0-0
+  {:witan/name :ccm-core-input/historic-population
    :witan/version "1.0.0"
    :witan/key :historic-population
    :witan/schema s/PopulationSchema})
 
-(definput in-future-mort-trend-1-0-0
-  {:witan/name :ccm-core-input/in-future-mort-trend
+(definput future-mortality-trend-assumption-1-0-0
+  {:witan/name :ccm-core-input/future-mortality-trend-assumption
    :witan/version "1.0.0"
    :witan/key :future-mortality-trend-assumption
    :witan/schema s/NationalTrendsSchema})
 
-(definput in-future-fert-trend-1-0-0
-  {:witan/name :ccm-core-input/in-future-fert-trend
+(definput future-fertility-trend-assumption-1-0-0
+  {:witan/name :ccm-core-input/future-fertility-trend-assumption
    :witan/version "1.0.0"
    :witan/key :future-fertility-trend-assumption
    :witan/schema s/NationalFertilityTrendsSchema})
 
-(definput in-hist-total-births-1-0-0
-  {:witan/name :ccm-core-input/in-hist-total-births
+(definput historic-births-1-0-0
+  {:witan/name :ccm-core-input/historic-births
    :witan/version "1.0.0"
    :witan/key :historic-births
    :witan/schema s/BirthsSchema})
 
-(definput in-proj-births-by-age-of-mother-1-0-0
-  {:witan/name :ccm-core-input/in-proj-births-by-age-of-mother
+(definput historic-births-by-age-mother-1-0-0
+  {:witan/name :ccm-core-input/historic-births-by-age-mother
    :witan/version "1.0.0"
    :witan/key :historic-births-by-age-mother
    :witan/schema s/BirthsAgeSexMotherSchema})
