@@ -49,12 +49,12 @@
 
     ;; inputs for loop
     [:historic-population    :prepare-inputs]
+    [:historic-births        :prepare-inputs]
 
     ;; pre-loop merge
     [:prepare-inputs         :select-starting-popn]
     [:project-asmr           :project-deaths]
     [:project-asfr           :project-births]
-    [:historic-births        :append-by-year]
 
     ;; --- start popn loop
     [:select-starting-popn       :project-births]

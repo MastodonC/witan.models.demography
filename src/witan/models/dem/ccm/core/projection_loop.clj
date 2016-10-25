@@ -33,14 +33,15 @@
   {:witan/name :ccm-core/prepare-inputs
    :witan/version "1.0.0"
    :witan/param-schema {:first-proj-year YearSchema}
-   :witan/input-schema {:historic-population PopulationSchema}
+   :witan/input-schema {:historic-population PopulationSchema
+                        :historic-births BirthsSchema}
    :witan/output-schema {:aggregated-population PopulationSchema
                          :aggregated-net-migration NetMigrationSchema
                          :aggregated-births BirthsSchema
                          :aggregated-deaths DeathsOutputSchema}}
-  [{:keys [historic-population]} {:keys [first-proj-year]}]
+  [{:keys [historic-population historic-births]} {:keys [first-proj-year]}]
   {:aggregated-population (wds/select-from-ds historic-population {:year {:lt first-proj-year}})
-   :aggregated-births (create-empty-ds BirthsSchema)
+   :aggregated-births (wds/select-from-ds historic-births {:year {:lt first-proj-year}})
    :aggregated-deaths (create-empty-ds DeathsOutputSchema)
    :aggregated-net-migration (create-empty-ds NetMigrationSchema)})
 
