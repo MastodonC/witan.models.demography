@@ -138,8 +138,7 @@ The historical data required for the projection comes from the UK's Office of Na
 * International in-migrants
 * International out-migrants
 
-Further information regarding these data inputs can be found [here](https://github.com/MastodonC/witan.models.demography/blob/feature/add-data-input-info/doc/Data_sources.csv)
-
+Further information regarding these data inputs can be found [here](https://github.com/MastodonC/witan.models.demography/blob/master/doc/Data_sources.csv)
 
 <br>
 
