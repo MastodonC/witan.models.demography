@@ -2,7 +2,7 @@
 
 [![Build Status](https://circleci.com/gh/MastodonC/witan.models.demography.svg?style=shield)](https://circleci.com/gh/MastodonC/witan.models.demography) [![Dependencies Status](https://jarkeeper.com/MastodonC/witan.models.demography/status.svg)](https://jarkeeper.com/MastodonC/witan.models.demography)
 
-## Table of content:
+## Table of contents:
 
 * [Description](#description)
 
@@ -16,11 +16,11 @@
 
 `witan.models.demography` is a Clojure library to run demographic models.
 
-Those models will be used on MastodonC's [Witan](http://www.mastodonc.com/products/witan/) city decision-making platform.
-They can also be used independently of Witan as a standalone demographic models library.
+These models will be used on MastodonC's [Witan](http://www.mastodonc.com/products/witan/) city decision-making platform.
+They can also be used independently of Witan as a standalone demographic modelling library.
 
 Current status:
-* Population projections: First release of a minimal version coming soon!
+* Population projections: Release 0.1.0 includes a minimal version of the model. 
 
 See the [docs](https://github.com/MastodonC/witan.models.demography/blob/master/doc/intro.md) for more info about the methodology.
 
@@ -32,14 +32,14 @@ See the [docs](https://github.com/MastodonC/witan.models.demography/blob/master/
 If you wish to contribute to `witan.models.demography`, please read the following guidelines.
 
 #### Github guidelines
-* **Fork this repository** (or clone it if you have writing rights to the reposotory).
-* **Create a new branch**. Let's try and keep the following naming conventions for branches:
-  * `feature/<what-this-branch-solves>`, example: `feature/project-mortality-rates`
-  * `doc/<what-this-branch-solves>`, example: `doc/contributors-practices`
-  * `fix/<what-this-branch-solves>`, example: `fix/run-ccm-from-cli`
-  * `tidy-up/<what-this-branch-solves>`, example: `tidy-up/upgrade-deps`
+* **Fork this repository** (or clone it if you have writing rights to the repository).
+* **Create a new branch**. Let's try to keep the naming conventions for branches as follows:
+  * `feature/`, example: `feature/project-mortality-rates`
+  * `doc/`, example: `doc/contributors-practices`
+  * `fix/`, example: `fix/run-ccm-from-cli`
+  * `tidy-up/`, example: `tidy-up/upgrade-deps`
 
-  This way, when you see a branch starting by `fix/` we know something is broken and someone is repairing it.
+  This way, when you see a branch starting by `fix/` we know something is broken and that someone is repairing it.
 * **Keep branches short** so that the reviewing process is easier and faster
 * Start a pull request (PR) as early as possible. You can add a `WIP` in the title to specify it's in progress.
 * Describe the aim of your changes in the PR description box.
@@ -47,9 +47,6 @@ If you wish to contribute to `witan.models.demography`, please read the followin
   * **run all the tests** from the commmand line with `$ lein test`
   * **run the lint tools** [`Eastwood`](https://github.com/jonase/eastwood) and [`Kibit`](https://github.com/jonase/kibit) with `$ lein eastwood` and `$ lein kibit`.
   * **format your code** with [`Cljfmt`](https://github.com/weavejester/cljfmt) tool with `lein cljfmt check` followed by `lein cljfmt fix`.
-  * **check the cohort-component model can still be run** from the command-line.
-  You'll need to build the jar file, run it on your terminal and check it outputs population projections.
-  For that follow the instructions in the ["user section"](#use-witanmodelsdemography) of the Readme.
 
 #### Coding guidelines
 
@@ -57,7 +54,7 @@ If you wish to contribute to `witan.models.demography`, please read the followin
 * Try to not have data changes and code changes in the same commit, and preferably not the same branch, as the data tends to swamp the code and hinder reviewing.
 * Avoid modifying a file that is being modified on another branch.
 * Avoid changing the name of a file while someone is working on another branch.
-* We moved away from using Incanter library.
+* We moved away from using the Incanter library.
   To manipulate `core.matrix` datasets look for functions:
   * from `core.matrix` in [`core.matrix.datasets`](https://github.com/mikera/core.matrix/blob/develop/src/main/clojure/clojure/core/matrix/dataset.clj)
   * from the `witan.workspace-api` dependency in [`witan.datasets`](https://github.com/MastodonC/witan.workspace-api/blob/master/src/witan/datasets.clj)
@@ -89,7 +86,7 @@ For any OS you should also be able to install it with Pip: `$ pip install graphv
 ```Clojure
 (witan.workspace-api/set-api-logging! println)
 ```
-Whenever a `defworkflowfn` is called logs will be written to your repl or terminal. It's very  useful for debugging purpose.
+Whenever a `defworkflowfn` is called logs will be written to your repl or terminal. It's very  useful for debugging purposes.
 
 Turn it off with:
 ```Clojure
