@@ -76,8 +76,7 @@ Death projections are calculated by applying a set of age and sex specific morta
 
 ### Migration
 
-The net migration projections are calculated based on historic movement of both domestic and international migrants. Migrants are further characterised as either in- or out-migrants, combining this information to project the
-net-migration.
+The net migration projections are calculated based on historic movement of both domestic and international migrants. Migrants are further characterised as either in- or out-migrants, combining this information to project the net-migration. Projections of international in-migrants can be modifed with the Brexit parameter, which can be adjusted to estimate the impact of Brexit on the overall population projection.
 
 ### Core
 The core module takes historic population data as well as projections from each of the components of change (above) to calculate the  population for each projected year.
@@ -113,6 +112,7 @@ Some parameters in the model can be specified by the user. The parameters, with 
 * Start & end years of year range to average over when projecting domestic out-migrants; migration out of an area (2003-2014)
 * Start & end years of year range to average over when projecting international in-migrants; migration into an area (2003-2014)
 * Start & end years of year range to average over when projecting international out-migrants; migration out of area (2003-2014)
+* Brexit parameter (1) **N.B.**: Takes a value 0-1. A value of one maintains the current estimated international in-migrant population projection.  
 * Proportion of male newborns, represented as a number of male newborns (105) and a number of all newborns (205). **IMPORTANT**: This proportion is set to 105/205 for the UK, and should only be changed for other countries.
 
 ## User-defined parameters for the geography
