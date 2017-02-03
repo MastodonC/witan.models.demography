@@ -5,9 +5,12 @@
             [clojure.core.matrix.dataset :as ds]
             [witan.datasets :as wds]
             [witan.workspace-api :refer [merge->]]
-            [witan.models.dem.ccm.core.projection-loop :as loop]))
+            [witan.models.dem.ccm.core.projection-loop :as loop]
+            [witan.models.dem.ccm.components-functions :as cf]))
 
 (defn- fp-equals? [x y ε] (< (Math/abs (- x y)) ε))
+
+(defn- fp-half? [x y ε] (< (- (* x 2) y) ε))
 
 (def data-inputs (ld/load-datasets
                   {:historic-births-by-age-mother
@@ -52,9 +55,24 @@
              :start-year-avg-mort 2010
              :end-year-avg-mort 2014
              :proj-asmr-variant :average-fixed
-             :mort-scenario :principal})
+             :mort-scenario :principal
+             :brexit-parameter 1.0})
 
 (def prepared-inputs (loop/prepare-inputs-1-0-0 data-inputs params))
+
+(deftest brexit-modifier-test
+  (testing "modifier correclty recalculates the in-migrants"
+    (let [clj-results (cf/first-projection-year-method-average (:international-in-migrants data-inputs)
+                                                               :intin :international-in 2003 2014)
+          half-in-migrants (-> (brexit-modifier clj-results :international-in 0.5)
+                               (ds/rename-columns {:international-in :half-international-in}))
+          full-in-migrants (brexit-modifier clj-results :international-in (:brexit-parameter params))
+          joined-data (wds/join full-in-migrants half-in-migrants [:gss-code :sex :age])]
+      (is (every? #(fp-half? (wds/subset-ds joined-data :rows % :cols :half-international-in)
+                             (wds/subset-ds joined-data :rows % :cols :international-in)
+
+                             0.000001)
+                  (range (first (:shape joined-data))))))))
 
 (deftest combine-into-net-flows-test
   (testing "The net migration flows are calculated correctly."
