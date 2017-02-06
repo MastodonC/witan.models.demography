@@ -206,7 +206,7 @@
      :witan/type :function
      :witan/fn :ccm-mig/proj-inter-in-mig
      :witan/params {:start-year-avg-intin-mig 2003 :end-year-avg-intin-mig 2014
-                    :brexit-parameter 1.0}}
+                    :in-migrant-multiplier 1.0}}
     {:witan/name :projected-international-out-migrants
      :witan/version "1.0.0"
      :witan/type :function

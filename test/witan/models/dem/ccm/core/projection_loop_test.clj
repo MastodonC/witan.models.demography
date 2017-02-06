@@ -64,7 +64,7 @@
              :start-year-avg-intout-mig 2003
              ;; (s/validate (s/pred (<= % (dec first-projection-year-mig))) :end-year-avg-intout-mig)
              :end-year-avg-intout-mig 2014
-             :brexit-parameter 1.0})
+             :in-migrant-multiplier 1.0})
 
 (def prepared-inputs (prepare-inputs-1-0-0 data-inputs params))
 

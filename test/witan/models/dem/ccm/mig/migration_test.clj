@@ -56,17 +56,17 @@
              :end-year-avg-mort 2014
              :proj-asmr-variant :average-fixed
              :mort-scenario :principal
-             :brexit-parameter 1.0})
+             :in-migrant-multiplier 1.0})
 
 (def prepared-inputs (loop/prepare-inputs-1-0-0 data-inputs params))
 
-(deftest brexit-modifier-test
+(deftest international-in-migrant-modifier-test
   (testing "modifier correctly recalculates the in-migrants"
     (let [clj-results (cf/first-projection-year-method-average (:international-in-migrants data-inputs)
                                                                :intin :international-in 2003 2014)
-          half-in-migrants (-> (brexit-modifier clj-results :international-in 0.5)
+          half-in-migrants (-> (international-in-migrant-modifier clj-results :international-in 0.5)
                                (ds/rename-columns {:international-in :half-international-in}))
-          full-in-migrants (brexit-modifier clj-results :international-in (:brexit-parameter params))
+          full-in-migrants (international-in-migrant-modifier clj-results :international-in (:in-migrant-multiplier params))
           joined-data (wds/join full-in-migrants half-in-migrants [:gss-code :sex :age])]
       (is (every? #(fp-half? (wds/subset-ds joined-data :rows % :cols :half-international-in)
                              (wds/subset-ds joined-data :rows % :cols :international-in)

@@ -32,11 +32,11 @@
    (cf/first-projection-year-method-average domestic-out-migrants :domout
                                             :domestic-out start-year-avg-domout-mig end-year-avg-domout-mig)})
 
-(defn brexit-modifier
-  "Takes in a dataset with projected in-migrants data, a column name to be modified based on a brexit impact value between 0-1"
-  [projected-in-migrants-data col brexit-param]
+(defn international-in-migrant-modifier
+  "Takes in a dataset with projected in-migrants data, a column name to be modified and a multiplier"
+  [projected-in-migrants-data col multiplier]
   (wds/add-derived-column projected-in-migrants-data col [col]
-                          (fn [x] (* brexit-param x))))
+                          (fn [x] (* multiplier x))))
 
 (defworkflowfn projected-international-in-migrants
   {:witan/name :ccm-mig/proj-inter-in-mig
@@ -44,13 +44,13 @@
    :witan/input-schema {:international-in-migrants InternationalInmigrants}
    :witan/param-schema {:start-year-avg-intin-mig (s/constrained s/Int m-utils/year?)
                         :end-year-avg-intin-mig (s/constrained s/Int m-utils/year?)
-                        :brexit-parameter (s/constrained s/Num number?)}
+                        :in-migrant-multiplier (s/constrained s/Num number?)}
    :witan/output-schema {:projected-international-in-migrants ProjInterInSchema}}
-  [{:keys [international-in-migrants]} {:keys [start-year-avg-intin-mig end-year-avg-intin-mig brexit-parameter]}]
+  [{:keys [international-in-migrants]} {:keys [start-year-avg-intin-mig end-year-avg-intin-mig in-migrant-multiplier]}]
   {:projected-international-in-migrants
    (-> (cf/first-projection-year-method-average international-in-migrants :intin
                                                 :international-in start-year-avg-intin-mig end-year-avg-intin-mig)
-       (brexit-modifier :international-in brexit-parameter))})
+       (international-in-migrant-modifier :international-in in-migrant-multiplier))})
 
 (defworkflowfn projected-international-out-migrants
   {:witan/name :ccm-mig/proj-inter-out-mig
