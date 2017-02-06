@@ -61,7 +61,7 @@
 (def prepared-inputs (loop/prepare-inputs-1-0-0 data-inputs params))
 
 (deftest brexit-modifier-test
-  (testing "modifier correclty recalculates the in-migrants"
+  (testing "modifier correctly recalculates the in-migrants"
     (let [clj-results (cf/first-projection-year-method-average (:international-in-migrants data-inputs)
                                                                :intin :international-in 2003 2014)
           half-in-migrants (-> (brexit-modifier clj-results :international-in 0.5)
