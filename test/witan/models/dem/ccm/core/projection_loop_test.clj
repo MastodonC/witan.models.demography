@@ -63,7 +63,8 @@
              ;; (s/validate (s/pred (>= % earliest-intout-mig-year)) :start-year-avg-intout-mig)
              :start-year-avg-intout-mig 2003
              ;; (s/validate (s/pred (<= % (dec first-projection-year-mig))) :end-year-avg-intout-mig)
-             :end-year-avg-intout-mig 2014})
+             :end-year-avg-intout-mig 2014
+             :in-migrant-multiplier 1.0})
 
 (def prepared-inputs (prepare-inputs-1-0-0 data-inputs params))
 
